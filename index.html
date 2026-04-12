@@ -1203,26 +1203,35 @@ async function loadVehicles(){
 // ===== クラス定義 =====
 const NAHA_CLASS_DEF={
   'A':{name:'Aクラス',label:'アルファード'},
-  'B':{name:'Bクラス',label:'ノア / ヴォクシー / ヴェルファイア'},
-  'C':{name:'Cクラス',label:'ライズ / ヤリスクロス'},
-  'D':{name:'Dクラス',label:'ミニバン（ガソリン）'},
-  'F':{name:'Fクラス',label:'コンパクト'},
-  'H':{name:'Hクラス',label:'ハイブリッド'},
+  'B':{name:'Bクラス',label:'ノアH / ヴォクシー / セレナH / アルファードM / ヴェルファイア'},
+  'C':{name:'Cクラス',label:'ライズ / ヤリスクロス（コンパクトSUV）'},
+  'D':{name:'Dクラス',label:'ノアM / エスクァイア / セレナM（ガソリンミニバン）'},
+  'F':{name:'Fクラス',label:'アクア / ノート / ヴィッツ（コンパクト）'},
+  'H':{name:'Hクラス',label:'プリウス / プリウスα（ハイブリッドセダン）'},
 };
 const SPK_CLASS_DEF={
   'LUX':{name:'高級ミニバン',label:'アルファード / ヴェルファイア'},
-  'MPV':{name:'ミニバン',label:'ノア / ステップワゴン / デリカ'},
-  'SUV':{name:'SUV',label:'CX-3 / CX-5 / ロッキー / ハリアー'},
-  'CPT':{name:'コンパクト',label:'ソリオ / アクセラ'},
+  'MPV':{name:'ミニバン',label:'デリカD5 / ノア / ステップワゴン'},
+  'SUV':{name:'SUV',label:'CX-5 / ハリアー'},
+  'CSUV':{name:'コンパクトSUV',label:'CX-3 / ロッキー'},
+  'SDN':{name:'セダン',label:'アクセラ / カローラフィールダー'},
+  'CPT':{name:'コンパクト',label:'ソリオ'},
   'OTH':{name:'その他',label:''},
 };
 function spkClass(name){
   if(!name) return 'OTH';
-  const n=name.toLowerCase();
-  if(n.includes('アルファード')||n.includes('ヴェルファイア')) return 'LUX';
-  if(n.includes('ノア')||n.includes('ステップワゴン')||n.includes('デリカ')) return 'MPV';
-  if(n.includes('cx')||n.includes('ロッキー')||n.includes('ハリアー')) return 'SUV';
-  if(n.includes('ソリオ')||n.includes('アクセラ')||n.includes('カローラ')) return 'CPT';
+  // 高級ミニバン
+  if(name.includes('アルファード')||name.includes('ヴェルファイア')) return 'LUX';
+  // ミニバン
+  if(name.includes('デリカ')||name.includes('ノア')||name.includes('ステップワゴン')) return 'MPV';
+  // SUV（大型）
+  if(name.includes('CX-5')||name.includes('ハリアー')) return 'SUV';
+  // コンパクトSUV
+  if(name.includes('CX-3')||name.includes('ロッキー')) return 'CSUV';
+  // セダン
+  if(name.includes('アクセラ')||name.includes('カローラ')) return 'SDN';
+  // コンパクト
+  if(name.includes('ソリオ')) return 'CPT';
   return 'OTH';
 }
 
@@ -1242,7 +1251,7 @@ function renderVehicleList(vehicles, store){
     if(!groups[cid]) groups[cid]=[];
     groups[cid].push(v);
   });
-  const classOrder=st2==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CPT','OTH'];
+  const classOrder=st2==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CSUV','SDN','CPT','OTH'];
 
   let html='';
   classOrder.forEach(cid=>{

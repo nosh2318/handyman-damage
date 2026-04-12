@@ -360,6 +360,44 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc0-confirm-all-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#8899bb;padding:0 2px 6px;}
 .sc0-confirm-all-bar .count{font-weight:800;color:#1a2840;font-size:14px;}
 
+/* ===== SR0: 返却チェック ===== */
+#sr0{background:#f2f6fb;}
+.sr0-hd{padding:52px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #d8e4f0;background:linear-gradient(180deg,#1a2e48,#1e3354);color:#fff;}
+.sr0-body{flex:1;overflow-y:auto;padding:0 0 8px;}
+.sr0-bottom{padding:10px 16px;padding-bottom:max(env(safe-area-inset-bottom),20px);display:flex;flex-direction:column;gap:9px;background:#f2f6fb;border-top:1px solid #e0eaf6;}
+.sr0-confirm-all-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#8899bb;padding:0 2px 6px;}
+.sr0-confirm-all-bar .count{font-weight:800;color:#1a2840;font-size:14px;}
+/* SR0アコーディオン */
+.sr0-acc{background:#fff;border:1px solid #dde8f4;border-radius:14px;overflow:hidden;margin:0 16px 8px;box-shadow:0 2px 8px rgba(30,50,100,.07);}
+.sr0-acc-hd{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+.sr0-acc-hd:active{background:#f4f8fc;}
+.sr0-acc-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.sr0-acc-info{flex:1;min-width:0;}
+.sr0-acc-loc{font-size:13px;font-weight:700;color:#1a2840;}
+.sr0-acc-sub{font-size:10px;color:#8899bb;margin-top:1px;}
+.sr0-acc-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.sr0-acc-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:8px;border:1px solid #d0dce8;background:#f4f8fc;color:#99aabb;white-space:nowrap;}
+.sr0-acc-arrow{font-size:18px;color:#b0c4dd;transition:transform .28s cubic-bezier(.4,0,.2,1);}
+.sr0-acc.open .sr0-acc-arrow{transform:rotate(90deg);}
+.sr0-acc-body{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
+.sr0-acc.open .sr0-acc-body{max-height:640px;}
+/* SR0 写真エリア */
+.sr0-acc-photo{width:100%;height:180px;position:relative;overflow:hidden;background:#111;cursor:pointer;display:block;}
+.sr0-acc-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.sr0-acc-photo-badge{position:absolute;bottom:8px;left:10px;padding:4px 11px;border-radius:20px;font-size:10px;font-weight:800;color:#fff;}
+/* SR0 ステータスボタン行 */
+.sr0-status-row{display:flex;gap:6px;padding:10px 14px 12px;border-top:1px solid #eef2f8;}
+.sr0-status-btn{flex:1;padding:9px 4px;border-radius:10px;border:1.5px solid #d0dce8;font-size:11px;font-weight:700;cursor:pointer;text-align:center;background:#f8fafd;color:#8899bb;transition:all .15s;}
+.sr0-status-btn.sel-ok{background:#edfaf4;border-color:#00bb55;color:#007733;}
+.sr0-status-btn.sel-worse{background:#fff0ee;border-color:#ff4444;color:#cc2222;}
+.sr0-status-btn.sel-repaired{background:#eef4fc;border-color:#4488cc;color:#2266cc;}
+/* SR0 追加ボタン */
+.sr0-add-btn{margin:4px 16px 8px;padding:13px;border-radius:12px;background:#fff;border:1.5px dashed #4488cc;color:#2266cc;font-size:13px;font-weight:700;cursor:pointer;text-align:center;width:calc(100% - 32px);}
+.sr0-add-btn:active{background:#eef4fc;}
+/* PC/iPad 対応 */
+@media(min-width:768px){.sr0-acc{margin:0 24px 8px;}.sr0-bottom{padding:10px 24px;}.sr0-add-btn{margin:4px 24px 8px;width:calc(100% - 48px);}}
+@media(min-width:1024px){.sr0-acc{margin:0 48px 8px;}.sr0-hd{padding:36px 48px 18px;}.sr0-bottom{padding:10px 48px;}.sr0-body{}.sr0-add-btn{margin:4px 48px 8px;width:calc(100% - 96px);}}
+
 /* ===== 初期登録バナー ===== */
 .s0-init-banner{margin:12px 16px 0;padding:16px;border-radius:14px;background:linear-gradient(135deg,#2a1800,#3a2000);border:1.5px solid #ee880060;display:flex;align-items:flex-start;gap:12px;}
 .s0-init-icon{font-size:28px;flex-shrink:0;margin-top:2px;}
@@ -659,6 +697,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   <div class="sc0-bottom">
     <div class="sc0-confirm-all-bar"><span id="sc0ConfirmCount" class="count">0</span><span id="sc0TotalLabel">/0件 確認済み</span></div>
     <button class="btn-primary btn-blue" id="sc0CheckoutBtn" style="opacity:.4;pointer-events:none;" onclick="sc0Checkout()">✓ 全件確認済み — 出庫する</button>
+    <button class="btn-ghost" onclick="goto('s0')">戻る</button>
+  </div>
+</div>
+
+<!-- ==================== SR0: 返却チェック ==================== -->
+<div class="screen" id="sr0">
+  <div class="sr0-hd">
+    <button class="back-btn" onclick="goto('s0')">‹</button>
+    <div>
+      <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">RETURN CHECK / 返却確認</div>
+      <div style="font-size:16px;font-weight:700;" id="sr0Title">返却チェック</div>
+      <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sr0Sub">—</div>
+    </div>
+  </div>
+  <div class="sr0-body" id="sr0Body">
+    <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
+  </div>
+  <div class="sr0-bottom">
+    <div class="sr0-confirm-all-bar">
+      <span id="sr0ConfirmCount" class="count">0</span>
+      <span id="sr0TotalLabel">/0件 確認済み</span>
+    </div>
+    <button class="btn-primary btn-green" id="sr0ReturnBtn" style="opacity:.4;pointer-events:none;" onclick="sr0SaveReturn()">✓ 全件確認済み — 返却完了</button>
     <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
 </div>
@@ -1746,6 +1807,7 @@ function goto(id){
   if(id==='s5'){renderS5();renderS5Map();}
   if(id==='sc') loadChain(currentVehicleId);
   if(id==='sc0') renderSc0();
+  if(id==='sr0') renderSr0();
   if(id==='login'){
     currentStaff=null;
     localStorage.removeItem('hm_staff');
@@ -1833,18 +1895,10 @@ function startInitialRegistration(){
 }
 
 function startReturnCheck(){
-  checkEventType='return';
-  capturedFrames=[];
-  aiDetectedDamages=[];
-  confirmedNewDamages=[];
-  confirmedCount=0;
-  if(!CLAUDE_API_KEY){
-    openApiKeySetting();
-    window._pendingCheckType='return';
-    return;
-  }
-  updateS1Labels();
-  goto('s1');
+  // SR0へ直接遷移（旧AIカメラフロー廃止）
+  sr0DamagesSnapshot=(vehiclesCache.find(x=>x.id===currentVehicleId)?.current_damages||[]).map(d=>({...d}));
+  Object.keys(SR0_STATUS).forEach(k=>delete SR0_STATUS[k]);
+  goto('sr0');
 }
 
 function updateS1Labels(){
@@ -1921,6 +1975,232 @@ async function markRepaired(){
     showToast('🔧 '+loc+'を修復済みにしました');
   }catch(e){
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
+  }
+}
+
+// ===== SR0: 返却チェック =====
+const SR0_STATUS={};        // dmgId → 'ok'|'worse'|'repaired'
+let sr0DamagesSnapshot=[];  // 返却チェック開始時点のダメージ一覧
+let sr0OpenId=null;
+
+function renderSr0(){
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v) return;
+  const damages=v.current_damages||[];
+  const vName=v.vehicles?.name||currentVehicleId;
+  document.getElementById('sr0Title').textContent=`返却チェック — ${vName}`;
+  document.getElementById('sr0Sub').textContent=fmtDate(new Date().toISOString()).slice(0,10);
+
+  const body=document.getElementById('sr0Body');
+  const sevC={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
+
+  // 予約バナー
+  const resvBanner=(v.current_resv_no||v.current_customer)?`
+    <div style="margin:12px 16px 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#0e2040,#162d52);border:1.5px solid #4488cc60;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🔑</div>
+      <div style="flex:1;">
+        <div style="font-size:11px;color:#88bbdd;font-weight:700;letter-spacing:1px;margin-bottom:3px;">RETURN — 返却受付</div>
+        <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:2px;">${v.current_customer||'—'} 様</div>
+        <div style="font-size:11px;color:#88aacc;">予約番号: ${v.current_resv_no||'—'}</div>
+      </div>
+    </div>`:'';
+
+  if(damages.length===0){
+    body.innerHTML=resvBanner+`
+      <div class="sc0-customer-banner" style="margin:12px 16px 0;">
+        <div class="sc0-customer-banner-icon">✅</div>
+        <div class="sc0-customer-banner-text">
+          <div class="title">記録済みの傷はありません</div>
+          <div class="body">新しい傷があれば下のボタンから追加してください。</div>
+        </div>
+      </div>
+      <button class="sr0-add-btn" onclick="openEditPanel()">＋ 新しい傷を追加</button>`;
+    document.getElementById('sr0TotalLabel').textContent='/0件 確認済み';
+    const btn=document.getElementById('sr0ReturnBtn');
+    if(btn){btn.style.opacity='1';btn.style.pointerEvents='all';}
+    return;
+  }
+
+  let html=resvBanner+`
+    <div class="sc0-customer-banner" style="margin-top:10px;">
+      <div class="sc0-customer-banner-icon">🔍</div>
+      <div class="sc0-customer-banner-text">
+        <div class="title">記録済みの傷を確認してください</div>
+        <div class="body">各傷の状態を「変化なし / 悪化 / 修復済み」で選択してください。</div>
+      </div>
+    </div>
+    <div class="sc0-section-label">記録済みの傷 — ${damages.length}件</div>`;
+
+  damages.forEach(d=>{
+    const c=sevC[d.severity]||sevC[d.type]||'#ff8888';
+    const tL=typeLabel(d.type);
+    const sL={minor:'軽微',moderate:'中程度',major:'重大'}[d.severity]||d.severity;
+    const cur=SR0_STATUS[d.id]||'';
+    html+=`
+    <div class="sr0-acc" id="sr0acc_${d.id}">
+      <div class="sr0-acc-hd" onclick="toggleSr0Acc('${d.id}')">
+        <div class="sr0-acc-dot" style="background:${c};"></div>
+        <div class="sr0-acc-info">
+          <div class="sr0-acc-loc">${d.location}</div>
+          <div class="sr0-acc-sub">${tL} ／ ${d.desc||sL}</div>
+        </div>
+        <div class="sr0-acc-right">
+          <div class="sr0-acc-badge" id="sr0badge_${d.id}" style="${cur?'background:#edfaf4;border-color:#00bb55;color:#007733;':''}">
+            ${cur==='ok'?'✓ 変化なし':cur==='worse'?'⬆ 悪化':cur==='repaired'?'🔧 修復済':'未確認'}
+          </div>
+          <div class="sr0-acc-arrow">›</div>
+        </div>
+      </div>
+      <div class="sr0-acc-body" id="sr0body_${d.id}">
+        ${d.photo?`<div class="sr0-acc-photo" onclick="openPhotoLBDirect('${d.id}')">
+          <img src="${d.photo}" style="width:100%;height:100%;object-fit:cover;display:block;">
+          <div class="sr0-acc-photo-badge" style="background:#00000088;">📷 エビデンス写真（出庫時）</div>
+        </div>`:`<div style="padding:10px 14px;font-size:11px;color:#aabbcc;text-align:center;background:#f8fafd;border-bottom:1px solid #eef2f8;">📷 写真なし</div>`}
+        <div style="padding:8px 14px 4px;display:flex;flex-wrap:wrap;gap:5px;">
+          <div class="sc0-acc-tag" style="color:${c};border-color:${c}40;background:${c}10;">⚠ ${tL}</div>
+          <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">${sL}</div>
+          ${d.desc?`<div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">${d.desc}</div>`:''}
+        </div>
+        <div class="sr0-status-row">
+          <button class="sr0-status-btn ${cur==='ok'?'sel-ok':''}" onclick="sr0SetStatus('${d.id}','ok')">✓ 変化なし</button>
+          <button class="sr0-status-btn ${cur==='worse'?'sel-worse':''}" onclick="sr0SetStatus('${d.id}','worse')">⬆ 悪化</button>
+          <button class="sr0-status-btn ${cur==='repaired'?'sel-repaired':''}" onclick="sr0SetStatus('${d.id}','repaired')">🔧 修復済み</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html+=`<button class="sr0-add-btn" onclick="openEditPanel()">＋ 新しい傷を追加</button>
+    <div class="sc0-note" style="margin:0 16px 8px;">⚠️ 新たな傷が発見された場合は「＋新しい傷を追加」から記録してください。</div>`;
+  body.innerHTML=html;
+
+  document.getElementById('sr0TotalLabel').textContent=`/${damages.length}件 確認済み`;
+  document.getElementById('sr0ConfirmCount').textContent='0';
+}
+
+function toggleSr0Acc(dmgId){
+  const acc=document.getElementById('sr0acc_'+dmgId);
+  const b=document.getElementById('sr0body_'+dmgId);
+  if(!acc||!b) return;
+  const isOpen=acc.classList.contains('open');
+  if(sr0OpenId&&sr0OpenId!==dmgId){
+    const prev=document.getElementById('sr0acc_'+sr0OpenId);
+    const prevB=document.getElementById('sr0body_'+sr0OpenId);
+    if(prev) prev.classList.remove('open');
+    if(prevB) prevB.style.maxHeight='';
+  }
+  if(isOpen){acc.classList.remove('open');b.style.maxHeight='';sr0OpenId=null;}
+  else{acc.classList.add('open');b.style.maxHeight=b.scrollHeight+'px';sr0OpenId=dmgId;}
+}
+
+function sr0SetStatus(dmgId,status){
+  SR0_STATUS[dmgId]=status;
+  // バッジ更新
+  const badge=document.getElementById('sr0badge_'+dmgId);
+  if(badge){
+    badge.textContent=status==='ok'?'✓ 変化なし':status==='worse'?'⬆ 悪化':'🔧 修復済み';
+    badge.style.cssText='font-size:9px;font-weight:700;padding:3px 9px;border-radius:8px;white-space:nowrap;'+(
+      status==='ok'?'background:#edfaf4;border:1px solid #00bb55;color:#007733;':
+      status==='worse'?'background:#fff0ee;border:1px solid #ff4444;color:#cc2222;':
+      'background:#eef4fc;border:1px solid #4488cc;color:#2266cc;');
+  }
+  // ステータスボタンの選択状態更新
+  const b=document.getElementById('sr0body_'+dmgId);
+  if(b){
+    b.querySelectorAll('.sr0-status-btn').forEach(btn=>{
+      btn.classList.remove('sel-ok','sel-worse','sel-repaired');
+    });
+    const btns=b.querySelectorAll('.sr0-status-btn');
+    if(btns[0]&&status==='ok') btns[0].classList.add('sel-ok');
+    if(btns[1]&&status==='worse') btns[1].classList.add('sel-worse');
+    if(btns[2]&&status==='repaired') btns[2].classList.add('sel-repaired');
+  }
+  // 確認済みカウント更新
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const total=(v?.current_damages||[]).length;
+  const confirmed=Object.keys(SR0_STATUS).filter(k=>(v?.current_damages||[]).some(d=>d.id===k)).length;
+  document.getElementById('sr0ConfirmCount').textContent=confirmed;
+  const returnBtn=document.getElementById('sr0ReturnBtn');
+  if(returnBtn){
+    if(confirmed>=total){returnBtn.style.opacity='1';returnBtn.style.pointerEvents='all';}
+    else{returnBtn.style.opacity='.4';returnBtn.style.pointerEvents='none';}
+  }
+  // 確認したら自動で閉じる
+  const acc=document.getElementById('sr0acc_'+dmgId);
+  const body2=document.getElementById('sr0body_'+dmgId);
+  if(acc){acc.classList.remove('open');}
+  if(body2) body2.style.maxHeight='';
+  if(sr0OpenId===dmgId) sr0OpenId=null;
+}
+
+async function sr0SaveReturn(){
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v) return;
+  const damages=v.current_damages||[];
+  const customer=v.current_customer||'—';
+  const resvNo=v.current_resv_no||'—';
+  const prevEventId=v.last_event_id||null;
+
+  // 新規追加された傷 = スナップショット後に追加されたもの
+  const snapIds=new Set(sr0DamagesSnapshot.map(d=>d.id));
+  const currentDamages=vehiclesCache.find(x=>x.id===currentVehicleId)?.current_damages||[];
+  const newDmgs=currentDamages.filter(d=>!snapIds.has(d.id));
+
+  // 最終的な傷リスト（修復済みを除外 + 新規追加を追加）
+  const finalDamages=[
+    ...sr0DamagesSnapshot.filter(d=>SR0_STATUS[d.id]!=='repaired'),
+    ...newDmgs
+  ];
+  // 新規・悪化リスト（check_eventsに記録）
+  const newDamagesRecord=[
+    ...sr0DamagesSnapshot.filter(d=>SR0_STATUS[d.id]==='worse'),
+    ...newDmgs
+  ];
+  const repairedCount=sr0DamagesSnapshot.filter(d=>SR0_STATUS[d.id]==='repaired').length;
+
+  const btn=document.getElementById('sr0ReturnBtn');
+  if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
+
+  try{
+    const now=new Date().toISOString();
+    const{data:ev,error:evErr}=await sb.from('check_events').insert({
+      vehicle_id:currentVehicleId,
+      event_type:'return',
+      staff:currentStaff,
+      customer_name:customer,
+      resv_no:resvNo,
+      damages_snapshot:finalDamages,
+      new_damages:newDamagesRecord,
+      staff_confirmed:true,
+      confirmed_at:now,
+      prev_event_id:prevEventId,
+      notes:`返却チェック ／ 新規傷${newDmgs.length}件 ／ 悪化${newDamagesRecord.length-newDmgs.length}件 ／ 修復済${repairedCount}件`
+    }).select().single();
+    if(evErr) throw evErr;
+
+    await sb.from('vehicle_twins').update({
+      status:'ready',
+      current_damages:finalDamages,
+      last_event_id:ev.id,
+      last_check_at:now,
+      last_check_staff:currentStaff,
+      current_resv_no:null,
+      current_customer:null,
+    }).eq('id',currentVehicleId);
+
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0){
+      vehiclesCache[idx]={...vehiclesCache[idx],status:'ready',current_damages:finalDamages,
+        last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,
+        current_resv_no:null,current_customer:null};
+      SAMPLE_DAMAGES=finalDamages;
+    }
+    goto('sm');
+    setTimeout(()=>showToast(`✓ 返却完了 ／ ${customer} 様 ／ 新規傷${newDmgs.length}件`),200);
+  }catch(e){
+    console.error('sr0SaveReturn:',e);
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    if(btn){btn.textContent='✓ 全件確認済み — 返却完了';btn.style.pointerEvents='all';}
   }
 }
 

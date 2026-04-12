@@ -98,7 +98,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .s0-vno{font-size:26px;font-weight:800;margin-bottom:2px;color:#ffffff;}
 .s0-model{font-size:11px;color:#88aaccaa;font-family:monospace;}
 .s0-car{margin:0 16px 0;background:#ffffff;border:1px solid #dde8f4;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.1);}
-.s0-car-view{position:relative;width:100%;height:300px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.s0-car-view{position:relative;width:100%;height:220px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .s0-car-view svg{width:100%;height:100%;}
 .insp-zone{cursor:default;transition:opacity .2s;}
 .insp-zone.has-dmg{opacity:1;}
@@ -386,62 +386,144 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .photo-lb-meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
 .photo-lb-tag{font-size:10px;padding:4px 10px;border-radius:8px;border:1px solid #ffffff20;color:#aabbcc;font-weight:700;background:#ffffff08;}
 
-/* ===== PC レスポンシブ (768px以上) ===== */
-@media (min-width:769px){
+/* ===================================================
+   レスポンシブ 3段階
+   スマホ : default (〜767px)
+   iPad   : 768px〜1023px
+   PC     : 1024px〜
+   =================================================== */
+
+/* ===== iPad (768px〜1023px) ===== */
+@media (min-width:768px) and (max-width:1023px){
   html,body{overflow:auto;}
+  body{background:#c8d8e8;}
   .screen{
     position:relative;inset:auto;display:none;flex-direction:column;
-    max-width:960px;width:100%;margin:0 auto;min-height:100vh;
-    box-shadow:0 0 40px rgba(0,0,0,.12);
-    border-radius:0;
+    max-width:640px;width:100%;margin:0 auto;min-height:100vh;
+    box-shadow:0 0 60px rgba(0,0,0,.14);
   }
   .screen.active{display:flex;opacity:1;pointer-events:all;}
-  body{background:#d4dde8;}
 
-  /* ログイン画面 */
-  #login{min-height:100vh;padding:40px 0;}
-  .login-inner{max-width:600px;margin:0 auto;padding:0 40px;}
-  .login-title{font-size:32px;}
+  /* ログイン */
+  #login{min-height:100vh;padding:60px 0;}
+  .login-inner{max-width:560px;margin:0 auto;padding:0 40px;}
+  .login-title{font-size:30px;}
   .login-sub{font-size:14px;margin-bottom:36px;}
-  .store-sel-wrap{flex-direction:row;gap:18px;}
-  .store-sel-card{flex:1;padding:28px 24px;font-size:18px;}
-  .store-sel-card .store-icon{font-size:34px;}
-  .store-sel-card .store-name{font-size:18px;}
+  .store-sel-wrap{flex-direction:row;gap:16px;}
+  .store-sel-card{flex:1;padding:26px 22px;}
+  .store-sel-card .store-icon{font-size:32px;}
+  .store-sel-card .store-name{font-size:17px;}
   .store-sel-card:hover{background:#1e3a5f;border-color:#4488cc;}
-
-  /* スタッフグリッド：4列 */
-  .login-grid{grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+  .login-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
   .login-btn{padding:20px 10px;}
   .login-btn:hover{background:#1e3a5f;border-color:#4488cc;}
 
-  /* SM: 車両一覧 */
-  .sm-hd{padding:28px 28px 16px;}
+  /* SM */
+  .sm-hd{padding:32px 28px 16px;}
   .sm-list{padding:12px 24px 40px;}
-  /* カードを2列グリッドに */
-  #sm .sm-list>*:not(.sm-class-hd):not(.sm-stats){display:block;}
-  .sm-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .sm-card{margin-bottom:0;}
-  .sm-stats{padding:12px 24px 8px;}
+  .sm-stats{padding:10px 24px 8px;}
 
-  /* ヘッダーのpaddingをPC用に */
-  .s0-hd{padding:24px 28px 20px;}
+  /* S0 */
+  .s0-hd{padding:28px 28px 20px;}
   .s0-car{margin:0 24px;}
+  .s0-car-view{height:240px;}
   .s0-chips{margin:10px 24px 0;}
   .s0-chain-link{margin:10px 24px 0;}
   .s0-actions{margin:auto 24px 0;padding-bottom:28px;}
   .s0-edit-btn{margin:8px 24px 0;}
 
-  .sc-hd{padding:24px 28px 16px;}
+  /* SC / SC0 */
+  .sc-hd,.sc0-hd{padding:28px 28px 16px;}
   .sc-list{padding:16px 28px 40px;}
+  .sc0-acc{margin:0 24px 8px;}
+  .sc0-customer-banner{margin:12px 24px 4px;}
+  .sc0-note{margin:4px 24px 8px;}
+  .sc0-bottom{padding:10px 24px;}
+  .sc0-section-label{padding:8px 24px 4px;}
 
-  .s1-hd{padding:24px 28px 16px;}
-  .s4-hd{padding:24px 28px 16px;}
+  /* オーバーレイ */
+  .edit-overlay,.dmg-edit-overlay,.conf-overlay,.photo-lb{max-width:640px;}
+  .sp-bottom{max-width:640px;}
+  .s1-hd,.s4-hd{padding:28px 28px 16px;}
   .s4-scroll{padding:12px 28px;}
   .s4-bottom{padding:14px 28px 28px;}
+}
 
-  /* オーバーレイ系をPC幅に合わせる */
-  .edit-overlay,.dmg-edit-overlay,.conf-overlay,.photo-lb{max-width:960px;}
-  .sp-bottom{max-width:960px;}
+/* ===== PC (1024px〜) ===== */
+@media (min-width:1024px){
+  html,body{overflow:auto;}
+  body{background:#c0cedd;}
+  .screen{
+    position:relative;inset:auto;display:none;flex-direction:column;
+    max-width:1080px;width:100%;margin:0 auto;min-height:100vh;
+    box-shadow:0 0 50px rgba(0,0,0,.10);
+  }
+  .screen.active{display:flex;opacity:1;pointer-events:all;}
+
+  /* ログイン */
+  #login{min-height:100vh;padding:80px 0;}
+  .login-inner{max-width:720px;margin:0 auto;padding:0 60px;}
+  .login-title{font-size:36px;}
+  .login-sub{font-size:15px;margin-bottom:40px;}
+  .store-sel-wrap{flex-direction:row;gap:20px;}
+  .store-sel-card{flex:1;padding:32px 28px;transition:all .2s;}
+  .store-sel-card .store-icon{font-size:40px;}
+  .store-sel-card .store-name{font-size:20px;}
+  .store-sel-card:hover{background:#1e3a5f;border-color:#4488cc;transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.2);}
+  .login-grid{grid-template-columns:repeat(5,1fr);gap:12px;}
+  .login-btn{padding:22px 10px;transition:all .18s;}
+  .login-btn:hover{background:#1e3a5f;border-color:#4488cc;}
+
+  /* SM: 2列グリッド */
+  .sm-hd{padding:36px 48px 18px;}
+  .sm-list{padding:12px 48px 40px;}
+  .sm-stats{padding:12px 48px 8px;}
+  .sm-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .sm-card{margin-bottom:0;transition:box-shadow .15s;}
+  .sm-card:hover{box-shadow:0 4px 16px rgba(30,50,100,.12);}
+
+  /* S0 */
+  .s0-hd{padding:36px 48px 20px;}
+  .s0-car{margin:0 48px;}
+  .s0-car-view{height:260px;}
+  .s0-chips{margin:12px 48px 0;}
+  .s0-chain-link{margin:12px 48px 0;}
+  .s0-actions{margin:auto 48px 0;padding-bottom:36px;}
+  .s0-edit-btn{margin:8px 48px 0;}
+  .s0-action-row .btn-primary{font-size:15px;padding:16px;}
+
+  /* SC / SC0 */
+  .sc-hd,.sc0-hd{padding:36px 48px 18px;}
+  .sc-list{padding:16px 48px 40px;}
+  .sc0-acc{margin:0 48px 8px;}
+  .sc0-customer-banner{margin:12px 48px 4px;}
+  .sc0-note{margin:4px 48px 8px;}
+  .sc0-bottom{padding:10px 48px;}
+  .sc0-section-label{padding:8px 48px 4px;}
+
+  /* オーバーレイ: PC幅に合わせる + シートは中央寄せ */
+  .edit-overlay,.dmg-edit-overlay,.conf-overlay,.photo-lb{max-width:1080px;}
+  .sp-bottom{max-width:1080px;}
+  .edit-sheet,.dmg-edit-sheet,.conf-sheet{
+    max-width:560px;
+    left:50%;right:auto;
+    transform:translateX(-50%) translateY(100%);
+    border-radius:22px 22px 0 0;
+  }
+  .edit-overlay.show .edit-sheet,
+  .dmg-edit-overlay.show .dmg-edit-sheet,
+  .conf-overlay.show .conf-sheet{
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* S1 / S4 */
+  .s1-hd,.s4-hd{padding:36px 48px 18px;}
+  .s4-scroll{padding:12px 48px;}
+  .s4-bottom{padding:14px 48px 36px;}
+
+  /* 写真ライトボックス: PC中央 */
+  .photo-lb-canvas{max-width:720px;margin:0 auto;}
+  .photo-lb-footer{max-width:720px;margin:0 auto;}
 }
 </style>
 </head>
@@ -491,6 +573,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <div class="sm-logo">HANDYMAN</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
+        <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
+        <button onclick="openApiKeySetting()" id="smAiBtn" style="font-size:9px;color:#ffaa44;background:#ffffff10;border:1px solid #ffaa4430;border-radius:6px;padding:3px 8px;cursor:pointer;" title="Claude APIキー設定">🤖</button>
         <button onclick="goto('login')" style="font-size:9px;color:#4488aa;background:#ffffff15;border:1px solid #ffffff20;border-radius:6px;padding:3px 8px;cursor:pointer;">切替</button>
       </div>
     </div>
@@ -565,250 +649,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     <button class="back-btn" onclick="goto('s0')">‹</button>
     <div>
       <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">CHECKOUT / 傷確認</div>
-      <div style="font-size:16px;font-weight:700;">出庫前 傷確認 — V-001</div>
-      <div style="font-size:10px;color:#88aacc;margin-top:2px;">山田 太郎 様 ／ 2026/04/12</div>
+      <div style="font-size:16px;font-weight:700;" id="sc0Title">出庫前 傷確認</div>
+      <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sc0Sub">—</div>
     </div>
   </div>
-  <div class="sc0-body">
-    <div class="sc0-customer-banner">
-      <div class="sc0-customer-banner-icon">📋</div>
-      <div class="sc0-customer-banner-text">
-        <div class="title">ご出発前に既存の傷をご確認ください</div>
-        <div class="body">各項目をタップすると写真が表示されます。ご確認後に「確認する」を押してください。</div>
-      </div>
-    </div>
-    <div class="sc0-section-label">記録済みの傷 — 4件</div>
-
-    <!-- ① 左フロントドア -->
-    <div class="sc0-acc" id="acc_dmg001">
-      <div class="sc0-acc-hd" onclick="toggleAcc('dmg001')">
-        <div class="sc0-acc-dot" style="background:#ff3333;box-shadow:0 0 0 3px #ff333320;"></div>
-        <div class="sc0-acc-info">
-          <div class="sc0-acc-loc">左フロントドア</div>
-          <div class="sc0-acc-sub">擦り傷 ／ 縦15cm</div>
-        </div>
-        <div class="sc0-acc-right">
-          <div class="sc0-acc-status" id="status_dmg001">未確認</div>
-          <div class="sc0-acc-arrow">›</div>
-        </div>
-      </div>
-      <div class="sc0-acc-body" id="body_dmg001">
-        <div class="sc0-acc-photo" onclick="openPhotoLB('dmg001')">
-          <svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="g1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a5060"/><stop offset="50%" stop-color="#6a7080"/><stop offset="100%" stop-color="#3a4050"/></linearGradient>
-              <linearGradient id="g1b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffffff" stop-opacity=".25"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
-              <filter id="blur1"><feGaussianBlur stdDeviation="1.5"/></filter>
-            </defs>
-            <rect width="400" height="180" fill="url(#g1a)"/>
-            <ellipse cx="200" cy="20" rx="200" ry="60" fill="url(#g1b)"/>
-            <line x1="0" y1="90" x2="400" y2="90" stroke="#ffffff10" stroke-width="1"/>
-            <line x1="155" y1="55" x2="178" y2="140" stroke="#1a1a1a" stroke-width="5" stroke-linecap="round" filter="url(#blur1)"/>
-            <line x1="155" y1="55" x2="178" y2="140" stroke="#c8c0b0" stroke-width="2" stroke-linecap="round"/>
-            <line x1="157" y1="55" x2="180" y2="140" stroke="#ffffff90" stroke-width="1" stroke-linecap="round"/>
-            <line x1="160" y1="72" x2="165" y2="80" stroke="#e8e0d0" stroke-width="1"/>
-            <line x1="163" y1="98" x2="169" y2="108" stroke="#d8d0c0" stroke-width="0.8"/>
-            <line x1="170" y1="122" x2="175" y2="130" stroke="#d0c8b8" stroke-width="0.8"/>
-            <circle cx="166" cy="97" r="34" fill="none" stroke="#ff3333" stroke-width="2.5" stroke-dasharray="6,3" opacity=".9"/>
-            <circle cx="166" cy="97" r="34" fill="#ff3333" opacity=".07"/>
-            <rect x="136" y="136" width="60" height="16" rx="4" fill="#ff3333dd"/>
-            <text x="166" y="147" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="-apple-system,sans-serif">擦り傷 15cm</text>
-          </svg>
-          <div class="sc0-acc-photo-badge" style="background:#ff3333dd;">左フロントドア</div>
-          <div class="sc0-acc-photo-expand">🔍 拡大</div>
-        </div>
-        <div class="sc0-acc-detail">
-          <div class="sc0-acc-tags">
-            <div class="sc0-acc-tag" style="color:#cc2222;border-color:#ff444440;background:#fff0f0;">⚠ 擦り傷</div>
-            <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">軽微</div>
-            <div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">縦15cm</div>
-          </div>
-          <div class="sc0-acc-date">📅 2026/03/28 撮影 ／ 予約#118で記録</div>
-        </div>
-        <div class="sc0-acc-confirm-row">
-          <button class="sc0-acc-btn" id="cfm_dmg001" onclick="toggleConfirm('dmg001')">確認する</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ② リアバンパー右 -->
-    <div class="sc0-acc" id="acc_dmg002">
-      <div class="sc0-acc-hd" onclick="toggleAcc('dmg002')">
-        <div class="sc0-acc-dot" style="background:#ff8800;box-shadow:0 0 0 3px #ff880020;"></div>
-        <div class="sc0-acc-info">
-          <div class="sc0-acc-loc">リアバンパー右</div>
-          <div class="sc0-acc-sub">塗装欠け ／ 横5cm</div>
-        </div>
-        <div class="sc0-acc-right">
-          <div class="sc0-acc-status" id="status_dmg002">未確認</div>
-          <div class="sc0-acc-arrow">›</div>
-        </div>
-      </div>
-      <div class="sc0-acc-body" id="body_dmg002">
-        <div class="sc0-acc-photo" onclick="openPhotoLB('dmg002')">
-          <svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="g2a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#282828"/><stop offset="50%" stop-color="#383838"/><stop offset="100%" stop-color="#1e1e1e"/></linearGradient>
-              <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
-            </defs>
-            <rect width="400" height="180" fill="url(#g2a)"/>
-            <path d="M0,55 Q200,35 400,55 L400,145 Q200,155 0,145Z" fill="#2e2e2e" stroke="#3a3a3a" stroke-width="0.5"/>
-            <ellipse cx="200" cy="55" rx="180" ry="28" fill="#ffffff08"/>
-            <ellipse cx="230" cy="100" rx="22" ry="14" fill="#111" filter="url(#blur2)" opacity=".7"/>
-            <ellipse cx="228" cy="98" rx="18" ry="11" fill="#8a9090"/>
-            <ellipse cx="226" cy="96" rx="14" ry="8" fill="#9aa0a0"/>
-            <path d="M210,90 Q215,86 228,86 Q240,86 247,93 Q250,98 248,108 Q244,113 230,112 Q215,112 210,105 Q207,100 210,90Z" fill="none" stroke="#1e1e1e" stroke-width="2.5"/>
-            <circle cx="222" cy="99" r="2" fill="#aa5500" opacity=".6"/>
-            <circle cx="230" cy="103" r="1.5" fill="#aa4400" opacity=".5"/>
-            <circle cx="228" cy="98" r="30" fill="none" stroke="#ff8800" stroke-width="2.5" stroke-dasharray="6,3" opacity=".9"/>
-            <circle cx="228" cy="98" r="30" fill="#ff8800" opacity=".06"/>
-            <rect x="198" y="135" width="60" height="16" rx="4" fill="#ff8800dd"/>
-            <text x="228" y="146" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="-apple-system,sans-serif">塗装欠け 5cm</text>
-          </svg>
-          <div class="sc0-acc-photo-badge" style="background:#ff8800dd;">リアバンパー右</div>
-          <div class="sc0-acc-photo-expand">🔍 拡大</div>
-        </div>
-        <div class="sc0-acc-detail">
-          <div class="sc0-acc-tags">
-            <div class="sc0-acc-tag" style="color:#995500;border-color:#ff880040;background:#fff4e8;">⚠ 塗装欠け</div>
-            <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">軽微</div>
-            <div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">横5cm</div>
-          </div>
-          <div class="sc0-acc-date">📅 2026/04/02 撮影 ／ 予約#122で記録</div>
-        </div>
-        <div class="sc0-acc-confirm-row">
-          <button class="sc0-acc-btn" id="cfm_dmg002" onclick="toggleConfirm('dmg002')">確認する</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ③ 右リアドア -->
-    <div class="sc0-acc" id="acc_dmg003">
-      <div class="sc0-acc-hd" onclick="toggleAcc('dmg003')">
-        <div class="sc0-acc-dot" style="background:#ffaa00;box-shadow:0 0 0 3px #ffaa0020;"></div>
-        <div class="sc0-acc-info">
-          <div class="sc0-acc-loc">右リアドア</div>
-          <div class="sc0-acc-sub">凹み ／ 直径3cm</div>
-        </div>
-        <div class="sc0-acc-right">
-          <div class="sc0-acc-status" id="status_dmg003">未確認</div>
-          <div class="sc0-acc-arrow">›</div>
-        </div>
-      </div>
-      <div class="sc0-acc-body" id="body_dmg003">
-        <div class="sc0-acc-photo" onclick="openPhotoLB('dmg003')">
-          <svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="g3a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4e5058"/><stop offset="50%" stop-color="#70747e"/><stop offset="100%" stop-color="#3e4048"/></linearGradient>
-              <radialGradient id="g3dent" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#2a2a2e"/><stop offset="40%" stop-color="#4a4c54"/><stop offset="75%" stop-color="#72747c"/><stop offset="100%" stop-color="#80828a" stop-opacity="0"/></radialGradient>
-              <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
-            </defs>
-            <rect width="400" height="180" fill="url(#g3a)"/>
-            <ellipse cx="200" cy="20" rx="200" ry="48" fill="#ffffff20"/>
-            <line x1="0" y1="88" x2="400" y2="88" stroke="#ffffff10" stroke-width="1"/>
-            <ellipse cx="218" cy="93" rx="28" ry="20" fill="#1a1a1e" filter="url(#blur3)" opacity=".6"/>
-            <ellipse cx="215" cy="90" rx="22" ry="16" fill="url(#g3dent)"/>
-            <path d="M193,80 Q200,75 215,77 Q228,78 235,86 Q240,93 237,103 Q232,111 216,111 Q199,111 193,103 Q188,95 193,80Z" fill="none" stroke="#999aa0" stroke-width="1.5" opacity=".6"/>
-            <path d="M196,81 Q202,77 215,78 Q226,80 233,87" fill="none" stroke="#dddee0" stroke-width="1" opacity=".4"/>
-            <circle cx="215" cy="90" r="33" fill="none" stroke="#ffaa00" stroke-width="2.5" stroke-dasharray="6,3" opacity=".9"/>
-            <circle cx="215" cy="90" r="33" fill="#ffaa00" opacity=".06"/>
-            <rect x="183" y="132" width="64" height="16" rx="4" fill="#ffaa00dd"/>
-            <text x="215" y="143" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="-apple-system,sans-serif">凹み 直径3cm</text>
-          </svg>
-          <div class="sc0-acc-photo-badge" style="background:#ffaa00dd;">右リアドア</div>
-          <div class="sc0-acc-photo-expand">🔍 拡大</div>
-        </div>
-        <div class="sc0-acc-detail">
-          <div class="sc0-acc-tags">
-            <div class="sc0-acc-tag" style="color:#886600;border-color:#ffaa0040;background:#fff8e0;">⚠ 凹み</div>
-            <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">軽微</div>
-            <div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">直径3cm</div>
-          </div>
-          <div class="sc0-acc-date">📅 2026/02/14 撮影 ／ 予約#109で記録</div>
-        </div>
-        <div class="sc0-acc-confirm-row">
-          <button class="sc0-acc-btn" id="cfm_dmg003" onclick="toggleConfirm('dmg003')">確認する</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ④ フロントガラス -->
-    <div class="sc0-acc" id="acc_dmg004">
-      <div class="sc0-acc-hd" onclick="toggleAcc('dmg004')">
-        <div class="sc0-acc-dot" style="background:#4488ff;box-shadow:0 0 0 3px #4488ff20;"></div>
-        <div class="sc0-acc-info">
-          <div class="sc0-acc-loc">フロントガラス</div>
-          <div class="sc0-acc-sub">ひび割れ ／ <span style="color:#cc1111;font-weight:700;">重大</span></div>
-        </div>
-        <div class="sc0-acc-right">
-          <div class="sc0-acc-status" id="status_dmg004">未確認</div>
-          <div class="sc0-acc-arrow">›</div>
-        </div>
-      </div>
-      <div class="sc0-acc-body" id="body_dmg004">
-        <div class="sc0-acc-photo" onclick="openPhotoLB('dmg004')">
-          <svg width="100%" height="180" viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <linearGradient id="g4a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b8d4ee"/><stop offset="100%" stop-color="#8ab0d8"/></linearGradient>
-              <linearGradient id="g4b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ffffff" stop-opacity=".35"/><stop offset="100%" stop-color="#ffffff" stop-opacity=".05"/></linearGradient>
-            </defs>
-            <rect width="400" height="180" fill="url(#g4a)"/>
-            <rect width="400" height="180" fill="url(#g4b)"/>
-            <line x1="50" y1="0" x2="200" y2="180" stroke="#ffffff" stroke-width="40" opacity=".07"/>
-            <line x1="120" y1="0" x2="250" y2="180" stroke="#ffffff" stroke-width="20" opacity=".05"/>
-            <g stroke="#1a1a2a" stroke-width="2" opacity=".9">
-              <line x1="195" y1="83" x2="215" y2="50"/>
-              <line x1="195" y1="83" x2="230" y2="65"/>
-              <line x1="195" y1="83" x2="240" y2="87"/>
-              <line x1="195" y1="83" x2="228" y2="113"/>
-              <line x1="195" y1="83" x2="205" y2="125"/>
-              <line x1="195" y1="83" x2="178" y2="120"/>
-              <line x1="195" y1="83" x2="162" y2="103"/>
-              <line x1="195" y1="83" x2="160" y2="79"/>
-              <line x1="195" y1="83" x2="165" y2="57"/>
-              <line x1="195" y1="83" x2="180" y2="47"/>
-            </g>
-            <g stroke="#2a2a3a" stroke-width="1.2" opacity=".7">
-              <line x1="215" y1="50" x2="225" y2="37"/><line x1="215" y1="50" x2="208" y2="39"/>
-              <line x1="230" y1="65" x2="244" y2="57"/><line x1="240" y1="87" x2="254" y2="83"/>
-              <line x1="240" y1="87" x2="246" y2="97"/><line x1="228" y1="113" x2="240" y2="121"/>
-              <line x1="165" y1="57" x2="155" y2="45"/><line x1="162" y1="103" x2="150" y2="111"/>
-              <line x1="160" y1="79" x2="145" y2="75"/>
-            </g>
-            <g stroke="#ffffff" stroke-width="0.8" opacity=".5">
-              <line x1="195" y1="83" x2="215" y2="50"/>
-              <line x1="195" y1="83" x2="240" y2="87"/>
-              <line x1="195" y1="83" x2="165" y2="57"/>
-            </g>
-            <circle cx="195" cy="83" r="4" fill="#1a1a2a" opacity=".8"/>
-            <circle cx="195" cy="83" r="2" fill="#ffffff" opacity=".7"/>
-            <circle cx="195" cy="83" r="40" fill="none" stroke="#4488ff" stroke-width="2.5" stroke-dasharray="6,3" opacity=".9"/>
-            <circle cx="195" cy="83" r="40" fill="#4488ff" opacity=".06"/>
-            <rect x="163" y="133" width="64" height="16" rx="4" fill="#3366eecc"/>
-            <text x="195" y="144" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="-apple-system,sans-serif">ひび割れ（重大）</text>
-          </svg>
-          <div class="sc0-acc-photo-badge" style="background:#3366eecc;">フロントガラス</div>
-          <div class="sc0-acc-photo-expand">🔍 拡大</div>
-        </div>
-        <div class="sc0-acc-detail">
-          <div class="sc0-acc-tags">
-            <div class="sc0-acc-tag" style="color:#2244bb;border-color:#4488ff40;background:#eef0ff;">⚠ ひび割れ</div>
-            <div class="sc0-acc-tag" style="color:#cc1111;border-color:#ff333340;background:#fff0f0;font-weight:800;">重大</div>
-            <div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">視界確認済</div>
-          </div>
-          <div class="sc0-acc-date">📅 2026/03/10 撮影 ／ 予約#114で記録</div>
-        </div>
-        <div class="sc0-acc-confirm-row">
-          <button class="sc0-acc-btn" id="cfm_dmg004" onclick="toggleConfirm('dmg004')">確認する</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="sc0-note">⚠️ 上記以外の傷が返却時に発見された場合、ご負担いただく場合があります。</div>
-    <div style="height:4px;"></div>
+  <div class="sc0-body" id="sc0Body">
+    <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
   </div>
   <div class="sc0-bottom">
-    <div class="sc0-confirm-all-bar"><span id="sc0ConfirmCount" class="count">0</span><span>/4件 確認済み</span></div>
+    <div class="sc0-confirm-all-bar"><span id="sc0ConfirmCount" class="count">0</span><span id="sc0TotalLabel">/0件 確認済み</span></div>
     <button class="btn-primary btn-blue" id="sc0CheckoutBtn" style="opacity:.4;pointer-events:none;" onclick="sc0Checkout()">✓ 全件確認済み — 出庫する</button>
     <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
@@ -836,7 +685,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="s1">
   <div class="s1-hd">
     <button class="back-btn" onclick="goto('s0')">‹</button>
-    <div><div class="s1-type">RETURN CHECK</div><div style="font-size:16px;font-weight:700;">返却チェック — V-001</div></div>
+    <div><div class="s1-type" id="s1TypeLabel">RETURN CHECK</div><div style="font-size:16px;font-weight:700;" id="s1Title">返却チェック — 車両</div></div>
   </div>
   <div class="guide-wrap">
     <div style="position:relative;width:160px;height:110px;display:flex;align-items:center;justify-content:center;">
@@ -845,11 +694,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <div style="position:absolute;animation:orbit 4s linear infinite;transform-origin:80px 55px;"><div style="font-size:18px;margin-left:72px;margin-top:52px;">📱</div></div>
       <style>@keyframes orbit{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}</style>
     </div>
-    <div style="text-align:center;"><div style="font-size:17px;font-weight:700;margin-bottom:5px;">車の周りを1周撮影</div><div style="font-size:12px;color:#ffffff40;line-height:1.7;">AIが自動で傷を検出します<br>アングル自由 — 歩きながらでOK</div></div>
+    <div style="text-align:center;"><div style="font-size:17px;font-weight:700;margin-bottom:5px;">車の周りを撮影</div><div style="font-size:12px;color:#ffffff40;line-height:1.7;">AIが自動で傷を検出します<br>終わったら録画ボタンを押して停止</div></div>
     <div class="guide-steps">
       <div class="guide-step"><div class="gs-num">1</div><div style="font-size:12px;">録画ボタンを押してスタート</div></div>
-      <div class="guide-step"><div class="gs-num">2</div><div style="font-size:12px;">車の周りを1周歩く <span style="color:#ffffff30;font-size:10px;">（10〜15秒）</span></div></div>
-      <div class="guide-step"><div class="gs-num">3</div><div style="font-size:12px;">傷がある箇所は止まって撮ると精度UP</div></div>
+      <div class="guide-step"><div class="gs-num">2</div><div style="font-size:12px;">車の周りをゆっくり1〜2周歩く</div></div>
+      <div class="guide-step"><div class="gs-num">3</div><div style="font-size:12px;">傷がある箇所は <strong>止まって近づいて</strong> 撮影</div></div>
+      <div class="guide-step"><div class="gs-num">4</div><div style="font-size:12px;">撮影が終わったら録画ボタンを押して停止</div></div>
     </div>
   </div>
   <div class="s1-bottom"><button class="btn-primary btn-green" onclick="startRecording()">🔴 録画開始</button></div>
@@ -858,14 +708,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <!-- ==================== S2: 録画中 ==================== -->
 <div class="screen" id="s2">
   <div class="rec-vf">
-    <div class="rec-vfbg"><svg viewBox="0 0 300 170" style="width:82%;opacity:.25;"><defs><linearGradient id="vb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8e8e4"/><stop offset="100%" stop-color="#b8b8b4"/></linearGradient></defs><path d="M100,46 L210,40 L185,28 L80,34Z" fill="#d8d8d4"/><path d="M25,60 L100,46 L100,140 L25,148Z" fill="#c8c8c4"/><path d="M100,46 L210,40 L210,132 L100,140Z" fill="url(#vb)"/><path d="M110,52 L175,48 L175,95 L110,99Z" fill="#1a2836" fill-opacity=".9"/><circle cx="82" cy="148" r="20" fill="#1a1a1a"/><circle cx="82" cy="148" r="14" fill="#444"/><circle cx="182" cy="146" r="20" fill="#1a1a1a"/><circle cx="182" cy="146" r="14" fill="#444"/></svg></div>
+    <!-- リアルカメラ映像 -->
+    <video id="recVideo" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;"></video>
+    <!-- カメラ起動前のフォールバック表示 -->
+    <div class="rec-vfbg" id="recVfBg"><svg viewBox="0 0 300 170" style="width:82%;opacity:.25;"><defs><linearGradient id="vb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8e8e4"/><stop offset="100%" stop-color="#b8b8b4"/></linearGradient></defs><path d="M100,46 L210,40 L185,28 L80,34Z" fill="#d8d8d4"/><path d="M25,60 L100,46 L100,140 L25,148Z" fill="#c8c8c4"/><path d="M100,46 L210,40 L210,132 L100,140Z" fill="url(#vb)"/><path d="M110,52 L175,48 L175,95 L110,99Z" fill="#1a2836" fill-opacity=".9"/><circle cx="82" cy="148" r="20" fill="#1a1a1a"/><circle cx="82" cy="148" r="14" fill="#444"/><circle cx="182" cy="146" r="20" fill="#1a1a1a"/><circle cx="182" cy="146" r="14" fill="#444"/></svg></div>
     <div class="rec-badge" id="recBadge" style="display:none;"><div class="rec-dot"></div><span class="rec-badge-text">REC</span></div>
     <div class="rec-timer" id="recTimer">0:00</div>
     <div class="rec-guide-text" id="recGuideText"><div class="rec-guide-main">録画ボタンを押してください</div></div>
-    <div style="position:absolute;bottom:130px;left:50%;transform:translateX(-50%);font-size:10px;color:#ffffff22;white-space:nowrap;" id="frameCount"></div>
+    <div style="position:absolute;bottom:130px;left:50%;transform:translateX(-50%);font-size:10px;color:#ffffff44;white-space:nowrap;" id="frameCount"></div>
   </div>
   <div class="rec-controls"><button class="rec-btn" id="recBtn" onclick="toggleRecording()"><div class="rec-btn-inner"></div></button></div>
 </div>
+<!-- フレームキャプチャ用 canvas（非表示） -->
+<canvas id="recCanvas" style="display:none;"></canvas>
+<!-- 写真選択用 input（非表示） -->
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
+<input type="file" id="libraryInput" accept="image/*" style="display:none;" onchange="handlePhotoSelect(this)">
+<canvas id="compressCanvas" style="display:none;"></canvas>
 
 <!-- ==================== SP: AI解析中 ==================== -->
 <div class="screen" id="sp">
@@ -927,32 +786,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
         <div class="s4-map-note-body">下のカードで各箇所を確認し、<strong>✓ 合ってる</strong> または <strong>✗ 違う</strong> を押してください</div>
       </div>
     </div>
-    <!-- 新規検出カード -->
-    <div class="dc" id="dc1">
-      <div class="dc-frame" style="background:#fff5f5;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:40px;height:40px;border-radius:50%;background:#ff333318;border:2px solid #ff3333;display:flex;align-items:center;justify-content:center;font-size:18px;">🔴</div>
-          <div style="font-size:12px;font-weight:700;color:#cc2222;">左フロントドア<br><span style="font-size:10px;color:#8899bb;font-weight:400;">擦り傷（縦約15cm）</span></div>
-        </div>
-        <div class="dc-bbox" style="border-color:#ff4444;top:25%;left:18%;width:40%;height:50%;"><div class="dc-bbox-lbl" style="background:#ff4444;">NEW</div></div>
-      </div>
-      <div class="dc-body"><div class="dc-loc">左フロントドア — 擦り傷</div><div class="dc-desc">AI検出 94% ／ 縦約15cm ／ ドア中央部</div><div class="dc-acts"><div class="dc-btn dc-ok" onclick="confirmDmg(1,true)">✓ 合ってる</div><div class="dc-btn dc-ng" onclick="confirmDmg(1,false)">✗ 違う</div></div></div>
+    <!-- AI検出結果カード（動的に生成） -->
+    <div id="s4CardsContainer">
+      <div style="text-align:center;padding:30px;color:#88aacc;font-size:13px;">AI解析結果を読み込み中...</div>
     </div>
-    <div class="dc" id="dc2">
-      <div class="dc-frame" style="background:#fff9f0;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:40px;height:40px;border-radius:50%;background:#ff880018;border:2px solid #ff8800;display:flex;align-items:center;justify-content:center;font-size:18px;">🟠</div>
-          <div style="font-size:12px;font-weight:700;color:#cc5500;">リアバンパー右<br><span style="font-size:10px;color:#8899bb;font-weight:400;">塗装欠け（横約5cm）</span></div>
-        </div>
-        <div class="dc-bbox" style="border-color:#ff8800;top:55%;left:52%;width:32%;height:28%;"><div class="dc-bbox-lbl" style="background:#ff8800;">NEW</div></div>
-      </div>
-      <div class="dc-body"><div class="dc-loc">リアバンパー右 — 塗装欠け</div><div class="dc-desc">AI検出 71% ／ 横約5cm ／ バンパー右端</div><div class="dc-acts"><div class="dc-btn dc-ok" onclick="confirmDmg(2,true)">✓ 合ってる</div><div class="dc-btn dc-ng" onclick="confirmDmg(2,false)">✗ 違う</div></div></div>
-    </div>
-    <!-- 既存傷（引継） -->
-    <div style="font-size:9px;color:#99aacc;letter-spacing:1.5px;margin:12px 0 7px;">— 既存傷（引継・変化なし）—</div>
-    <div class="dc dc-existing"><div class="dc-body" style="padding:9px 12px;"><div style="display:flex;align-items:center;gap:8px;"><span>🟡</span><div><div class="dc-loc">右リアドア — 凹み</div><div class="dc-desc">前回記録済 ／ 変化なし</div></div><div style="margin-left:auto;font-size:9px;color:#99aacc;background:#eef2f8;padding:2px 6px;border-radius:5px;">引継</div></div></div></div>
-    <div class="dc dc-existing"><div class="dc-body" style="padding:9px 12px;"><div style="display:flex;align-items:center;gap:8px;"><span>🔵</span><div><div class="dc-loc">フロントガラス — ひび割れ</div><div class="dc-desc">前回記録済 ／ 変化なし</div></div><div style="margin-left:auto;font-size:9px;color:#99aacc;background:#eef2f8;padding:2px 6px;border-radius:5px;">引継</div></div></div></div>
-    <div style="height:14px;"></div>
   </div>
   <div class="s4-bottom">
     <button class="btn-primary btn-green" id="s4confirmBtn" onclick="goto('s5')" style="opacity:.4;pointer-events:none;">記録を確定して保存</button>
@@ -963,22 +800,50 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="s5">
   <div class="s5-top">
     <div class="s5-check">✓</div>
-    <div class="s5-title">返却チェック完了</div>
-    <div class="s5-sub">2026/04/12 09:05 ／ スタッフ: 大下<br>新しい傷 2件 → check_eventsに追記<br><span style="color:#00d4ff70;font-size:11px;">vehicle_twins.current_damages 更新済み</span></div>
+    <div class="s5-title" id="s5Title">返却チェック完了</div>
+    <div class="s5-sub" id="s5Sub">処理中...</div>
   </div>
   <div class="s5-map-wrap">
     <div class="s5-map-card">
       <div class="s5-map-hd">
-        <span class="s5-map-hd-lbl">VEHICLE STATUS — 更新済み</span>
-        <span class="s5-new-chip">+2 NEW</span>
+        <span class="s5-map-hd-lbl">VEHICLE STATUS</span>
+        <span class="s5-new-chip" id="s5NewChip">+0 NEW</span>
       </div>
       <div class="s5-map-view" id="s5MapView"></div>
       <div class="s5-map-legend" id="s5MapLegend"></div>
     </div>
   </div>
   <div class="s5-bottom">
-    <button class="btn-primary btn-green" onclick="completeAndReturn()">✓ 完了 — 車両一覧に戻る</button>
+    <button class="btn-primary btn-green" id="s5SaveBtn" onclick="saveCheckEvent()">✓ 記録を保存して完了</button>
     <button class="btn-ghost" onclick="goto('sc')">⛓ チェーン履歴を確認</button>
+  </div>
+</div>
+
+<!-- ===== Claude APIキー設定モーダル ===== -->
+<div class="conf-overlay" id="apiKeyOverlay" onclick="closeApiKeySetting(event)">
+  <div class="conf-sheet">
+    <div class="conf-handle"></div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:28px;margin-bottom:6px;">🤖</div>
+      <div style="font-size:16px;font-weight:800;color:#1a2840;">Claude AIキー設定</div>
+      <div style="font-size:11px;color:#8899bb;margin-top:4px;line-height:1.6;">
+        Anthropic Console → API Keys<br>「HANDYMAN」のキーをコピーして貼り付けてください
+      </div>
+    </div>
+    <div style="background:#f4f8fc;border:1.5px solid #d0dce8;border-radius:12px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-size:9px;color:#8899bb;font-weight:700;letter-spacing:1px;margin-bottom:6px;">APIキー</div>
+      <input id="apiKeyInput" type="password"
+        placeholder="sk-ant-api03-..."
+        style="width:100%;border:none;background:transparent;font-size:13px;color:#1a2840;font-family:monospace;outline:none;"
+        oninput="updateApiKeyPreview()">
+      <div id="apiKeyStatus" style="font-size:10px;margin-top:6px;color:#8899bb;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button onclick="toggleApiKeyVisibility()" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid #d0dce8;background:#fff;color:#5577aa;font-size:12px;font-weight:600;cursor:pointer;">👁 表示切替</button>
+      <button onclick="pasteApiKey()" style="flex:1;padding:11px;border-radius:10px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:600;cursor:pointer;">📋 貼り付け</button>
+    </div>
+    <button class="btn-primary btn-green" onclick="saveApiKey()" style="margin-bottom:10px;">✓ 保存する</button>
+    <button class="btn-ghost" onclick="closeApiKeySetting()">キャンセル</button>
   </div>
 </div>
 
@@ -1045,6 +910,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       </div>
       <div class="edit-section">メモ（任意）</div>
       <input class="edit-desc-input" id="editDescInput" placeholder="例: 縦15cm、ドア中央部" type="text">
+      <div class="edit-section" style="margin-top:4px;">写真（任意）</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button onclick="triggerCamera()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:600;cursor:pointer;">📷 撮影</button>
+        <button onclick="triggerLibrary()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:600;cursor:pointer;">📁 選択</button>
+      </div>
+      <div id="editPhotoPreview" style="display:none;width:100%;border-radius:10px;overflow:hidden;border:1px solid #d0dce8;margin-bottom:10px;position:relative;">
+        <img id="editPhotoImg" style="width:100%;display:block;" src="">
+        <button onclick="clearEditPhoto()" style="position:absolute;top:6px;right:6px;background:#00000088;border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">✕ 削除</button>
+      </div>
     </div>
     <div class="edit-action-row">
       <button class="edit-ok-btn" id="editOkBtn" onclick="submitEdit()" style="opacity:.4;pointer-events:none;">✓ 傷を追加</button>
@@ -1087,6 +961,93 @@ const STAFF_LIST=[
 let currentStaff=localStorage.getItem('hm_staff')||null;
 let currentStore=localStorage.getItem('hm_store')||'naha';
 let currentVehicleId=null; // 現在開いている車両ID
+
+// ===== Claude APIキー =====
+let CLAUDE_API_KEY = localStorage.getItem('hm_claude_key') || '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';
+
+// ===== APIキー設定UI =====
+function openApiKeySetting(){
+  const input=document.getElementById('apiKeyInput');
+  if(input) input.value=CLAUDE_API_KEY||'';
+  updateApiKeyPreview();
+  updateSmAiBtn();
+  document.getElementById('apiKeyOverlay').classList.add('show');
+}
+function closeApiKeySetting(e){
+  if(e&&e.target!==document.getElementById('apiKeyOverlay')) return;
+  document.getElementById('apiKeyOverlay').classList.remove('show');
+}
+function updateApiKeyPreview(){
+  const input=document.getElementById('apiKeyInput');
+  const status=document.getElementById('apiKeyStatus');
+  if(!input||!status) return;
+  const val=input.value.trim();
+  if(!val){ status.textContent=''; return; }
+  if(val.startsWith('sk-ant-')&&val.length>30){
+    status.innerHTML='<span style="color:#00aa55;">✓ 有効なキー形式です</span>';
+  } else {
+    status.innerHTML='<span style="color:#ff8800;">⚠ sk-ant-api03-... の形式で入力してください</span>';
+  }
+}
+function toggleApiKeyVisibility(){
+  const input=document.getElementById('apiKeyInput');
+  if(!input) return;
+  input.type=input.type==='password'?'text':'password';
+}
+async function pasteApiKey(){
+  try{
+    const text=await navigator.clipboard.readText();
+    const input=document.getElementById('apiKeyInput');
+    if(input){input.value=text.trim();updateApiKeyPreview();}
+  }catch(e){
+    showToast('クリップボードへのアクセスを許可してください');
+  }
+}
+function saveApiKey(){
+  const input=document.getElementById('apiKeyInput');
+  if(!input) return;
+  const val=input.value.trim();
+  if(!val.startsWith('sk-ant-')){
+    showToast('⚠ sk-ant-api03-... の形式で入力してください');
+    return;
+  }
+  CLAUDE_API_KEY=val;
+  localStorage.setItem('hm_claude_key',val);
+  document.getElementById('apiKeyOverlay').classList.remove('show');
+  updateSmAiBtn();
+  showToast('✓ Claude AIキーを保存しました — AI解析が使えます');
+  // 撮影待ちがあれば自動で遷移
+  if(window._pendingCheckType){
+    const t=window._pendingCheckType;
+    window._pendingCheckType=null;
+    setTimeout(()=>{
+      checkEventType=t;
+      updateS1Labels();
+      goto('s1');
+    },600);
+  }
+}
+function updateSmAiBtn(){
+  const btn=document.getElementById('smAiBtn');
+  if(!btn) return;
+  if(CLAUDE_API_KEY){
+    btn.style.color='#44dd88';
+    btn.style.borderColor='#44dd8840';
+    btn.title='Claude AIキー設定済み';
+  } else {
+    btn.style.color='#ffaa44';
+    btn.style.borderColor='#ffaa4430';
+    btn.title='Claude APIキーを設定してください';
+  }
+}
+
+let checkEventType = 'return'; // 'initial' | 'return'
+let capturedFrames = [];       // 録画中にキャプチャしたbase64画像
+let aiDetectedDamages = [];    // Claude Visionが検出した傷リスト
+let confirmedNewDamages = [];  // スタッフが「合ってる」と確認した傷
+let confirmedCount = 0;        // S4で確認済みカード数
+let mediaStream = null;        // getUserMedia ストリーム
+let frameCaptureInterval = null; // フレームキャプチャ用タイマー
 
 function initLogin(){
   // 常にSTEP1（店舗選択）から開始
@@ -1428,7 +1389,7 @@ function renderS0(v){
         <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
           <div class="s0-action-row" style="display:flex;gap:8px;margin-bottom:10px;">
             <button class="btn-primary btn-blue" onclick="goto('sc0')" style="flex:1;padding:14px;font-size:13px;">🚗 出庫チェック</button>
-            <button class="btn-primary btn-green" onclick="goto('s1')" style="flex:1;padding:14px;font-size:13px;">📹 返却チェック</button>
+            <button class="btn-primary btn-green" onclick="startReturnCheck()" style="flex:1;padding:14px;font-size:13px;">📹 返却チェック</button>
           </div>
         </div>`;
     }
@@ -1501,12 +1462,23 @@ if(currentStaff){
   loadVehicles();
   subscribeRealtime();
 }
+// AIキーボタン初期状態
+setTimeout(()=>updateSmAiBtn(), 100);
+
+// ===== 車両一覧リロード =====
+async function reloadVehicles(){
+  const btn=document.getElementById('smReloadBtn');
+  if(btn){btn.textContent='⏳';btn.style.pointerEvents='none';}
+  await loadVehicles();
+  if(btn){btn.textContent='🔄';btn.style.pointerEvents='all';}
+  showToast('✓ 車両一覧を更新しました');
+}
 
 // ===== 日付 =====
 (()=>{const d=new Date();const smDate=document.getElementById('smDate');if(smDate)smDate.textContent=d.getFullYear()+'/'+(d.getMonth()+1+'').padStart(2,'0')+'/'+(d.getDate()+'').padStart(2,'0');})();
 
 // ===== 車両俯瞰図（カーチェックシート形式） =====
-const INSP_SVG=`<svg viewBox="0 0 260 390" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;max-height:300px;">
+const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;max-height:220px;">
 <defs>
   <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#dce8f0"/>
@@ -1517,11 +1489,12 @@ const INSP_SVG=`<svg viewBox="0 0 260 390" xmlns="http://www.w3.org/2000/svg" st
     <stop offset="100%" stop-color="#c8d8e4"/>
   </linearGradient>
 </defs>
+<!-- 方向ラベル（回転外 → 文字が読める） -->
+<text x="-60" y="142" fill="#334466" font-size="7" letter-spacing="2" font-family="monospace" font-weight="600">◄ REAR</text>
+<text x="278" y="142" fill="#334466" font-size="7" letter-spacing="2" font-family="monospace" font-weight="600">FRONT ►</text>
+<!-- 車両本体: -90°回転 中心(130,195) -->
+<g transform="rotate(-90, 130, 195)">
 <rect width="260" height="390" fill="#e8f0f6" rx="6"/>
-
-<!-- 方向ラベル -->
-<text x="130" y="13" text-anchor="middle" fill="#334466" font-size="8" letter-spacing="3" font-family="monospace" font-weight="600">REAR ↑</text>
-<text x="130" y="386" text-anchor="middle" fill="#334466" font-size="8" letter-spacing="3" font-family="monospace" font-weight="600">↓ FRONT</text>
 
 <!-- ===== リアバンパー ===== -->
 <rect id="iz-rear-bumper" x="85" y="18" width="90" height="22" rx="4" fill="#b8ccd8" stroke="#4477aa" stroke-width="1.5"/>
@@ -1615,28 +1588,29 @@ const INSP_SVG=`<svg viewBox="0 0 260 390" xmlns="http://www.w3.org/2000/svg" st
 <rect id="iz-front-bumper" x="85" y="356" width="90" height="22" rx="4" fill="#b8ccd8" stroke="#4477aa" stroke-width="1.5"/>
 <rect x="105" y="360" width="50" height="12" rx="1" fill="#e8eee8" stroke="#33446640" stroke-width="0.5"/>
 <text x="130" y="369" text-anchor="middle" fill="#2a3a50" font-size="5" font-family="monospace" font-weight="600">那覇500さ23-45</text>
+</g>
 </svg>`;
 
-// ゾーンID → {name, cx%, cy%} マッピング（俯瞰図SVG座標 viewBox 260×390）
+// ゾーンID → {name, cx%, cy%} マッピング（横向き: new_cx=old_cy, new_cy=100-old_cx）
 const ZONE_MAP={
-  'フロントバンパー':   {id:'iz-front-bumper', cx:50,  cy:94.4},
-  'ボンネット':         {id:'iz-hood',          cx:50,  cy:86.3},
-  'フロントガラス':     {id:'iz-roof',          cx:50,  cy:71.5},
-  '左フロントフェンダー':{id:'iz-lf-fender',   cx:22,  cy:75  },
-  '右フロントフェンダー':{id:'iz-rf-fender',   cx:78,  cy:75  },
-  '左フロントドア':     {id:'iz-lf-door',       cx:16,  cy:62  },
-  '右フロントドア':     {id:'iz-rf-door',       cx:84,  cy:62  },
-  'ルーフ':             {id:'iz-roof',           cx:50,  cy:52  },
-  '左リアドア':         {id:'iz-lr-door',        cx:16,  cy:43  },
-  '右リアドア':         {id:'iz-rr-door',        cx:84,  cy:43  },
-  '左リアフェンダー':   {id:'iz-lr-fender',      cx:22,  cy:30  },
-  '右リアフェンダー':   {id:'iz-rr-fender',      cx:78,  cy:30  },
-  'リアバンパー右':     {id:'iz-rear-bumper',    cx:62,  cy:7   },
-  'リアバンパー左':     {id:'iz-rear-bumper',    cx:38,  cy:7   },
-  'リアバンパー':       {id:'iz-rear-bumper',    cx:50,  cy:7   },
-  'バックドア':         {id:'iz-trunk',          cx:50,  cy:13.3},
-  '左ドアミラー':       {id:'iz-l-mirror',       cx:28,  cy:70.5},
-  '右ドアミラー':       {id:'iz-r-mirror',       cx:76,  cy:70.5},
+  'フロントバンパー':   {id:'iz-front-bumper', cx:94.4, cy:50  },
+  'ボンネット':         {id:'iz-hood',          cx:86.3, cy:50  },
+  'フロントガラス':     {id:'iz-roof',          cx:71.5, cy:50  },
+  '左フロントフェンダー':{id:'iz-lf-fender',   cx:75,   cy:78  },
+  '右フロントフェンダー':{id:'iz-rf-fender',   cx:75,   cy:22  },
+  '左フロントドア':     {id:'iz-lf-door',       cx:62,   cy:84  },
+  '右フロントドア':     {id:'iz-rf-door',       cx:62,   cy:16  },
+  'ルーフ':             {id:'iz-roof',           cx:52,   cy:50  },
+  '左リアドア':         {id:'iz-lr-door',        cx:43,   cy:84  },
+  '右リアドア':         {id:'iz-rr-door',        cx:43,   cy:16  },
+  '左リアフェンダー':   {id:'iz-lr-fender',      cx:30,   cy:78  },
+  '右リアフェンダー':   {id:'iz-rr-fender',      cx:30,   cy:22  },
+  'リアバンパー右':     {id:'iz-rear-bumper',    cx:7,    cy:38  },
+  'リアバンパー左':     {id:'iz-rear-bumper',    cx:7,    cy:62  },
+  'リアバンパー':       {id:'iz-rear-bumper',    cx:7,    cy:50  },
+  'バックドア':         {id:'iz-trunk',          cx:13.3, cy:50  },
+  '左ドアミラー':       {id:'iz-l-mirror',       cx:70.5, cy:72  },
+  '右ドアミラー':       {id:'iz-r-mirror',       cx:70.5, cy:24  },
 };
 
 // damage severity → color
@@ -1724,13 +1698,16 @@ function renderInspectionMap(damages){
 
 // S4: 新規検出のみ表示、赤ハイライト
 function renderS4Map(){
-  const newDmgs=SAMPLE_DAMAGES.filter(d=>DEMO_NEW_IDS.has(d.id));
-  renderMapInto('s4MapView',null,newDmgs,DEMO_NEW_IDS);
+  const newIds=new Set(aiDetectedDamages.map(d=>d.id));
+  renderMapInto('s4MapView',null,aiDetectedDamages,newIds);
 }
 
 // S5: 全傷表示、新規はNEWマーク
 function renderS5Map(){
-  renderMapInto('s5MapView','s5MapLegend',SAMPLE_DAMAGES,DEMO_NEW_IDS);
+  const existing=(vehiclesCache.find(v=>v.id===currentVehicleId)||{}).current_damages||[];
+  const allDmgs=[...existing,...confirmedNewDamages];
+  const newIds=new Set(confirmedNewDamages.map(d=>d.id));
+  renderMapInto('s5MapView','s5MapLegend',allDmgs,newIds);
 }
 
 // サンプルデータ（DB接続前の表示用）
@@ -1765,9 +1742,10 @@ function goto(id){
   if(target) target.classList.add('active');
   if(id==='sm') loadVehicles();
   if(id==='sp') startPipeline();
-  if(id==='s4') renderS4Map();
-  if(id==='s5') renderS5Map();
+  if(id==='s4'){renderS4Cards();renderS4Map();}
+  if(id==='s5'){renderS5();renderS5Map();}
   if(id==='sc') loadChain(currentVehicleId);
+  if(id==='sc0') renderSc0();
   if(id==='login'){
     currentStaff=null;
     localStorage.removeItem('hm_staff');
@@ -1836,85 +1814,50 @@ async function loadChain(vehicleId){
   if(tl) tl.innerHTML=html;
 }
 
-// ===== 初期登録フロー =====
+// ===== 初期登録 / 返却チェック フロー開始 =====
 function startInitialRegistration(){
-  // 傷編集パネルをそのまま流用：現在の傷をゼロから記録
-  // まず s0-edit-btn と同じ編集フローを開く
-  showToast('🗺 車両図の部位をタップして傷を追加してください');
-  // 編集モード（初期登録用フラグをセット）
-  window._initRegMode=true;
-  const editBtn=document.getElementById('s0EditBtnArea');
-  if(editBtn) editBtn.click();
-  // editパネルが開かれるまで待ってからフラグ表示
-  setTimeout(()=>{
-    const editOverlay=document.querySelector('.edit-overlay');
-    if(!editOverlay||editOverlay.classList.contains('show')) return;
-    // 車体図のタップを有効化するため編集モードをオン
-    document.querySelectorAll('.insp-zone').forEach(z=>z.style.cursor='pointer');
-    // 初期登録完了ボタンを action area に追加
-    const actionArea=document.getElementById('s0ActionArea');
-    if(actionArea){
-      actionArea.innerHTML=`
-        <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
-          <div style="font-size:11px;color:#ffbb55;text-align:center;margin-bottom:10px;">🗺 車体図の部位をタップ → 傷を追加してください</div>
-          <button class="btn-init" onclick="saveInitialRegistration()">⚡ 登録完了 — チェーン起点として保存</button>
-          <button class="btn-ghost" style="margin-top:8px;" onclick="cancelInitReg()">キャンセル</button>
-        </div>`;
-    }
-  },100);
+  checkEventType='initial';
+  capturedFrames=[];
+  aiDetectedDamages=[];
+  confirmedNewDamages=[];
+  confirmedCount=0;
+  if(!CLAUDE_API_KEY){
+    // キー未設定なら設定画面を先に開く
+    openApiKeySetting();
+    // 設定後に自動で撮影フローへ進むよう pending 状態を記憶
+    window._pendingCheckType='initial';
+    return;
+  }
+  updateS1Labels();
+  goto('s1');
 }
 
-function cancelInitReg(){
-  window._initRegMode=false;
+function startReturnCheck(){
+  checkEventType='return';
+  capturedFrames=[];
+  aiDetectedDamages=[];
+  confirmedNewDamages=[];
+  confirmedCount=0;
+  if(!CLAUDE_API_KEY){
+    openApiKeySetting();
+    window._pendingCheckType='return';
+    return;
+  }
+  updateS1Labels();
+  goto('s1');
+}
+
+function updateS1Labels(){
+  const typeEl=document.getElementById('s1TypeLabel');
+  const titleEl=document.getElementById('s1Title');
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-  if(v) renderS0(v);
-}
-
-async function saveInitialRegistration(){
-  if(!currentVehicleId||!currentStaff) return;
-  const damages=SAMPLE_DAMAGES||[];
-  const btn=document.querySelector('.btn-init');
-  if(btn){btn.textContent='保存中...';btn.disabled=true;}
-  try{
-    // 1. check_events に初期登録イベントを追加
-    const {data:ev,error:evErr}=await sb.from('check_events').insert({
-      vehicle_id:currentVehicleId,
-      event_type:'initial',
-      staff:currentStaff,
-      damages_snapshot:damages,
-      new_damages:damages,
-      staff_confirmed:true,
-      confirmed_at:new Date().toISOString(),
-      notes:`初期登録 ／ 傷${damages.length}件`
-    }).select().single();
-    if(evErr) throw evErr;
-    // 2. vehicle_twins を更新
-    const {error:twErr}=await sb.from('vehicle_twins').update({
-      current_damages:damages,
-      last_event_id:ev.id,
-      last_check_at:new Date().toISOString(),
-      last_check_staff:currentStaff,
-    }).eq('id',currentVehicleId);
-    if(twErr) throw twErr;
-    // 3. キャッシュを更新
-    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
-    if(idx>=0){
-      vehiclesCache[idx]={...vehiclesCache[idx],
-        current_damages:damages,
-        last_event_id:ev.id,
-        last_check_at:new Date().toISOString(),
-        last_check_staff:currentStaff,
-      };
-    }
-    window._initRegMode=false;
-    showToast(`✓ 初期登録完了 ／ 傷${damages.length}件 ／ チェーン起点を作成しました`);
-    // S0を再レンダー（登録済み状態に）
-    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-    if(v) renderS0(v);
-  }catch(e){
-    console.error('saveInitialRegistration:',e);
-    showToast('❌ 保存エラー: '+e.message);
-    if(btn){btn.textContent='⚡ 登録完了 — チェーン起点として保存';btn.disabled=false;}
+  const vName=v?.vehicles?.name||currentVehicleId||'車両';
+  if(checkEventType==='initial'){
+    if(typeEl) typeEl.textContent='INITIAL REGISTRATION';
+    if(titleEl) titleEl.textContent=`初期登録 — ${vName}`;
+  } else {
+    if(typeEl) typeEl.textContent='RETURN CHECK';
+    if(titleEl) titleEl.textContent=`返却チェック — ${vName}`;
   }
 }
 
@@ -1960,20 +1903,74 @@ function closeDmgEdit(e){
   document.getElementById('dmgEditOverlay').classList.remove('show');
   currentEditDmgId=null;
 }
-function markRepaired(){
-  if(!currentEditDmgId)return;
+async function markRepaired(){
+  if(!currentEditDmgId) return;
   const d=SAMPLE_DAMAGES.find(x=>x.id===currentEditDmgId);
   const loc=d?d.location:'';
-  SAMPLE_DAMAGES=SAMPLE_DAMAGES.filter(x=>x.id!==currentEditDmgId);
-  renderInspectionMap(SAMPLE_DAMAGES);
-  document.getElementById('dmgEditOverlay').classList.remove('show');
-  currentEditDmgId=null;
-  showToast('🔧 '+loc+'を修復済みにしました（チェーンに記録）');
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const updated=(v?.current_damages||[]).filter(x=>x.id!==currentEditDmgId);
+  try{
+    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    if(error) throw error;
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0) vehiclesCache[idx].current_damages=updated;
+    SAMPLE_DAMAGES=updated;
+    renderInspectionMap(SAMPLE_DAMAGES);
+    document.getElementById('dmgEditOverlay').classList.remove('show');
+    currentEditDmgId=null;
+    showToast('🔧 '+loc+'を修復済みにしました');
+  }catch(e){
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+  }
+}
+
+// ===== 写真ユーティリティ =====
+let editPhoto=null;
+function resetEditPhoto(){
+  editPhoto=null;
+  const p=document.getElementById('editPhotoPreview');
+  const img=document.getElementById('editPhotoImg');
+  if(p) p.style.display='none';
+  if(img) img.src='';
+}
+function clearEditPhoto(){ resetEditPhoto(); showToast('写真を削除しました'); }
+function triggerCamera(){ document.getElementById('cameraInput').click(); }
+function triggerLibrary(){ document.getElementById('libraryInput').click(); }
+async function handlePhotoSelect(input){
+  const file=input.files[0]; if(!file) return; input.value='';
+  try{
+    const b64=await compressPhoto(file,800,0.72);
+    editPhoto=b64;
+    const preview=document.getElementById('editPhotoPreview');
+    const img=document.getElementById('editPhotoImg');
+    if(img) img.src=b64;
+    if(preview) preview.style.display='block';
+    showToast('✓ 写真を追加しました');
+  }catch(e){ showToast('⚠ 写真の読み込みに失敗しました'); }
+}
+function compressPhoto(file,maxPx,quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1,maxPx/Math.max(img.width,img.height));
+        const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+        const canvas=document.getElementById('compressCanvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=reject; img.src=e.target.result;
+    };
+    reader.onerror=reject; reader.readAsDataURL(file);
+  });
 }
 
 // ===== 空きゾームタップ → 傷追加シート =====
 function openAddDmgSheet(zoneName){
   editZone=zoneName;editType=null;editSev=null;
+  resetEditPhoto();
   document.getElementById('editTitle').textContent=zoneName+' — 傷を追加';
   document.getElementById('editSub').textContent='傷の種類と程度を選んでください';
   document.getElementById('editZoneSection').style.display='none';
@@ -2031,24 +2028,50 @@ function updateEditBtns(){
   document.getElementById('editRepairBtn').style.opacity=repair?'1':'.4';
   document.getElementById('editRepairBtn').style.pointerEvents=repair?'all':'none';
 }
-function submitEdit(){
-  if(!editZone||!editType||!editSev)return;
+async function submitEdit(){
+  if(!editZone||!editType||!editSev) return;
   const desc=document.getElementById('editDescInput').value.trim()||'手動追加';
   const now=new Date();
   const ts=now.getFullYear()+'/'+(now.getMonth()+1+'').padStart(2,'0')+'/'+(now.getDate()+'').padStart(2,'0')+' '+(now.getHours()+'').padStart(2,'0')+':'+(now.getMinutes()+'').padStart(2,'0');
-  SAMPLE_DAMAGES.push({id:'dmg_'+Date.now(),location:editZone,type:editType,severity:editSev,desc,addedAt:ts,photo:'📸'});
-  renderInspectionMap(SAMPLE_DAMAGES);
-  document.getElementById('editOverlay').classList.remove('show');
-  showToast('✓ '+editZone+'の傷を追加しました（'+ts+'）');
+  const newDmg={id:'dmg_'+Date.now(),location:editZone,type:editType,severity:editSev,desc,addedAt:ts,photo:editPhoto||null,addedBy:currentStaff};
+  const btn=document.getElementById('editOkBtn');
+  if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
+  try{
+    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+    const updated=[...(v?.current_damages||[]),newDmg];
+    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    if(error) throw error;
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0) vehiclesCache[idx].current_damages=updated;
+    SAMPLE_DAMAGES=updated;
+    renderInspectionMap(SAMPLE_DAMAGES);
+    document.getElementById('editOverlay').classList.remove('show');
+    resetEditPhoto();
+    showToast('✓ '+editZone+'の傷を保存しました');
+  }catch(e){
+    console.error('submitEdit:',e);
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+  }finally{
+    if(btn){btn.textContent='✓ 傷を追加';btn.style.pointerEvents='all';}
+  }
 }
-function repairZone(){
-  if(!editZone)return;
-  const before=SAMPLE_DAMAGES.length;
-  SAMPLE_DAMAGES=SAMPLE_DAMAGES.filter(d=>d.location!==editZone);
-  const removed=before-SAMPLE_DAMAGES.length;
-  renderInspectionMap(SAMPLE_DAMAGES);
-  document.getElementById('editOverlay').classList.remove('show');
-  showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
+async function repairZone(){
+  if(!editZone) return;
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const updated=(v?.current_damages||[]).filter(d=>d.location!==editZone);
+  const removed=(v?.current_damages||[]).length-updated.length;
+  try{
+    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    if(error) throw error;
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0) vehiclesCache[idx].current_damages=updated;
+    SAMPLE_DAMAGES=updated;
+    renderInspectionMap(SAMPLE_DAMAGES);
+    document.getElementById('editOverlay').classList.remove('show');
+    showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
+  }catch(e){
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+  }
 }
 function showToast(msg){
   const t=document.createElement('div');
@@ -2058,13 +2081,108 @@ function showToast(msg){
   setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},3000);
 }
 
-// ===== SC0: アコーディオン =====
+// ===== SC0: 動的レンダリング =====
+const SC0_CONFIRMED=new Set();
 let sc0OpenId=null;
+let sc0TotalDmgIds=[];
+
+function renderSc0(){
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v) return;
+  const damages=v.current_damages||[];
+  const vName=v.vehicles?.name||currentVehicleId||'車両';
+  const resvInfo=v.current_resv_no?` — 予約 ${v.current_resv_no}`:''
+  const customer=v.current_customer?`${v.current_customer} 様`:'';
+
+  // ヘッダー
+  const titleEl=document.getElementById('sc0Title');
+  const subEl=document.getElementById('sc0Sub');
+  if(titleEl) titleEl.textContent=`出庫前 傷確認 — ${vName}`;
+  if(subEl) subEl.textContent=customer+(resvInfo?resvInfo+' ／':'')+(customer?' ':'')+ fmtDate(new Date().toISOString()).slice(0,10);
+
+  SC0_CONFIRMED.clear();
+  sc0TotalDmgIds=damages.map(d=>d.id);
+
+  const body=document.getElementById('sc0Body');
+  if(!body) return;
+
+  if(damages.length===0){
+    body.innerHTML=`
+      <div class="sc0-customer-banner" style="margin-top:12px;">
+        <div class="sc0-customer-banner-icon">✅</div>
+        <div class="sc0-customer-banner-text">
+          <div class="title">記録済みの傷はありません</div>
+          <div class="body">この車両には現在記録された傷がありません。そのまま出庫できます。</div>
+        </div>
+      </div>
+      <div style="height:8px;"></div>`;
+    const totalLabel=document.getElementById('sc0TotalLabel');
+    if(totalLabel) totalLabel.textContent='/0件 確認済み';
+    const okBtn=document.getElementById('sc0CheckoutBtn');
+    if(okBtn){okBtn.style.opacity='1';okBtn.style.pointerEvents='all';}
+    return;
+  }
+
+  const sevColors={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
+
+  let html=`
+    <div class="sc0-customer-banner">
+      <div class="sc0-customer-banner-icon">📋</div>
+      <div class="sc0-customer-banner-text">
+        <div class="title">ご出発前に既存の傷をご確認ください</div>
+        <div class="body">各項目をタップして内容を確認し「確認する」を押してください。</div>
+      </div>
+    </div>
+    <div class="sc0-section-label">記録済みの傷 — ${damages.length}件</div>`;
+
+  damages.forEach((d,i)=>{
+    const c=sevColors[d.severity]||sevColors[d.type]||'#ff8888';
+    const sevLabel={minor:'軽微',moderate:'中程度',major:'重大'}[d.severity]||d.severity;
+    const typeL=typeLabel(d.type);
+    const isMajor=d.severity==='major';
+    html+=`
+    <div class="sc0-acc" id="acc_${d.id}">
+      <div class="sc0-acc-hd" onclick="toggleAcc('${d.id}')">
+        <div class="sc0-acc-dot" style="background:${c};box-shadow:0 0 0 3px ${c}20;"></div>
+        <div class="sc0-acc-info">
+          <div class="sc0-acc-loc">${d.location}</div>
+          <div class="sc0-acc-sub">${typeL} ／ ${d.desc||sevLabel}${isMajor?` ／ <span style="color:#cc1111;font-weight:700;">重大</span>`:''}</div>
+        </div>
+        <div class="sc0-acc-right">
+          <div class="sc0-acc-status" id="status_${d.id}">未確認</div>
+          <div class="sc0-acc-arrow">›</div>
+        </div>
+      </div>
+      <div class="sc0-acc-body" id="body_${d.id}">
+        <div class="sc0-acc-detail" style="padding:12px 14px 4px;">
+          <div class="sc0-acc-tags">
+            <div class="sc0-acc-tag" style="color:${c};border-color:${c}40;background:${c}10;">⚠ ${typeL}</div>
+            <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">${sevLabel}</div>
+            ${d.desc?`<div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">${d.desc}</div>`:''}
+          </div>
+          <div class="sc0-acc-date" style="margin-top:6px;">📍 ${d.location}</div>
+        </div>
+        <div class="sc0-acc-confirm-row">
+          <button class="sc0-acc-btn" id="cfm_${d.id}" onclick="toggleConfirm('${d.id}')">確認する</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html+=`<div class="sc0-note">⚠️ 上記以外の傷が返却時に発見された場合、ご負担いただく場合があります。</div><div style="height:4px;"></div>`;
+  body.innerHTML=html;
+
+  const totalLabel=document.getElementById('sc0TotalLabel');
+  if(totalLabel) totalLabel.textContent=`/${damages.length}件 確認済み`;
+  const cntEl=document.getElementById('sc0ConfirmCount');
+  if(cntEl) cntEl.textContent='0';
+}
+
 function toggleAcc(dmgId){
   const acc=document.getElementById('acc_'+dmgId);
   const body=document.getElementById('body_'+dmgId);
+  if(!acc||!body) return;
   const isOpen=acc.classList.contains('open');
-  // 別の開いているものを閉じる
   if(sc0OpenId&&sc0OpenId!==dmgId){
     const prev=document.getElementById('acc_'+sc0OpenId);
     const prevBody=document.getElementById('body_'+sc0OpenId);
@@ -2072,34 +2190,23 @@ function toggleAcc(dmgId){
     if(prevBody) prevBody.style.maxHeight='';
   }
   if(isOpen){
-    acc.classList.remove('open');
-    body.style.maxHeight='';
-    sc0OpenId=null;
+    acc.classList.remove('open');body.style.maxHeight='';sc0OpenId=null;
   } else {
-    acc.classList.add('open');
-    body.style.maxHeight=body.scrollHeight+'px';
-    sc0OpenId=dmgId;
+    acc.classList.add('open');body.style.maxHeight=body.scrollHeight+'px';sc0OpenId=dmgId;
   }
 }
 
-// ===== SC0: 傷確認（顧客向け） =====
-const SC0_CONFIRMED=new Set();
-const SC0_PHOTO_DATA={
-  dmg001:{loc:'左フロントドア',type:'擦り傷',sev:'軽微',desc:'縦15cm の擦り傷。塗装が部分的に剥がれています。',date:'2026/03/28',resv:'#118',color:'#ff3333'},
-  dmg002:{loc:'リアバンパー右',type:'塗装欠け',sev:'軽微',desc:'横5cm の塗装欠け。下地金属が露出しています。',date:'2026/04/02',resv:'#122',color:'#ff8800'},
-  dmg003:{loc:'右リアドア',type:'凹み',sev:'軽微',desc:'直径3cm の凹み。パネル全体には影響なし。',date:'2026/02/14',resv:'#109',color:'#ffaa00'},
-  dmg004:{loc:'フロントガラス',type:'ひび割れ',sev:'重大',desc:'放射状のひび割れ。視界への影響は軽微ですが、進行に注意が必要です。',date:'2026/03/10',resv:'#114',color:'#3366ee'},
-};
 function toggleConfirm(dmgId){
-  const confirmed=SC0_CONFIRMED.has(dmgId);
-  if(confirmed){
+  const wasConfirmed=SC0_CONFIRMED.has(dmgId);
+  if(wasConfirmed){
     SC0_CONFIRMED.delete(dmgId);
   } else {
     SC0_CONFIRMED.add(dmgId);
     // 確認したら自動で閉じる
     const acc=document.getElementById('acc_'+dmgId);
-    const body=document.getElementById('body_'+dmgId);
-    if(acc){acc.classList.remove('open');body.style.maxHeight='';}
+    const b=document.getElementById('body_'+dmgId);
+    if(acc){acc.classList.remove('open');}
+    if(b) b.style.maxHeight='';
     if(sc0OpenId===dmgId) sc0OpenId=null;
   }
   const btn=document.getElementById('cfm_'+dmgId);
@@ -2112,17 +2219,52 @@ function toggleConfirm(dmgId){
     if(statusEl){statusEl.textContent='✓ 確認済';statusEl.classList.add('ok');}
   }
   const cnt=SC0_CONFIRMED.size;
+  const total=sc0TotalDmgIds.length;
   const cntEl=document.getElementById('sc0ConfirmCount');
   if(cntEl) cntEl.textContent=cnt;
   const okBtn=document.getElementById('sc0CheckoutBtn');
   if(okBtn){
-    if(cnt>=4){okBtn.style.opacity='1';okBtn.style.pointerEvents='all';}
+    if(cnt>=total){okBtn.style.opacity='1';okBtn.style.pointerEvents='all';}
     else{okBtn.style.opacity='.4';okBtn.style.pointerEvents='none';}
   }
 }
-function sc0Checkout(){
+
+async function sc0Checkout(){
+  // チェックアウトイベントをチェーンに記録
+  if(!currentVehicleId||!currentStaff) return;
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const damages=v?.current_damages||[];
+  const customer=v?.current_customer||'—';
+  const resvNo=v?.current_resv_no||'—';
+  const prevEventId=v?.last_event_id||null;
+  try{
+    const{data:ev,error}=await sb.from('check_events').insert({
+      vehicle_id:currentVehicleId,
+      event_type:'checkout',
+      staff:currentStaff,
+      customer_name:customer,
+      resv_no:resvNo,
+      damages_snapshot:damages,
+      new_damages:[],
+      staff_confirmed:true,
+      confirmed_at:new Date().toISOString(),
+      prev_event_id:prevEventId,
+      notes:`出庫チェック ／ 傷${damages.length}件確認済み`
+    }).select().single();
+    if(error) throw error;
+    // last_event_id 更新
+    await sb.from('vehicle_twins').update({
+      last_event_id:ev.id,
+      last_check_at:new Date().toISOString(),
+      last_check_staff:currentStaff,
+    }).eq('id',currentVehicleId);
+    const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
+    if(idx>=0){vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:new Date().toISOString(),last_check_staff:currentStaff};}
+  }catch(e){
+    console.warn('sc0Checkout save error:',e);
+  }
   goto('sm');
-  setTimeout(()=>showToast('✓ 出庫イベントをチェーンに記録しました（山田 太郎 様）'),200);
+  setTimeout(()=>showToast(`✓ 出庫チェック完了 ／ ${customer} 様 ／ チェーンに記録`),200);
 }
 
 // ===== 写真ライトボックス =====
@@ -2152,15 +2294,8 @@ function closePhotoLB(e){
   document.getElementById('photoLb').classList.remove('show');
 }
 
-// ===== 完了 → マスタ =====
+// ===== 完了 → マスタ（後方互換スタブ） =====
 function completeAndReturn(){
-  confirmed=0;
-  const btn=document.getElementById('s4confirmBtn');
-  btn.style.opacity='.4';btn.style.pointerEvents='none';
-  ['dc1','dc2'].forEach((cid,i)=>{
-    const n=i+1,card=document.getElementById(cid),acts=card.querySelector('.dc-acts');
-    if(acts){acts.innerHTML=`<div class="dc-btn dc-ok" onclick="confirmDmg(${n},true)">✓ 合ってる</div><div class="dc-btn dc-ng" onclick="confirmDmg(${n},false)">✗ 違う</div>`;acts.style.padding='';}
-  });
   goto('sm');
 }
 
@@ -2169,92 +2304,431 @@ function animateNewPins(){}
 
 // ===== 録画 =====
 let recInterval=null,recSec=0,isRec=false;
-const GUIDE=['車の前から撮影中...','右側へ移動してください','右側面を撮影中...','後ろへ回ってください','後面を撮影中...','左側へ移動してください','左側面を撮影中...','撮影完了！'];
-function startRecording(){goto('s2');setTimeout(()=>toggleRecording(),800);}
+const GUIDE=['車の前から撮影中...','右側へ移動してください','右側面を撮影中...','後ろへ回ってください','後面を撮影中...','左側へ移動してください','左側面を撮影中...','前に戻ってください','全体を確認してください','傷のある箇所は近づいて撮影','もう一度周回してください','撮影が終わったらボタンを押してください'];
+
+// カメラを起動してS2へ
+async function startRecording(){
+  goto('s2');
+  capturedFrames=[];
+  const video=document.getElementById('recVideo');
+  const bg=document.getElementById('recVfBg');
+  // リアカメラを要求
+  try{
+    mediaStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},
+      audio:false
+    });
+    video.srcObject=mediaStream;
+    await video.play();
+    if(bg) bg.style.display='none';
+    video.style.display='block';
+    showToast('📷 カメラ起動 — 録画ボタンを押してください');
+    setTimeout(()=>toggleRecording(),600);
+  }catch(e){
+    console.warn('カメラアクセス失敗:',e.message);
+    showToast('📷 カメラを使用できません — シミュレーションモード');
+    setTimeout(()=>toggleRecording(),800);
+  }
+}
+
+// フレームキャプチャ（録画中に定期実行）
+function captureVideoFrame(){
+  const video=document.getElementById('recVideo');
+  if(!video||!video.srcObject||video.readyState<2) return;
+  const canvas=document.getElementById('recCanvas');
+  canvas.width=640; canvas.height=360;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0,640,360);
+  const frame=canvas.toDataURL('image/jpeg',0.72);
+  capturedFrames.push(frame);
+  // 最大6フレームを均等間隔で保持
+  if(capturedFrames.length>6) capturedFrames.splice(0,1);
+}
+
+// メディアストリーム停止
+function stopMediaStream(){
+  if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}
+  const video=document.getElementById('recVideo');
+  if(video){video.srcObject=null;video.style.display='none';}
+  const bg=document.getElementById('recVfBg');
+  if(bg) bg.style.display='flex';
+  if(frameCaptureInterval){clearInterval(frameCaptureInterval);frameCaptureInterval=null;}
+}
+
 function toggleRecording(){
   if(!isRec){
     isRec=true;recSec=0;
     document.getElementById('recBadge').style.display='flex';
     document.getElementById('recBtn').classList.add('recording');
+    // 5秒おきにフレームキャプチャ（最大6枚）
+    frameCaptureInterval=setInterval(()=>captureVideoFrame(),5000);
     recInterval=setInterval(()=>{
       recSec++;
       const m=Math.floor(recSec/60),s=recSec%60;
       document.getElementById('recTimer').textContent=m+':'+(s+'').padStart(2,'0');
       const idx=Math.min(Math.floor(recSec/2),GUIDE.length-1);
       document.getElementById('recGuideText').innerHTML=`<div class="rec-guide-main">${GUIDE[idx]}</div>`;
-      document.getElementById('frameCount').textContent=`フレーム: ${recSec*4}`;
-      if(recSec>=13)stopRecording();
+      document.getElementById('frameCount').textContent=`📷 ${capturedFrames.length}フレーム取得`;
+      // 自動停止なし — スタッフが手動で止める（最大10分）
+      if(recSec>=600) stopRecording();
     },1000);
+  } else {
+    stopRecording();
   }
 }
+
 function stopRecording(){
   if(recInterval){clearInterval(recInterval);recInterval=null;}
+  if(frameCaptureInterval){clearInterval(frameCaptureInterval);frameCaptureInterval=null;}
   isRec=false;
   document.getElementById('recBadge').style.display='none';
   document.getElementById('recBtn').classList.remove('recording');
-  document.getElementById('recGuideText').innerHTML='<div class="rec-guide-main" style="color:#00ff88;">✓ 撮影完了 — 解析開始</div>';
+  document.getElementById('recGuideText').innerHTML='<div class="rec-guide-main" style="color:#00ff88;">✓ 撮影完了 — AI解析開始</div>';
+  // 最後に1フレームキャプチャ
+  captureVideoFrame();
+  stopMediaStream();
   setTimeout(()=>goto('sp'),1000);
 }
 
-// ===== AI解析画面 =====
-function startPipeline(){
+// ===== Claude Vision API 呼び出し =====
+async function callClaudeVision(frames, existingDamages){
+  // APIキー未設定時はデモデータを返す
+  if(!CLAUDE_API_KEY){
+    showToast('⚠ Claude APIキー未設定 — デモモードで動作中');
+    await new Promise(r=>setTimeout(r,2000));
+    // デモ：ランダムに0〜2件返す
+    const demo=[
+      {id:'demo_'+Date.now()+'_1',location:'左フロントドア',type:'scratch',severity:'minor',desc:'デモ検出: 擦り傷 縦約15cm'},
+      {id:'demo_'+Date.now()+'_2',location:'リアバンパー右',type:'chip',severity:'minor',desc:'デモ検出: 塗装欠け 横約5cm'},
+    ];
+    return demo.slice(0,Math.floor(Math.random()*3));
+  }
+
+  // 有効なフレームのみ使用（最大4枚）
+  const validFrames=frames.filter(f=>f&&f.startsWith('data:image')).slice(-4);
+  const imageParts=validFrames.map(f=>({
+    type:'image',
+    source:{
+      type:'base64',
+      media_type:'image/jpeg',
+      data:f.replace(/^data:image\/jpeg;base64,/,'')
+    }
+  }));
+
+  const existingList=(existingDamages||[]).map(d=>`${d.location}: ${d.type}`).join(', ')||'なし';
+  const prompt=`あなたはレンタカー会社のスタッフです。これらの画像は${checkEventType==='initial'?'新規車両の初期状態':'返却された車両'}の撮影です。
+
+車両の傷・損傷を確認してください。
+既存の記録済み傷（これらは除外）: ${existingList}
+
+新しく発見した傷・損傷があれば以下のJSON配列のみを返してください。
+部位名は必ずこのリストから選択: フロントバンパー, ボンネット, フロントガラス, 左フロントフェンダー, 右フロントフェンダー, 左フロントドア, 右フロントドア, ルーフ, 左リアドア, 右リアドア, 左リアフェンダー, 右リアフェンダー, リアバンパー, バックドア, 左ドアミラー, 右ドアミラー
+
+[{"location":"部位名","type":"scratch|dent|chip|crack|other","severity":"minor|moderate|major","desc":"説明"}]
+
+新しい傷がない場合は []`;
+
+  try{
+    const body={
+      model:'claude-opus-4-5',
+      max_tokens:1024,
+      messages:[{
+        role:'user',
+        content:[
+          ...(imageParts.length>0?imageParts:[{type:'text',text:'※画像なし（テキストのみ解析）'}]),
+          {type:'text',text:prompt}
+        ]
+      }]
+    };
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':CLAUDE_API_KEY,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){
+      const errText=await res.text();
+      throw new Error(`Claude API ${res.status}: ${errText}`);
+    }
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'';
+    console.log('Claude response:',text);
+    const match=text.match(/\[[\s\S]*?\]/);
+    if(!match) return [];
+    const damages=JSON.parse(match[0]);
+    return damages.map((d,i)=>({...d,id:'ai_'+Date.now()+'_'+i}));
+  }catch(e){
+    console.error('Claude Vision error:',e);
+    showToast('❌ AI解析エラー: '+e.message.slice(0,40));
+    return [];
+  }
+}
+
+// typeLabel ユーティリティ
+function typeLabel(t){
+  return{scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他'}[t]||t;
+}
+
+// SP結果カードを描画
+function renderSpResults(damages){
+  if(!damages||damages.length===0){
+    document.getElementById('spResult').innerHTML=`
+      <div style="text-align:center;padding:10px 0;">
+        <div style="font-size:36px;margin-bottom:8px;">✅</div>
+        <div style="font-size:15px;font-weight:700;color:#00cc66;">新しい傷は見つかりませんでした</div>
+        <div style="font-size:11px;color:#88aacc;margin-top:4px;">車両は良好な状態です</div>
+      </div>`;
+    return;
+  }
+  const icons={major:'🔴',moderate:'🟠',minor:'🟡',crack:'🔵'};
+  let html=`<div class="sp-result-hd">▲ 新しい傷が見つかりました — ${damages.length}件</div>`;
+  damages.forEach(d=>{
+    html+=`
+      <div class="sp-dmg-card">
+        <div class="sp-dmg-icon">${icons[d.severity]||icons[d.type]||'🔴'}</div>
+        <div style="flex:1;">
+          <div class="sp-dmg-loc">${d.location} — ${typeLabel(d.type)}</div>
+          <div class="sp-dmg-desc">${d.desc||''}</div>
+        </div>
+        <div class="sp-dmg-badge">NEW</div>
+      </div>`;
+  });
+  document.getElementById('spResult').innerHTML=html;
+}
+
+// ===== AI解析パイプライン（実装版） =====
+async function startPipeline(){
   // リセット
   document.getElementById('spNextBtn').style.opacity='0';
   document.getElementById('spNextBtn').style.pointerEvents='none';
   document.getElementById('spResult').classList.remove('show');
   document.querySelectorAll('.sp-dot').forEach(d=>{d.className='sp-dot';});
-  document.getElementById('spPhase').textContent='AIが動画を確認しています';
-  document.getElementById('spPhaseSub').textContent='しばらくお待ちください...';
+  aiDetectedDamages=[];
 
-  const phases=[
-    {phase:'AIが動画を確認しています',    sub:'ゆっくり撮影してくれてありがとうございます',  dot:0},
-    {phase:'傷を探しています',            sub:'前回との違いを調べています',                   dot:1},
-    {phase:'結果をまとめています',         sub:'もう少しかかります...',                        dot:2},
-    {phase:'確認が必要な傷が見つかりました', sub:'スタッフの確認が必要です',                   dot:3, result:true},
-  ];
-
-  function setPhase(i){
-    const p=phases[i];
-    const phEl=document.getElementById('spPhase');
-    const subEl=document.getElementById('spPhaseSub');
-    phEl.style.opacity='0';
-    setTimeout(()=>{
-      phEl.textContent=p.phase;
-      subEl.textContent=p.sub;
-      phEl.style.opacity='1';
-    },150);
+  const setDot=(i)=>{
     for(let d=0;d<4;d++){
       const el=document.getElementById('spDot'+d);
       if(d<i) el.className='sp-dot done';
       else if(d===i) el.className='sp-dot active';
       else el.className='sp-dot';
     }
-    if(p.result){
-      setTimeout(()=>{
-        document.getElementById('spResult').classList.add('show');
-      },500);
-      setTimeout(()=>{
-        document.getElementById('spNextBtn').style.opacity='1';
-        document.getElementById('spNextBtn').style.pointerEvents='all';
-      },1200);
-    }
+  };
+  const setPhaseText=(phase,sub)=>{
+    const phEl=document.getElementById('spPhase');
+    const subEl=document.getElementById('spPhaseSub');
+    phEl.style.opacity='0';
+    setTimeout(()=>{phEl.textContent=phase;subEl.textContent=sub;phEl.style.opacity='1';},150);
+  };
+
+  // PHASE 0: 開始
+  setDot(0);
+  setPhaseText('AIが画像を分析しています','ゆっくり撮影してくれてありがとうございます');
+  await new Promise(r=>setTimeout(r,1200));
+
+  // PHASE 1: 解析中
+  setDot(1);
+  setPhaseText('傷を探しています','前回との違いを調べています...');
+
+  // 既存傷を取得
+  const existing=(vehiclesCache.find(v=>v.id===currentVehicleId)||{}).current_damages||[];
+
+  // Claude Vision API 呼び出し（async）
+  let damages=[];
+  try{
+    damages=await callClaudeVision(capturedFrames,existing);
+  }catch(e){
+    console.error('Pipeline error:',e);
+    damages=[];
   }
 
-  setPhase(0);
-  setTimeout(()=>setPhase(1), 3000);
-  setTimeout(()=>setPhase(2), 6000);
-  setTimeout(()=>setPhase(3), 9000);
+  // PHASE 2: まとめ
+  setDot(2);
+  setPhaseText('結果をまとめています','もう少しかかります...');
+  await new Promise(r=>setTimeout(r,800));
+
+  // PHASE 3: 完了
+  setDot(3);
+  aiDetectedDamages=damages;
+
+  if(damages.length>0){
+    setPhaseText(`確認が必要な傷が見つかりました`,`${damages.length}件の傷を検出`);
+  }else{
+    setPhaseText('新しい傷は見つかりませんでした','車両は良好な状態です');
+  }
+
+  renderSpResults(damages);
+  await new Promise(r=>setTimeout(r,500));
+  document.getElementById('spResult').classList.add('show');
+
+  await new Promise(r=>setTimeout(r,700));
+  const nextBtn=document.getElementById('spNextBtn');
+  nextBtn.textContent=damages.length>0?'確認画面へ進む →':'確認して完了 →';
+  nextBtn.style.opacity='1';
+  nextBtn.style.pointerEvents='all';
+}
+
+// ===== S4: AI検出カードを動的に描画 =====
+function renderS4Cards(){
+  const container=document.getElementById('s4CardsContainer');
+  if(!container) return;
+  const existing=(vehiclesCache.find(v=>v.id===currentVehicleId)||{}).current_damages||[];
+
+  // バッジ/タイトル更新
+  const badge=document.querySelector('.s4-badge');
+  if(badge) badge.textContent=`⚠ 新たな傷 ${aiDetectedDamages.length}件を検出`;
+
+  // 確認カウンターリセット
+  confirmedNewDamages=[];
+  confirmedCount=0;
+
+  let html='';
+  if(aiDetectedDamages.length===0){
+    html=`<div style="text-align:center;padding:24px 16px;background:#edfaf4;border:1px solid #c8eed8;border-radius:14px;margin-bottom:12px;">
+      <div style="font-size:28px;margin-bottom:6px;">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#007733;">新しい傷は検出されませんでした</div>
+      <div style="font-size:11px;color:#7799bb;margin-top:4px;">このまま保存して完了できます</div>
+    </div>`;
+  } else {
+    aiDetectedDamages.forEach((d,idx)=>{
+      const color=d.severity==='major'?'#ff4444':d.severity==='moderate'?'#ff8800':'#ffcc00';
+      const bg=d.severity==='major'?'#fff5f5':d.severity==='moderate'?'#fff9f0':'#fffde0';
+      const sevLabel={minor:'軽微',moderate:'中程度',major:'重大'}[d.severity]||d.severity;
+      html+=`
+      <div class="dc" id="dc_ai_${idx}">
+        <div class="dc-frame" style="background:${bg};">
+          <div style="display:flex;align-items:center;gap:10px;padding:0 12px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:${color}18;border:2px solid ${color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🔴</div>
+            <div style="font-size:13px;font-weight:700;color:#1a2840;">${d.location}<br><span style="font-size:10px;color:#8899bb;font-weight:400;">${typeLabel(d.type)}（${sevLabel}）</span></div>
+          </div>
+        </div>
+        <div class="dc-body">
+          <div class="dc-loc">${d.location} — ${typeLabel(d.type)}</div>
+          <div class="dc-desc">AI検出 ／ ${sevLabel}${d.desc?' ／ '+d.desc:''}</div>
+          <div class="dc-acts">
+            <div class="dc-btn dc-ok" onclick="confirmDmg(${idx},true)">✓ 合ってる</div>
+            <div class="dc-btn dc-ng" onclick="confirmDmg(${idx},false)">✗ 違う</div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  // 既存傷（引継）
+  if(existing.length>0){
+    html+=`<div style="font-size:9px;color:#99aacc;letter-spacing:1.5px;margin:12px 0 7px;">— 既存傷（引継・変化なし）—</div>`;
+    existing.forEach(d=>{
+      html+=`<div class="dc dc-existing"><div class="dc-body" style="padding:9px 12px;"><div style="display:flex;align-items:center;gap:8px;"><span>🟡</span><div><div class="dc-loc">${d.location} — ${typeLabel(d.type)}</div><div class="dc-desc">前回記録済 ／ 変化なし</div></div><div style="margin-left:auto;font-size:9px;color:#99aacc;background:#eef2f8;padding:2px 6px;border-radius:5px;">引継</div></div></div></div>`;
+    });
+  }
+  html+='<div style="height:14px;"></div>';
+  container.innerHTML=html;
+
+  // 確認ボタンの初期状態
+  const saveBtn=document.getElementById('s4confirmBtn');
+  if(saveBtn){
+    if(aiDetectedDamages.length===0){
+      saveBtn.style.opacity='1';saveBtn.style.pointerEvents='all';
+    } else {
+      saveBtn.style.opacity='.4';saveBtn.style.pointerEvents='none';
+    }
+  }
+}
+
+// ===== S5: 完了画面を描画 =====
+function renderS5(){
+  const newCnt=confirmedNewDamages.length;
+  const existing=(vehiclesCache.find(v=>v.id===currentVehicleId)||{}).current_damages||[];
+  const allDmgs=[...existing,...confirmedNewDamages];
+  const newIds=new Set(confirmedNewDamages.map(d=>d.id));
+  const today=fmtDate(new Date().toISOString());
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const vName=v?.vehicles?.name||currentVehicleId||'車両';
+
+  const title=document.getElementById('s5Title');
+  const sub=document.getElementById('s5Sub');
+  const chip=document.getElementById('s5NewChip');
+  if(title) title.textContent=checkEventType==='initial'?'初期登録完了':'返却チェック完了';
+  if(sub) sub.innerHTML=`${vName} ／ ${today}<br>担当: ${currentStaff} ／ 新規傷 ${newCnt}件`;
+  if(chip) chip.textContent=newCnt>0?`+${newCnt} NEW`:'変化なし';
+
+  const saveBtn=document.getElementById('s5SaveBtn');
+  if(saveBtn){saveBtn.textContent='✓ 記録を保存して完了';saveBtn.disabled=false;}
+
+  renderMapInto('s5MapView','s5MapLegend',allDmgs,newIds);
+}
+
+// ===== チェックイベントをSupabaseに保存 =====
+async function saveCheckEvent(){
+  if(!currentVehicleId||!currentStaff) return;
+  const existing=(vehiclesCache.find(v=>v.id===currentVehicleId)||{}).current_damages||[];
+  const newDmgs=confirmedNewDamages||[];
+  const allDmgs=[...existing,...newDmgs];
+  const prevEventId=vehiclesCache.find(v=>v.id===currentVehicleId)?.last_event_id||null;
+
+  const btn=document.getElementById('s5SaveBtn');
+  if(btn){btn.textContent='保存中...';btn.disabled=true;}
+
+  try{
+    // 1. check_events に追記
+    const{data:ev,error:evErr}=await sb.from('check_events').insert({
+      vehicle_id:currentVehicleId,
+      event_type:checkEventType,
+      staff:currentStaff,
+      damages_snapshot:allDmgs,
+      new_damages:newDmgs,
+      staff_confirmed:true,
+      confirmed_at:new Date().toISOString(),
+      prev_event_id:prevEventId,
+      notes:`${checkEventType==='initial'?'初期登録':'返却チェック'} ／ 新規傷${newDmgs.length}件`
+    }).select().single();
+    if(evErr) throw evErr;
+
+    // 2. vehicle_twins を更新
+    const{error:twErr}=await sb.from('vehicle_twins').update({
+      current_damages:allDmgs,
+      last_event_id:ev.id,
+      last_check_at:new Date().toISOString(),
+      last_check_staff:currentStaff,
+    }).eq('id',currentVehicleId);
+    if(twErr) throw twErr;
+
+    // 3. キャッシュ更新
+    const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
+    if(idx>=0){
+      vehiclesCache[idx]={...vehiclesCache[idx],
+        current_damages:allDmgs,
+        last_event_id:ev.id,
+        last_check_at:new Date().toISOString(),
+        last_check_staff:currentStaff,
+      };
+    }
+
+    // S5ボタンを「完了」に変更してSMへ
+    if(btn){btn.textContent='✓ 保存完了！';btn.style.background='linear-gradient(135deg,#0099cc,#006699)';}
+    showToast(`✓ 保存完了 ／ 新規傷${newDmgs.length}件 ／ チェーンに記録しました`);
+    setTimeout(()=>goto('sm'),1500);
+
+  }catch(e){
+    console.error('saveCheckEvent:',e);
+    showToast('❌ 保存エラー: '+e.message.slice(0,50));
+    if(btn){btn.textContent='✓ 記録を保存して完了';btn.disabled=false;}
+  }
 }
 
 // ===== 確認ボタン（2ステップ：選択→確認モーダル→確定） =====
-let confirmed=0;
 let pendingId=null, pendingOk=null;
+let pendingIdx=null, pendingOk2=null;
 
 // ① ✓ or ✗ タップ → モーダルを出す
-function confirmDmg(id,ok){
-  const card=document.getElementById('dc'+id);
-  const loc=card.querySelector('.dc-loc').textContent;
-  pendingId=id; pendingOk=ok;
+function confirmDmg(idx,ok){
+  const d=aiDetectedDamages[idx];
+  const loc=d?d.location:`損傷 ${idx+1}`;
+  pendingIdx=idx; pendingOk2=ok;
+  pendingId=idx; pendingOk=ok;
 
   document.getElementById('confDmgName').textContent=loc;
   const choice=document.getElementById('confDmgChoice');
@@ -2277,25 +2751,37 @@ function confirmDmg(id,ok){
 function cancelConf(e){
   if(e && e.target!==document.getElementById('confOverlay')) return;
   document.getElementById('confOverlay').classList.remove('show');
+  pendingIdx=null; pendingOk2=null;
   pendingId=null; pendingOk=null;
 }
 
 // ③ 「はい」→ 確定
 function commitDmg(){
-  if(pendingId===null) return;
-  const id=pendingId, ok=pendingOk;
+  if(pendingIdx===null) return;
+  const idx=pendingIdx, ok=pendingOk2;
   document.getElementById('confOverlay').classList.remove('show');
 
-  const acts=document.getElementById('dc'+id).querySelector('.dc-acts');
-  acts.innerHTML=ok
-    ?'<div class="dc-confirmed">✓ 記録確定</div>'
-    :'<div class="dc-confirmed" style="background:#ff444410;color:#ff8888;border-color:#ff444420;">✗ スキップ</div>';
-  acts.style.padding='0';
-  confirmed++;
-  if(confirmed>=2){
-    const btn=document.getElementById('s4confirmBtn');
-    btn.style.opacity='1'; btn.style.pointerEvents='all';
+  const card=document.getElementById('dc_ai_'+idx);
+  if(card){
+    const acts=card.querySelector('.dc-acts');
+    if(acts){
+      acts.innerHTML=ok
+        ?'<div class="dc-confirmed">✓ 記録確定</div>'
+        :'<div class="dc-confirmed" style="background:#ff444410;color:#ff8888;border-color:#ff444420;">✗ スキップ</div>';
+      acts.style.padding='0';
+    }
   }
+  if(ok){
+    const d=aiDetectedDamages[idx];
+    if(d&&!confirmedNewDamages.find(x=>x.id===d.id)) confirmedNewDamages.push(d);
+  }
+
+  confirmedCount++;
+  if(confirmedCount>=aiDetectedDamages.length){
+    const saveBtn=document.getElementById('s4confirmBtn');
+    if(saveBtn){saveBtn.style.opacity='1';saveBtn.style.pointerEvents='all';}
+  }
+  pendingIdx=null; pendingOk2=null;
   pendingId=null; pendingOk=null;
 }
 </script>

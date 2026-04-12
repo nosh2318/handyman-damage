@@ -1,5 +1,5 @@
-// HANDYMAN 車両チェック Service Worker v1
-const CACHE = 'handyman-damage-v1';
+// HANDYMAN 車両チェック Service Worker v2
+const CACHE = 'handyman-damage-v2';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', e => {

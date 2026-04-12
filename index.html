@@ -1105,8 +1105,7 @@ async function openVehicle(vehicleId){
   const cached=vehiclesCache.find(v=>v.id===vehicleId);
   if(cached){
     renderS0(cached);
-    SAMPLE_DAMAGES=(cached.current_damages||[]);
-    renderInspectionMap(SAMPLE_DAMAGES);
+    renderInspectionMap(cached.current_damages||[]);
   }
 
   // vehicle_twinsから最新ダメージ状態を取得
@@ -1116,8 +1115,7 @@ async function openVehicle(vehicleId){
     if(idx>=0){
       vehiclesCache[idx]={...vehiclesCache[idx],...twin};
       renderS0(vehiclesCache[idx]);
-      SAMPLE_DAMAGES=vehiclesCache[idx].current_damages||[];
-      renderInspectionMap(SAMPLE_DAMAGES);
+      renderInspectionMap(vehiclesCache[idx].current_damages||[]);
     }
   }
 }
@@ -1515,16 +1513,11 @@ function renderS5Map(){
   renderMapInto('s5MapView','s5MapLegend',allDmgs,newIds);
 }
 
-// サンプルデータ（DB接続前の表示用）
-let SAMPLE_DAMAGES=[
-  {id:'dmg001',location:'左フロントドア',type:'scratch',severity:'minor',desc:'縦15cm',photo:'📸'},
-  {id:'dmg002',location:'リアバンパー右',type:'chip',severity:'minor',desc:'横5cm',photo:'📸'},
-  {id:'dmg003',location:'右リアドア',type:'dent',severity:'minor',desc:'直径3cm',photo:'📸'},
-  {id:'dmg004',location:'フロントガラス',type:'crack',severity:'major',desc:'ひび割れ',photo:'📸'},
-];
-// 今回の返却チェックで新規検出された傷ID
-const DEMO_NEW_IDS=new Set(['dmg001','dmg002']);
-renderInspectionMap(SAMPLE_DAMAGES);
+// 現在の車両ダメージを返すヘルパー
+function currentDamages(){
+  return vehiclesCache.find(x=>x.id===currentVehicleId)?.current_damages||[];
+}
+renderInspectionMap([]);
 
 // ===== （旧アングル切替 — 削除済） =====
 // ダミー関数（既存コードとの互換維持）
@@ -1679,7 +1672,7 @@ function updateS1Labels(){
 
 // ===== ゾーンタップ（傷追加 or 編集） =====
 function tapZone(zoneId){
-  const dmgsHere=SAMPLE_DAMAGES.filter(d=>{
+  const dmgsHere=currentDamages().filter(d=>{
     let z=ZONE_MAP[d.location];
     if(!z){ const keys=Object.keys(ZONE_MAP).sort((a,b)=>b.length-a.length); for(const k of keys){ if(d.location.includes(k)){z=ZONE_MAP[k];break;} } }
     return z&&z.id===zoneId;
@@ -1695,7 +1688,7 @@ function tapZone(zoneId){
 // ===== 既存傷ピンタップ → 編集シート =====
 let currentEditDmgId=null;
 function openDmgEdit(dmgId){
-  const d=SAMPLE_DAMAGES.find(x=>x.id===dmgId);
+  const d=currentDamages().find(x=>x.id===dmgId);
   if(!d) return;
   currentEditDmgId=dmgId;
   const typeNames={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他'};
@@ -1721,7 +1714,7 @@ function closeDmgEdit(e){
 }
 async function markRepaired(){
   if(!currentEditDmgId) return;
-  const d=SAMPLE_DAMAGES.find(x=>x.id===currentEditDmgId);
+  const d=currentDamages().find(x=>x.id===currentEditDmgId);
   const loc=d?d.location:'';
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   const updated=(v?.current_damages||[]).filter(x=>x.id!==currentEditDmgId);
@@ -1730,14 +1723,17 @@ async function markRepaired(){
     if(error) throw error;
     const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
     if(idx>=0) vehiclesCache[idx].current_damages=updated;
-    SAMPLE_DAMAGES=updated;
-    renderInspectionMap(SAMPLE_DAMAGES);
+    renderInspectionMap(updated);
     document.getElementById('dmgEditOverlay').classList.remove('show');
     currentEditDmgId=null;
     showToast('🔧 '+loc+'を修復済みにしました');
   }catch(e){
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
   }
+}
+
+function typeLabel(type){
+  return {scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他'}[type]||type||'—';
 }
 
 // ===== SR0: 返却チェック =====
@@ -1955,7 +1951,6 @@ async function sr0SaveReturn(){
       vehiclesCache[idx]={...vehiclesCache[idx],status:'ready',current_damages:finalDamages,
         last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,
         current_resv_no:null,current_customer:null};
-      SAMPLE_DAMAGES=finalDamages;
     }
     goto('sm');
     setTimeout(()=>showToast(`✓ 返却完了 ／ ${customer} 様 ／ 新規傷${newDmgs.length}件`),200);
@@ -2085,8 +2080,7 @@ async function submitEdit(){
     if(error) throw error;
     const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
     if(idx>=0) vehiclesCache[idx].current_damages=updated;
-    SAMPLE_DAMAGES=updated;
-    renderInspectionMap(SAMPLE_DAMAGES);
+    renderInspectionMap(updated);
     document.getElementById('editOverlay').classList.remove('show');
     resetEditPhoto();
     showToast('✓ '+editZone+'の傷を保存しました');
@@ -2107,8 +2101,7 @@ async function repairZone(){
     if(error) throw error;
     const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
     if(idx>=0) vehiclesCache[idx].current_damages=updated;
-    SAMPLE_DAMAGES=updated;
-    renderInspectionMap(SAMPLE_DAMAGES);
+    renderInspectionMap(updated);
     document.getElementById('editOverlay').classList.remove('show');
     showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
   }catch(e){

@@ -341,7 +341,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc0-acc.open .sc0-acc-arrow{transform:rotate(90deg);}
 /* 展開エリア */
 .sc0-acc-body{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.4,0,.2,1);}
-.sc0-acc.open .sc0-acc-body{max-height:460px;}
+.sc0-acc.open .sc0-acc-body{max-height:600px;}
 .sc0-acc-photo{width:100%;height:180px;position:relative;overflow:hidden;background:#111;cursor:pointer;display:block;}
 .sc0-acc-photo:active{opacity:.88;}
 .sc0-acc-photo svg{display:block;width:100%;height:100%;}
@@ -2125,8 +2125,19 @@ function renderSc0(){
 
   const sevColors={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
 
-  let html=`
-    <div class="sc0-customer-banner">
+  // 予約バナー（予約番号・氏名がある場合は目立たせる）
+  const resvBanner= (v.current_resv_no||v.current_customer) ? `
+    <div style="margin:12px 16px 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#0e2040,#162d52);border:1.5px solid #4488cc60;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🚗</div>
+      <div style="flex:1;">
+        <div style="font-size:11px;color:#88bbdd;font-weight:700;letter-spacing:1px;margin-bottom:3px;">TODAY'S RESERVATION</div>
+        <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:2px;">${v.current_customer||'—'} 様</div>
+        <div style="font-size:11px;color:#88aacc;">予約番号: ${v.current_resv_no||'—'}</div>
+      </div>
+    </div>` : '';
+
+  let html=resvBanner+`
+    <div class="sc0-customer-banner" style="margin-top:10px;">
       <div class="sc0-customer-banner-icon">📋</div>
       <div class="sc0-customer-banner-text">
         <div class="title">ご出発前に既存の傷をご確認ください</div>
@@ -2154,13 +2165,21 @@ function renderSc0(){
         </div>
       </div>
       <div class="sc0-acc-body" id="body_${d.id}">
-        <div class="sc0-acc-detail" style="padding:12px 14px 4px;">
+        ${d.photo
+          ? `<div class="sc0-acc-photo" onclick="openPhotoLBDirect('${d.id}')">
+               <img src="${d.photo}" style="width:100%;height:100%;object-fit:cover;display:block;">
+               <div class="sc0-acc-photo-badge" style="background:#00000088;">📷 エビデンス写真</div>
+               <div class="sc0-acc-photo-expand">拡大 ↗</div>
+             </div>`
+          : `<div style="padding:10px 14px 0;background:#f8fafd;border-bottom:1px solid #eef2f8;font-size:11px;color:#aabbcc;text-align:center;letter-spacing:.5px;">📷 写真なし</div>`
+        }
+        <div class="sc0-acc-detail" style="padding:10px 14px 4px;">
           <div class="sc0-acc-tags">
             <div class="sc0-acc-tag" style="color:${c};border-color:${c}40;background:${c}10;">⚠ ${typeL}</div>
             <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">${sevLabel}</div>
             ${d.desc?`<div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">${d.desc}</div>`:''}
           </div>
-          <div class="sc0-acc-date" style="margin-top:6px;">📍 ${d.location}</div>
+          <div class="sc0-acc-date" style="margin-top:4px;">📍 ${d.location}${d.addedAt?' ／ 記録日: '+d.addedAt.slice(0,10):''}</div>
         </div>
         <div class="sc0-acc-confirm-row">
           <button class="sc0-acc-btn" id="cfm_${d.id}" onclick="toggleConfirm('${d.id}')">確認する</button>
@@ -2252,41 +2271,41 @@ async function sc0Checkout(){
       notes:`出庫チェック ／ 傷${damages.length}件確認済み`
     }).select().single();
     if(error) throw error;
-    // last_event_id 更新
+    // vehicle_twins: status='out' + last_event_id 更新
+    const now=new Date().toISOString();
     await sb.from('vehicle_twins').update({
+      status:'out',
       last_event_id:ev.id,
-      last_check_at:new Date().toISOString(),
+      last_check_at:now,
       last_check_staff:currentStaff,
     }).eq('id',currentVehicleId);
     const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
-    if(idx>=0){vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:new Date().toISOString(),last_check_staff:currentStaff};}
+    if(idx>=0){vehiclesCache[idx]={...vehiclesCache[idx],status:'out',last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff};}
+    const btn=document.getElementById('sc0CheckoutBtn');
+    if(btn){btn.textContent='✓ 出庫完了';btn.style.background='linear-gradient(135deg,#00aa55,#007733)';}
   }catch(e){
     console.warn('sc0Checkout save error:',e);
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    return;
   }
   goto('sm');
   setTimeout(()=>showToast(`✓ 出庫チェック完了 ／ ${customer} 様 ／ チェーンに記録`),200);
 }
 
 // ===== 写真ライトボックス =====
-function openPhotoLB(dmgId){
-  const d=SC0_PHOTO_DATA[dmgId];
-  if(!d) return;
-  // 対応するphoto-areaのSVGをコピー
-  const srcArea=document.querySelector('[onclick="openPhotoLB(\''+dmgId+'\')"]');
-  const svg=srcArea?srcArea.querySelector('svg'):null;
+function openPhotoLBDirect(dmgId){
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  const d=(v?.current_damages||[]).find(x=>x.id===dmgId);
+  if(!d||!d.photo) return;
   const inner=document.getElementById('lbCanvasInner');
-  if(inner&&svg){
-    const clone=svg.cloneNode(true);
-    clone.setAttribute('width','100%');
-    clone.setAttribute('style','display:block;width:100%;height:auto;min-height:220px;');
-    inner.innerHTML='';
-    inner.appendChild(clone);
-  }
-  document.getElementById('lbLoc').textContent=d.loc;
-  document.getElementById('lbSub').textContent=d.date+' 撮影 ／ 予約'+d.resv+'で記録';
-  document.getElementById('lbDesc').textContent=d.desc;
+  if(inner) inner.innerHTML=`<img src="${d.photo}" style="width:100%;display:block;border-radius:12px;">`;
+  document.getElementById('lbLoc').textContent=d.location;
+  document.getElementById('lbSub').textContent=(d.addedAt||'—')+' 記録 ／ 担当: '+(d.addedBy||'—');
+  document.getElementById('lbDesc').textContent=d.desc||'';
   const meta=document.getElementById('lbMeta');
-  if(meta) meta.innerHTML=`<div class="photo-lb-tag">${d.type}</div><div class="photo-lb-tag">${d.sev}</div><div class="photo-lb-tag">📅 ${d.date}</div>`;
+  const tL={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他'};
+  const sL={minor:'軽微',moderate:'中程度',major:'重大'};
+  if(meta) meta.innerHTML=`<div class="photo-lb-tag">${tL[d.type]||d.type||'—'}</div><div class="photo-lb-tag">${sL[d.severity]||d.severity||'—'}</div>`;
   document.getElementById('photoLb').classList.add('show');
 }
 function closePhotoLB(e){

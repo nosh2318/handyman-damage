@@ -1,5 +1,5 @@
-// HANDYMAN 車両チェック Service Worker v3
-const CACHE = 'handyman-damage-v3';
+// HANDYMAN 車両チェック Service Worker v4
+const CACHE = 'handyman-damage-v4';
 
 self.addEventListener('install', e => {
   // キャッシュはしない（常に最新を取得）
@@ -15,13 +15,12 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // index.html は必ずネットワークから取得（キャッシュ使わない）
+  // supabase は素通し
   if (e.request.url.includes('supabase.co')) return;
-  if (e.request.mode === 'navigate' ||
-      e.request.url.endsWith('.html') ||
-      e.request.url.endsWith('/')) {
-    e.respondWith(fetch(e.request));
-    return;
-  }
-  e.respondWith(fetch(e.request));
+  // 常にネットワークから取得（キャッシュ一切使わない）
+  e.respondWith(
+    fetch(e.request, { cache: 'no-store' }).catch(() => {
+      return new Response('offline', { status: 503 });
+    })
+  );
 });

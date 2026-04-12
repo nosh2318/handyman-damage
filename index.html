@@ -81,6 +81,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sm-dmg{font-size:9px;color:#8899bb;background:#eef2f8;padding:2px 6px;border-radius:6px;}
 .sm-arr{color:#b0c4dd;font-size:18px;align-self:center;padding-right:2px;}
 .sm-stats{display:flex;gap:6px;padding:10px 16px 6px;}
+/* クラスグループヘッダー */
+.sm-class-hd{display:flex;align-items:center;gap:8px;padding:14px 2px 6px;margin-bottom:2px;}
+.sm-class-badge{font-size:11px;font-weight:900;letter-spacing:1px;padding:3px 10px;border-radius:8px;background:#1a2e48;color:#88ccff;border:1px solid #2a4a70;}
+.sm-class-name{font-size:12px;color:#6688aa;font-weight:600;}
+.sm-class-count{font-size:10px;color:#4466aa;background:#e8f0fa;padding:2px 7px;border-radius:6px;margin-left:auto;}
+/* クラスバッジ（カード内） */
+.sm-class-tag{font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;background:#e8f0fa;color:#4466aa;margin-left:4px;}
 .ssp{flex:1;background:#ffffff;border:1px solid #dde8f4;border-radius:10px;padding:7px 6px;text-align:center;box-shadow:0 1px 4px rgba(30,50,100,.05);}
 .ssp-n{font-size:17px;font-weight:800;color:#1a2840;}
 .ssp-l{font-size:8px;color:#8899bb;margin-top:1px;}
@@ -1021,22 +1028,23 @@ if('serviceWorker' in navigator){
 }
 
 // ===== スタッフ管理 =====
+// store:'both'=両店舗共通, 'naha'=那覇のみ, 'sapporo'=札幌のみ
 const STAFF_LIST=[
-  {id:'oshita',    name:'大下',   emoji:'👨‍💼'},
-  {id:'saito',     name:'斎藤',   emoji:'👨‍💼'},
-  {id:'ie',        name:'伊江',   emoji:'👨‍💼'},
-  {id:'hirose',    name:'廣瀬',   emoji:'👨‍💼'},
-  {id:'takeyama',  name:'武山',   emoji:'👨‍💼'},
-  {id:'mikuni',    name:'三國',   emoji:'👨‍💼'},
-  {id:'akamine',   name:'赤嶺',   emoji:'👨‍💼'},
-  {id:'oshiro',    name:'大城',   emoji:'👨‍💼'},
-  {id:'tonaki',    name:'渡名喜', emoji:'👨‍💼'},
-  {id:'nishimura', name:'西村',   emoji:'👨‍💼'},
-  {id:'nakama',    name:'仲間',   emoji:'👨‍💼'},
-  {id:'arimoto',   name:'有本',   emoji:'👨‍💼'},
-  {id:'koyama',    name:'小山',   emoji:'👨‍💼'},
-  {id:'yoshida',   name:'吉田',   emoji:'👨‍💼'},
-  {id:'fukudome',  name:'福留',   emoji:'👨‍💼'},
+  {id:'oshita',    name:'大下',   emoji:'👨‍💼', store:'both'},
+  {id:'takeyama',  name:'武山',   emoji:'👨‍💼', store:'both'},
+  {id:'saito',     name:'斎藤',   emoji:'👨‍💼', store:'both'},
+  {id:'ie',        name:'伊江',   emoji:'👨‍💼', store:'naha'},
+  {id:'hirose',    name:'廣瀬',   emoji:'👨‍💼', store:'naha'},
+  {id:'mikuni',    name:'三國',   emoji:'👨‍💼', store:'naha'},
+  {id:'akamine',   name:'赤嶺',   emoji:'👨‍💼', store:'naha'},
+  {id:'oshiro',    name:'大城',   emoji:'👨‍💼', store:'naha'},
+  {id:'tonaki',    name:'渡名喜', emoji:'👨‍💼', store:'naha'},
+  {id:'nishimura', name:'西村',   emoji:'👨‍💼', store:'naha'},
+  {id:'nakama',    name:'仲間',   emoji:'👨‍💼', store:'naha'},
+  {id:'arimoto',   name:'有本',   emoji:'👨‍💼', store:'naha'},
+  {id:'koyama',    name:'小山',   emoji:'👨‍💼', store:'naha'},
+  {id:'yoshida',   name:'吉田',   emoji:'👨‍💼', store:'naha'},
+  {id:'fukudome',  name:'福留',   emoji:'👨‍💼', store:'naha'},
 ];
 let currentStaff=localStorage.getItem('hm_staff')||null;
 let currentStore=localStorage.getItem('hm_store')||'naha';
@@ -1061,7 +1069,8 @@ function showStep2(store){
   const badge=document.getElementById('loginStoreBadge');
   badge.textContent=store==='naha'?'🌺 那覇空港店':'❄️ 札幌店';
   const grid=document.getElementById('staffGrid');
-  grid.innerHTML=STAFF_LIST.map(s=>`
+  const filtered=STAFF_LIST.filter(s=>s.store==='both'||s.store===store);
+  grid.innerHTML=filtered.map(s=>`
     <button class="login-btn" onclick="selectStaff('${s.id}','${s.name}')">
       <div class="avatar">${s.emoji}</div>${s.name}
     </button>`).join('');
@@ -1103,7 +1112,7 @@ async function loadVehicles(){
     if(currentStore==='naha'){
       // 那覇: nha_cars + vehicle_twins(ダメージ状態)
       const [{data:cars},{data:twins}]=await Promise.all([
-        sb.from('nha_cars').select('id,name,plate,class_id,status').eq('store_id','naha').eq('status','active').order('id'),
+        sb.from('nha_cars').select('id,name,plate,class_id,status').eq('store_id','naha').eq('status','active').order('class_id').order('id'),
         sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,odometer,rental_count').eq('store','naha')
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
@@ -1117,7 +1126,7 @@ async function loadVehicles(){
         last_check_staff:twMap[car.id]?.last_check_staff||null,
         odometer:twMap[car.id]?.odometer||0,
         rental_count:twMap[car.id]?.rental_count||0,
-        vehicles:{name:car.name,plate_no:car.plate,code:car.id}
+        vehicles:{name:car.name,plate_no:car.plate,code:car.id,class_id:car.class_id}
       }));
     } else {
       // 札幌: vehicles + vehicle_twins(ダメージ状態)
@@ -1136,7 +1145,7 @@ async function loadVehicles(){
         last_check_staff:twMap[car.code]?.last_check_staff||null,
         odometer:twMap[car.code]?.odometer||0,
         rental_count:twMap[car.code]?.rental_count||0,
-        vehicles:{name:car.name,plate_no:car.plate_no,code:car.code,year:car.year}
+        vehicles:{name:car.name,plate_no:car.plate_no,code:car.code,year:car.year,class_id:spkClass(car.name)}
       }));
     }
     vehiclesCache=vehicles;
@@ -1151,40 +1160,100 @@ async function loadVehicles(){
   }
 }
 
+// ===== クラス定義 =====
+const NAHA_CLASS_DEF={
+  'A':{name:'Aクラス',label:'アルファード'},
+  'B':{name:'Bクラス',label:'ノア / ヴォクシー / ヴェルファイア'},
+  'C':{name:'Cクラス',label:'ライズ / ヤリスクロス'},
+  'D':{name:'Dクラス',label:'ミニバン（ガソリン）'},
+  'F':{name:'Fクラス',label:'コンパクト'},
+  'H':{name:'Hクラス',label:'ハイブリッド'},
+};
+const SPK_CLASS_DEF={
+  'LUX':{name:'高級ミニバン',label:'アルファード / ヴェルファイア'},
+  'MPV':{name:'ミニバン',label:'ノア / ステップワゴン / デリカ'},
+  'SUV':{name:'SUV',label:'CX-3 / CX-5 / ロッキー / ハリアー'},
+  'CPT':{name:'コンパクト',label:'ソリオ / アクセラ'},
+  'OTH':{name:'その他',label:''},
+};
+function spkClass(name){
+  if(!name) return 'OTH';
+  const n=name.toLowerCase();
+  if(n.includes('アルファード')||n.includes('ヴェルファイア')) return 'LUX';
+  if(n.includes('ノア')||n.includes('ステップワゴン')||n.includes('デリカ')) return 'MPV';
+  if(n.includes('cx')||n.includes('ロッキー')||n.includes('ハリアー')) return 'SUV';
+  if(n.includes('ソリオ')||n.includes('アクセラ')||n.includes('カローラ')) return 'CPT';
+  return 'OTH';
+}
+
 function renderVehicleList(vehicles){
   const list=document.getElementById('smList');
   if(!vehicles||vehicles.length===0){
     list.innerHTML='<div style="text-align:center;padding:40px 0;color:#8899bb;">車両データなし</div>';
     return;
   }
-  list.innerHTML=vehicles.map(v=>{
-    const vInfo=v.vehicles||{};
-    const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
-    const dmgCnt=(v.current_damages||[]).length;
-    const resvTxt=v.current_resv_no?(` ${v.current_resv_no}`):'';
-    return `
-    <div class="sm-card" style="--stripe:${st.stripe}" onclick="openVehicle('${v.id}')" id="smcard_${v.id}">
-      <div class="sm-stripe" style="background:${st.stripe};"></div>
-      <div class="sm-thumb"><svg viewBox="0 0 68 40">
-        <rect width="68" height="40" fill="#0a0e18"/>
-        <path d="M7,14 L61,14 L61,30 L7,30Z" fill="#d0d0cc"/>
-        <path d="M15,14 L53,14 L50,29 L18,29Z" fill="#1a2836" fill-opacity=".88"/>
-        <circle cx="18" cy="35" r="4.5" fill="#222"/><circle cx="50" cy="35" r="4.5" fill="#222"/>
-        ${dmgCnt>0?'<circle cx="25" cy="21" r="3" fill="#ff444470" stroke="#ff4444" stroke-width="1"/>':''}
-      </svg></div>
-      <div class="sm-info">
-        <div class="sm-vno">${v.id} <span style="font-size:10px;font-weight:400;color:#ffffff35;">${vInfo.name||''}</span></div>
-        <div class="sm-model">${vInfo.plate_no||'—'}</div>
-        <div class="sm-status-row">
-          <div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">
-            ${statusEmoji(v.status)} ${st.label}${resvTxt}
-          </div>
-          ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
-        </div>
+  const classDef=currentStore==='naha'?NAHA_CLASS_DEF:SPK_CLASS_DEF;
+  // クラス順にグループ化
+  const groups={};
+  vehicles.forEach(v=>{
+    const cid=(v.vehicles?.class_id)||'OTH';
+    if(!groups[cid]) groups[cid]=[];
+    groups[cid].push(v);
+  });
+  const classOrder=currentStore==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CPT','OTH'];
+
+  let html='';
+  classOrder.forEach(cid=>{
+    const list2=groups[cid];
+    if(!list2||list2.length===0) return;
+    const cd=classDef[cid]||{name:cid,label:''};
+    // ステータス別カウント
+    const returning=list2.filter(v=>v.status==='returning').length;
+    const out=list2.filter(v=>v.status==='out').length;
+    const maint=list2.filter(v=>v.status==='maintenance').length;
+    let statusNote='';
+    if(returning>0) statusNote+=`<span style="color:#ff5555;font-weight:700;">${returning}件返却待ち</span> `;
+    if(out>0) statusNote+=`<span style="color:#ff8800;">${out}件貸出中</span> `;
+    if(maint>0) statusNote+=`<span style="color:#5577ee;">${maint}件整備中</span> `;
+    html+=`
+    <div class="sm-class-hd">
+      <div class="sm-class-badge">${cid}</div>
+      <div>
+        <div class="sm-class-name">${cd.name} <span style="color:#4488aa;font-size:10px;">${cd.label}</span></div>
+        ${statusNote?`<div style="font-size:10px;margin-top:1px;">${statusNote}</div>`:''}
       </div>
-      <div class="sm-arr">›</div>
+      <div class="sm-class-count">${list2.length}台</div>
     </div>`;
-  }).join('');
+    list2.forEach(v=>{
+      const vInfo=v.vehicles||{};
+      const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
+      const dmgCnt=(v.current_damages||[]).length;
+      const resvTxt=v.current_resv_no?(' '+v.current_resv_no):'';
+      html+=`
+      <div class="sm-card" onclick="openVehicle('${v.id}')" id="smcard_${v.id}">
+        <div class="sm-stripe" style="background:${st.stripe};"></div>
+        <div class="sm-thumb"><svg viewBox="0 0 68 40">
+          <rect width="68" height="40" fill="#0a0e18"/>
+          <path d="M7,14 L61,14 L61,30 L7,30Z" fill="#d0d0cc"/>
+          <path d="M15,14 L53,14 L50,29 L18,29Z" fill="#1a2836" fill-opacity=".88"/>
+          <circle cx="18" cy="35" r="4.5" fill="#222"/><circle cx="50" cy="35" r="4.5" fill="#222"/>
+          ${dmgCnt>0?'<circle cx="25" cy="21" r="3" fill="#ff444470" stroke="#ff4444" stroke-width="1"/>':''}
+        </svg></div>
+        <div class="sm-info">
+          <div class="sm-vno">${vInfo.name||v.id}</div>
+          <div class="sm-model">${v.id} <span style="color:#9bb;">/ ${vInfo.plate_no||'—'}</span></div>
+          <div class="sm-status-row">
+            <div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">
+              ${statusEmoji(v.status)} ${st.label}${resvTxt}
+            </div>
+            ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
+          </div>
+        </div>
+        <div class="sm-arr">›</div>
+      </div>`;
+    });
+  });
+  list.innerHTML=html;
 }
 
 function updateSmStats(vehicles){

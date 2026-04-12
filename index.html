@@ -1149,7 +1149,7 @@ async function loadVehicles(){
       }));
     }
     vehiclesCache=vehicles;
-    renderVehicleList(vehiclesCache);
+    renderVehicleList(vehiclesCache,currentStore);
     updateSmStats(vehiclesCache);
     const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
     const el=document.getElementById('smHdStore');
@@ -1186,13 +1186,15 @@ function spkClass(name){
   return 'OTH';
 }
 
-function renderVehicleList(vehicles){
+function renderVehicleList(vehicles, store){
   const list=document.getElementById('smList');
   if(!vehicles||vehicles.length===0){
     list.innerHTML='<div style="text-align:center;padding:40px 0;color:#8899bb;">車両データなし</div>';
     return;
   }
-  const classDef=currentStore==='naha'?NAHA_CLASS_DEF:SPK_CLASS_DEF;
+  // store引数がなければグローバル変数を使う
+  const st2=store||currentStore||'naha';
+  const classDef=st2==='naha'?NAHA_CLASS_DEF:SPK_CLASS_DEF;
   // クラス順にグループ化
   const groups={};
   vehicles.forEach(v=>{
@@ -1200,7 +1202,7 @@ function renderVehicleList(vehicles){
     if(!groups[cid]) groups[cid]=[];
     groups[cid].push(v);
   });
-  const classOrder=currentStore==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CPT','OTH'];
+  const classOrder=st2==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CPT','OTH'];
 
   let html='';
   classOrder.forEach(cid=>{

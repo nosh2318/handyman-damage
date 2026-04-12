@@ -13,19 +13,29 @@
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-/* ===== スタッフ選択画面 ===== */
-#login{background:linear-gradient(160deg,#0f1e34,#1a2e48);justify-content:center;align-items:center;}
+/* ===== ログイン画面（2ステップ）===== */
+#login{background:linear-gradient(160deg,#0f1e34,#1a2e48);justify-content:center;align-items:center;overflow-y:auto;}
 .login-inner{width:100%;padding:0 28px;display:flex;flex-direction:column;align-items:center;gap:0;}
 .login-logo{font-size:11px;font-weight:900;letter-spacing:4px;color:#4488cc;margin-bottom:12px;}
 .login-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:6px;text-align:center;}
-.login-sub{font-size:12px;color:#6688aa;margin-bottom:36px;text-align:center;}
-.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:28px;}
+.login-sub{font-size:12px;color:#6688aa;margin-bottom:32px;text-align:center;}
+/* STEP1: 店舗選択 */
+.store-sel-wrap{display:flex;flex-direction:column;gap:14px;width:100%;margin-bottom:16px;}
+.store-sel-card{padding:22px 20px;border-radius:16px;border:2px solid #2a4060;background:#162840;color:#cce0ff;font-size:18px;font-weight:800;cursor:pointer;text-align:center;transition:all .18s;display:flex;align-items:center;gap:14px;}
+.store-sel-card:active{background:#1e3a5f;border-color:#4488cc;}
+.store-sel-card .store-icon{font-size:28px;}
+.store-sel-card .store-info{text-align:left;}
+.store-sel-card .store-name{font-size:16px;font-weight:800;color:#fff;}
+.store-sel-card .store-sub{font-size:11px;color:#6688aa;margin-top:2px;}
+/* STEP2: スタッフ選択 */
+.login-step2{display:none;width:100%;flex-direction:column;align-items:center;}
+.login-step2.active{display:flex;}
+.login-back{align-self:flex-start;margin-bottom:16px;background:none;border:none;color:#6688aa;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0;}
+.login-store-badge{margin-bottom:20px;padding:8px 18px;border-radius:20px;background:#1e3a5f;border:1.5px solid #4488cc;color:#88ccff;font-size:13px;font-weight:700;}
+.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:16px;}
 .login-btn{padding:18px 10px;border-radius:14px;border:1.5px solid #2a4060;background:#162840;color:#cce0ff;font-size:15px;font-weight:700;cursor:pointer;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:5px;}
 .login-btn:active{background:#1e3a5f;border-color:#4488cc;}
 .login-btn .avatar{width:36px;height:36px;border-radius:50%;background:#2a4a70;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:2px;}
-.login-store-sel{display:flex;gap:8px;width:100%;}
-.login-store-btn{flex:1;padding:12px;border-radius:12px;border:1.5px solid #2a4060;background:#162840;color:#6688aa;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .18s;}
-.login-store-btn.sel{background:#1e3a5f;border-color:#4488cc;color:#88ccff;}
 
 /* ===== グローバルリセット & ライトテーマ ===== */
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -366,12 +376,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   <div class="login-inner">
     <div class="login-logo">HANDYMAN</div>
     <div class="login-title">車両チェック</div>
-    <div class="login-sub">担当スタッフを選択してください</div>
-    <div class="login-grid" id="staffGrid"></div>
-    <div style="font-size:10px;color:#4466aa;margin-bottom:10px;align-self:flex-start;">店舗</div>
-    <div class="login-store-sel">
-      <button class="login-store-btn sel" id="storeNaha" onclick="selStore('naha')">🌺 那覇空港店</button>
-      <button class="login-store-btn" id="storeSpk" onclick="selStore('sapporo')">❄️ 札幌店</button>
+
+    <!-- STEP 1: 店舗選択 -->
+    <div id="loginStep1" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+      <div class="login-sub">店舗を選択してください</div>
+      <div class="store-sel-wrap">
+        <button class="store-sel-card" onclick="selectStore('naha')">
+          <div class="store-icon">🌺</div>
+          <div class="store-info">
+            <div class="store-name">那覇空港店</div>
+            <div class="store-sub">沖縄県那覇市</div>
+          </div>
+        </button>
+        <button class="store-sel-card" onclick="selectStore('sapporo')">
+          <div class="store-icon">❄️</div>
+          <div class="store-info">
+            <div class="store-name">札幌店</div>
+            <div class="store-sub">北海道札幌市</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: スタッフ選択 -->
+    <div id="loginStep2" class="login-step2">
+      <button class="login-back" onclick="backToStep1()">‹ 店舗を選び直す</button>
+      <div class="login-store-badge" id="loginStoreBadge"></div>
+      <div class="login-sub" style="margin-bottom:20px;">担当スタッフを選択してください</div>
+      <div class="login-grid" id="staffGrid"></div>
     </div>
   </div>
 </div>
@@ -990,29 +1022,56 @@ if('serviceWorker' in navigator){
 
 // ===== スタッフ管理 =====
 const STAFF_LIST=[
-  {id:'oshita',  name:'大下',  emoji:'👨‍💼'},
-  {id:'saito',   name:'斎藤',  emoji:'👨‍💼'},
-  {id:'ie',      name:'伊江',  emoji:'👨‍💼'},
-  {id:'hirose',  name:'廣瀬',  emoji:'👨‍💼'},
-  {id:'takeyama',name:'竹山',  emoji:'👨‍💼'},
-  {id:'mikuni',  name:'三國',  emoji:'👨‍💼'},
+  {id:'oshita',    name:'大下',   emoji:'👨‍💼'},
+  {id:'saito',     name:'斎藤',   emoji:'👨‍💼'},
+  {id:'ie',        name:'伊江',   emoji:'👨‍💼'},
+  {id:'hirose',    name:'廣瀬',   emoji:'👨‍💼'},
+  {id:'takeyama',  name:'武山',   emoji:'👨‍💼'},
+  {id:'mikuni',    name:'三國',   emoji:'👨‍💼'},
+  {id:'akamine',   name:'赤嶺',   emoji:'👨‍💼'},
+  {id:'oshiro',    name:'大城',   emoji:'👨‍💼'},
+  {id:'tonaki',    name:'渡名喜', emoji:'👨‍💼'},
+  {id:'nishimura', name:'西村',   emoji:'👨‍💼'},
+  {id:'nakama',    name:'仲間',   emoji:'👨‍💼'},
+  {id:'arimoto',   name:'有本',   emoji:'👨‍💼'},
+  {id:'koyama',    name:'小山',   emoji:'👨‍💼'},
+  {id:'yoshida',   name:'吉田',   emoji:'👨‍💼'},
+  {id:'fukudome',  name:'福留',   emoji:'👨‍💼'},
 ];
 let currentStaff=localStorage.getItem('hm_staff')||null;
 let currentStore=localStorage.getItem('hm_store')||'naha';
 let currentVehicleId=null; // 現在開いている車両ID
 
 function initLogin(){
+  // 前回の店舗が保存されていればSTEP2から、なければSTEP1から
+  if(currentStore && localStorage.getItem('hm_store')){
+    showStep2(currentStore);
+  } else {
+    showStep1();
+  }
+}
+function showStep1(){
+  document.getElementById('loginStep1').style.display='flex';
+  document.getElementById('loginStep2').classList.remove('active');
+}
+function selectStore(store){
+  currentStore=store;
+  localStorage.setItem('hm_store',store);
+  showStep2(store);
+}
+function showStep2(store){
+  document.getElementById('loginStep1').style.display='none';
+  document.getElementById('loginStep2').classList.add('active');
+  const badge=document.getElementById('loginStoreBadge');
+  badge.textContent=store==='naha'?'🌺 那覇空港店':'❄️ 札幌店';
   const grid=document.getElementById('staffGrid');
   grid.innerHTML=STAFF_LIST.map(s=>`
     <button class="login-btn" onclick="selectStaff('${s.id}','${s.name}')">
       <div class="avatar">${s.emoji}</div>${s.name}
     </button>`).join('');
-  selStore(currentStore);
 }
-function selStore(store){
-  currentStore=store;
-  document.getElementById('storeNaha').classList.toggle('sel',store==='naha');
-  document.getElementById('storeSpk').classList.toggle('sel',store==='sapporo');
+function backToStep1(){
+  showStep1();
 }
 function selectStaff(id,name){
   currentStaff=name;

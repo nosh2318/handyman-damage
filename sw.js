@@ -1,23 +1,27 @@
-// HANDYMAN 車両チェック Service Worker v2
-const CACHE = 'handyman-damage-v2';
-const ASSETS = ['/', '/index.html'];
+// HANDYMAN 車両チェック Service Worker v3
+const CACHE = 'handyman-damage-v3';
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  // キャッシュはしない（常に最新を取得）
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
+  // 古いキャッシュを全削除
   e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    Promise.all(keys.map(k => caches.delete(k)))
   ));
   self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
-  // Supabase API はキャッシュしない
+  // index.html は必ずネットワークから取得（キャッシュ使わない）
   if (e.request.url.includes('supabase.co')) return;
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  if (e.request.mode === 'navigate' ||
+      e.request.url.endsWith('.html') ||
+      e.request.url.endsWith('/')) {
+    e.respondWith(fetch(e.request));
+    return;
+  }
+  e.respondWith(fetch(e.request));
 });

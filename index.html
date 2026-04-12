@@ -360,6 +360,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc0-confirm-all-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#8899bb;padding:0 2px 6px;}
 .sc0-confirm-all-bar .count{font-weight:800;color:#1a2840;font-size:14px;}
 
+/* ===== 初期登録バナー ===== */
+.s0-init-banner{margin:12px 16px 0;padding:16px;border-radius:14px;background:linear-gradient(135deg,#2a1800,#3a2000);border:1.5px solid #ee880060;display:flex;align-items:flex-start;gap:12px;}
+.s0-init-icon{font-size:28px;flex-shrink:0;margin-top:2px;}
+.s0-init-title{font-size:14px;font-weight:800;color:#ffbb55;margin-bottom:4px;}
+.s0-init-desc{font-size:11px;color:#cc9944;line-height:1.6;}
+.btn-init{width:100%;padding:17px;border-radius:14px;border:none;font-size:16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,#ee8800,#cc5500);color:#fff;box-shadow:0 6px 20px #ee880040;}
+/* SM 未登録バナー */
+.sm-unreg-banner{margin:8px 16px 0;padding:10px 14px;border-radius:10px;background:#2a1800;border:1px solid #ee880040;display:flex;align-items:center;gap:8px;font-size:12px;color:#ffbb55;font-weight:600;}
+.sm-unreg-count{font-size:18px;font-weight:900;color:#ffcc66;margin-right:2px;}
+/* SM 未登録バッジ */
+.sm-badge-unreg{font-size:9px;padding:2px 7px;border-radius:7px;font-weight:800;background:#3a2000;color:#ffaa33;border:1px solid #ee880050;}
 /* ===== 写真ライトボックス ===== */
 .photo-lb{position:fixed;inset:0;background:#000;z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;max-width:520px;margin:0 auto;display:flex;flex-direction:column;}
 .photo-lb.show{opacity:1;pointer-events:all;}
@@ -486,11 +497,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     <div style="font-size:22px;font-weight:800;margin-bottom:2px;">車両一覧</div>
     <div style="font-size:11px;color:#ffffff35;" id="smHdStore">読み込み中...</div>
   </div>
+  <div id="smUnregBanner" style="display:none;" class="sm-unreg-banner">⚡ <span id="smUnregCount" class="sm-unreg-count">0</span>台が初期登録待ちです — タップして登録してください</div>
   <div class="sm-stats" id="smStats">
     <div class="ssp"><div class="ssp-n" style="color:#ff8888;" id="cntReturning">—</div><div class="ssp-l">返却待ち</div></div>
     <div class="ssp"><div class="ssp-n" style="color:#ffcc55;" id="cntOut">—</div><div class="ssp-l">貸出中</div></div>
     <div class="ssp"><div class="ssp-n" style="color:#66dd99;" id="cntReady">—</div><div class="ssp-l">空車</div></div>
     <div class="ssp"><div class="ssp-n" style="color:#88aaff;" id="cntMaint">—</div><div class="ssp-l">整備中</div></div>
+    <div class="ssp"><div class="ssp-n" style="color:#ffcc66;" id="cntUnreg">—</div><div class="ssp-l">要登録</div></div>
   </div>
   <div class="sm-list" id="smList">
     <div style="text-align:center;padding:40px 0;color:#8899bb;font-size:13px;">読み込み中...</div>
@@ -526,57 +539,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <span>時点 — 出庫チェック前に必ず確認</span>
     </div>
   </div>
-  <div class="s0-chips">
-    <div class="chip" style="color:#ff8888;border-color:#ff444435;background:#ff444410;">🔴 左フロントドア</div>
-    <div class="chip" style="color:#ffaa55;border-color:#ff880035;background:#ff880010;">🟠 リアバンパー右</div>
-    <div class="chip" style="color:#ffcc55;border-color:#ffaa0035;background:#ffaa0010;">🟡 右リアドア</div>
-    <div class="chip" style="color:#88aaff;border-color:#4488ff35;background:#4488ff10;">🔵 フロントガラス</div>
-  </div>
-  <div class="s0-chain-link" onclick="goto('sc')">
-    <div style="font-size:16px;">⛓</div>
-    <div style="flex:1;"><div class="s0-chain-title">チェーン履歴を見る</div><div class="s0-chain-sub">廃車まで繋がる全記録 — 127件</div></div>
-    <div style="color:#00d4ff28;font-size:16px;">›</div>
-  </div>
-  <div class="s0-actions">
-    <div class="s0-action-row">
-      <button class="btn-primary btn-blue" onclick="goto('sc0')" style="font-size:13px;padding:14px;">🚗 出庫チェック</button>
-      <button class="btn-primary btn-green" onclick="goto('s1')" style="font-size:13px;padding:14px;">📹 返却チェック</button>
-    </div>
-  </div>
+  <div id="s0ChipsList" class="s0-chips"></div>
+  <div id="s0InitBanner"></div>
+  <div id="s0ChainSection"></div>
+  <div id="s0ActionArea" class="s0-actions"></div>
 </div>
 
 <!-- ==================== SC: チェーン履歴 ==================== -->
 <div class="screen" id="sc">
   <div class="sc-hd">
     <button class="back-btn" onclick="goto('s0')">‹</button>
-    <div><div style="font-size:16px;font-weight:700;">V-001 チェーン履歴</div><div style="font-size:10px;color:#88aacc;margin-top:2px;">追記のみ・削除不可 — 廃車まで繋がる</div></div>
+    <div><div style="font-size:16px;font-weight:700;" id="scTitle">チェーン履歴</div><div style="font-size:10px;color:#88aacc;margin-top:2px;">追記のみ・削除不可 — 廃車まで繋がる</div></div>
   </div>
-  <div class="sc-list"><div class="sc-timeline">
-    <div class="sc-event sc-ev-return has-new">
-      <div class="sc-dot">📹</div>
-      <div class="sc-body"><div class="sc-ev-header"><div><span class="sc-ev-type">返却チェック</span><span class="sc-now">● 最新</span></div><div class="sc-ev-date">2026/04/12 09:05</div></div><div class="sc-ev-detail">予約 #127 ／ 山田 太郎 ／ 大下</div><div class="sc-ev-new"><div class="sc-ev-new-t">▲ 新規ダメージ 2件</div><div class="sc-ev-new-i">• 左フロントドア — 擦り傷 (AI 94%)<br>• リアバンパー右 — 軽微な傷 (AI 71%)</div></div></div>
+  <div class="sc-list">
+    <div class="sc-timeline" id="scTimeline">
+      <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
     </div>
-    <div class="sc-event sc-ev-checkout">
-      <div class="sc-dot">🚗</div>
-      <div class="sc-body"><div class="sc-ev-header"><div class="sc-ev-type">出庫チェック</div><div class="sc-ev-date">2026/04/11 10:30</div></div><div class="sc-ev-detail">予約 #127 ／ 山田 太郎 ／ 大下<br>出庫時 2件（確認済）</div></div>
-    </div>
-    <div class="sc-event sc-ev-return">
-      <div class="sc-dot">📹</div>
-      <div class="sc-body"><div class="sc-ev-header"><div class="sc-ev-type">返却チェック</div><div class="sc-ev-date">2026/04/10 18:22</div></div><div class="sc-ev-detail">予約 #126 ／ 佐藤 花子 ／ 斎藤<br>2件 — 新規なし</div></div>
-    </div>
-    <div class="sc-event sc-ev-checkout">
-      <div class="sc-dot">🚗</div>
-      <div class="sc-body"><div class="sc-ev-header"><div class="sc-ev-type">出庫チェック</div><div class="sc-ev-date">2026/04/09 09:45</div></div><div class="sc-ev-detail">予約 #126 ／ 佐藤 花子 ／ 斎藤</div></div>
-    </div>
-    <div class="sc-event sc-ev-repair">
-      <div class="sc-dot">🔧</div>
-      <div class="sc-body"><div class="sc-ev-header"><div class="sc-ev-type" style="color:#88aaff;">修理完了</div><div class="sc-ev-date">2026/04/08 14:00</div></div><div class="sc-ev-detail">右フロントバンパー 板金 ／ 大下</div></div>
-    </div>
-    <div class="sc-event sc-ev-initial">
-      <div class="sc-dot">⚡</div>
-      <div class="sc-body"><div class="sc-ev-header"><div class="sc-ev-type" style="color:#ffffff35;">初期登録</div><div class="sc-ev-date">2020/06/01</div></div><div class="sc-ev-detail">チェーン起点 ／ 走行0km ／ 傷0件</div></div>
-    </div>
-  </div><div style="height:20px;text-align:center;font-size:10px;color:#ffffff12;">— 起点 —</div></div>
+    <div style="height:20px;text-align:center;font-size:10px;color:#ffffff12;">— 起点 —</div>
+  </div>
 </div>
 
 <!-- ==================== SC0: 出庫チェック ==================== -->
@@ -1171,7 +1151,7 @@ async function loadVehicles(){
       // 那覇: nha_cars + vehicle_twins(ダメージ状態)
       const [{data:cars},{data:twins}]=await Promise.all([
         sb.from('nha_cars').select('id,name,plate,class_id,status').eq('store_id','naha').eq('status','active').order('class_id').order('id'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,odometer,rental_count').eq('store','naha')
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','naha')
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
       vehicles=(cars||[]).map(car=>({
@@ -1182,6 +1162,7 @@ async function loadVehicles(){
         current_customer:twMap[car.id]?.current_customer||null,
         last_check_at:twMap[car.id]?.last_check_at||null,
         last_check_staff:twMap[car.id]?.last_check_staff||null,
+        last_event_id:twMap[car.id]?.last_event_id||null,
         odometer:twMap[car.id]?.odometer||0,
         rental_count:twMap[car.id]?.rental_count||0,
         vehicles:{name:car.name,plate_no:car.plate,code:car.id,class_id:car.class_id}
@@ -1190,7 +1171,7 @@ async function loadVehicles(){
       // 札幌: vehicles + vehicle_twins(ダメージ状態)
       const [{data:cars},{data:twins}]=await Promise.all([
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,odometer,rental_count').eq('store','sapporo')
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo')
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
       vehicles=(cars||[]).map(car=>({
@@ -1201,6 +1182,7 @@ async function loadVehicles(){
         current_customer:twMap[car.code]?.current_customer||null,
         last_check_at:twMap[car.code]?.last_check_at||null,
         last_check_staff:twMap[car.code]?.last_check_staff||null,
+        last_event_id:twMap[car.code]?.last_event_id||null,
         odometer:twMap[car.code]?.odometer||0,
         rental_count:twMap[car.code]?.rental_count||0,
         vehicles:{name:car.name,plate_no:car.plate_no,code:car.code,year:car.year,class_id:spkClass(car.name)}
@@ -1308,6 +1290,7 @@ function renderVehicleList(vehicles, store){
               ${statusEmoji(v.status)} ${st.label}${resvTxt}
             </div>
             ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
+            ${!v.last_event_id?`<div class="sm-badge-unreg">⚡ 要初期登録</div>`:''}
           </div>
         </div>
         <div class="sm-arr">›</div>
@@ -1323,6 +1306,19 @@ function updateSmStats(vehicles){
   document.getElementById('cntOut').textContent=vehicles.filter(v=>v.status==='out').length;
   document.getElementById('cntReady').textContent=vehicles.filter(v=>v.status==='ready').length;
   document.getElementById('cntMaint').textContent=vehicles.filter(v=>v.status==='maintenance').length;
+  const unregCnt=vehicles.filter(v=>!v.last_event_id).length;
+  const cntEl=document.getElementById('cntUnreg');
+  if(cntEl) cntEl.textContent=unregCnt;
+  const banner=document.getElementById('smUnregBanner');
+  if(banner){
+    if(unregCnt>0){
+      banner.style.display='flex';
+      const cnt=document.getElementById('smUnregCount');
+      if(cnt) cnt.textContent=unregCnt;
+    } else {
+      banner.style.display='none';
+    }
+  }
 }
 
 // ===== 車両詳細を開く =====
@@ -1356,8 +1352,8 @@ function renderS0(v){
   const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
   const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
   setText('s0StoreLabel',`HANDYMAN / ${storeLabel}`);
-  setText('s0Vno',v.id);
-  setText('s0Model',`${vInfo.plate_no||'—'} ／ ${vInfo.name||'—'} ${vInfo.year||''}`);
+  setText('s0Vno',vInfo.name||v.id);
+  setText('s0Model',`${v.id} ／ ${vInfo.plate_no||'—'}`);
   const badge=document.getElementById('s0StatusBadge');
   if(badge){
     badge.textContent=`${statusEmoji(v.status)} ${st.label}${v.current_resv_no?' — '+v.current_resv_no+' '+(v.current_customer||''):''}`;
@@ -1365,20 +1361,78 @@ function renderS0(v){
   }
   const lastCheck=v.last_check_at?fmtDate(v.last_check_at):'—';
   const staff=v.last_check_staff||'—';
-  setText('s0LastCheck',`📅 最終チェック: ${lastCheck} ／ 担当: ${staff}`);
+  // 初期登録済みかどうか
+  const isRegistered=!!v.last_event_id;
+  if(isRegistered){
+    setText('s0LastCheck',`📅 最終チェック: ${lastCheck} ／ 担当: ${staff}`);
+  } else {
+    setText('s0LastCheck','⚡ 初期登録未完了 — チェーン起点が必要です');
+  }
   // 統計
   const statsRow=document.querySelector('.s0-stats-row');
   if(statsRow) statsRow.innerHTML=`
     <div class="s0-stat"><span class="k">走行距離</span><span class="v">${(v.odometer||0).toLocaleString()} km</span></div>
     <div class="s0-stat"><span class="k">貸出回数</span><span class="v">${v.rental_count||0} 回</span></div>
-    <div class="s0-stat"><span class="k">記録傷</span><span class="v" style="color:#ff8888;">${(v.current_damages||[]).length} 件</span></div>`;
-  // チップ更新
-  updateS0Chips(v.current_damages||[]);
+    <div class="s0-stat"><span class="k">記録傷</span><span class="v" style="color:${isRegistered?'#ff8888':'#ffcc66'};">${isRegistered?(v.current_damages||[]).length+'件':'未登録'}</span></div>`;
+  // チップ
+  updateS0Chips(v.current_damages||[], isRegistered);
+  // 初期登録バナー
+  const initBanner=document.getElementById('s0InitBanner');
+  if(initBanner){
+    if(!isRegistered){
+      initBanner.innerHTML=`
+        <div class="s0-init-banner">
+          <div class="s0-init-icon">⚡</div>
+          <div>
+            <div class="s0-init-title">初期登録が必要です</div>
+            <div class="s0-init-desc">この車両はまだチェーン起点が作られていません。<br>現在の傷をすべて記録して、チェーンをスタートさせてください。</div>
+          </div>
+        </div>`;
+    } else {
+      initBanner.innerHTML='';
+    }
+  }
+  // チェーン履歴リンク
+  const chainSection=document.getElementById('s0ChainSection');
+  if(chainSection){
+    if(isRegistered){
+      chainSection.innerHTML=`
+        <div class="s0-chain-link" onclick="goto('sc')">
+          <div style="font-size:16px;">⛓</div>
+          <div style="flex:1;"><div class="s0-chain-title">チェーン履歴を見る</div><div class="s0-chain-sub">廃車まで繋がる全記録</div></div>
+          <div style="color:#00d4ff28;font-size:16px;">›</div>
+        </div>`;
+    } else {
+      chainSection.innerHTML='';
+    }
+  }
+  // アクションボタン
+  const actionArea=document.getElementById('s0ActionArea');
+  if(actionArea){
+    if(!isRegistered){
+      actionArea.innerHTML=`
+        <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
+          <button class="btn-init" onclick="startInitialRegistration()">⚡ 初期登録する — チェーン起点を作成</button>
+        </div>`;
+    } else {
+      actionArea.innerHTML=`
+        <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
+          <div class="s0-action-row" style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="btn-primary btn-blue" onclick="goto('sc0')" style="flex:1;padding:14px;font-size:13px;">🚗 出庫チェック</button>
+            <button class="btn-primary btn-green" onclick="goto('s1')" style="flex:1;padding:14px;font-size:13px;">📹 返却チェック</button>
+          </div>
+        </div>`;
+    }
+  }
 }
 
-function updateS0Chips(damages){
-  const chips=document.querySelector('.s0-chips');
+function updateS0Chips(damages, isRegistered){
+  const chips=document.getElementById('s0ChipsList');
   if(!chips) return;
+  if(!isRegistered){
+    chips.innerHTML='<div class="chip" style="color:#ffbb55;border-color:#ee880035;background:#ee880010;">⚡ 初期登録を完了してください</div>';
+    return;
+  }
   if(damages.length===0){chips.innerHTML='<div class="chip" style="color:#00aa55;border-color:#00aa5535;background:#00aa5510;">✓ 傷なし（クリーン）</div>';return;}
   chips.innerHTML=damages.map(d=>{
     const c=dmgColor(d);
@@ -1704,11 +1758,154 @@ function goto(id){
   if(id==='sp') startPipeline();
   if(id==='s4') renderS4Map();
   if(id==='s5') renderS5Map();
+  if(id==='sc') loadChain(currentVehicleId);
   if(id==='login'){
-    // 切替の場合はSTEP1（店舗選択）に戻す
     currentStaff=null;
     localStorage.removeItem('hm_staff');
     initLogin();
+  }
+}
+
+// ===== チェーン履歴ロード =====
+async function loadChain(vehicleId){
+  if(!vehicleId) return;
+  const tl=document.getElementById('scTimeline');
+  const title=document.getElementById('scTitle');
+  // ヘッダータイトル更新
+  const v=vehiclesCache.find(x=>x.id===vehicleId);
+  if(title) title.textContent=`${v?.vehicles?.name||vehicleId} チェーン履歴`;
+  if(tl) tl.innerHTML='<div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>';
+  const {data:events,error}=await sb.from('check_events')
+    .select('id,event_type,resv_no,customer_name,staff,damages_snapshot,new_damages,created_at,notes')
+    .eq('vehicle_id',vehicleId)
+    .order('created_at',{ascending:false})
+    .limit(50);
+  if(error||!events||events.length===0){
+    if(tl) tl.innerHTML=`
+      <div style="text-align:center;padding:50px 20px;color:#88aacc;">
+        <div style="font-size:32px;margin-bottom:12px;">⚡</div>
+        <div style="font-size:14px;font-weight:700;color:#ffbb55;margin-bottom:6px;">チェーン未作成</div>
+        <div style="font-size:11px;">初期登録を完了するとここに履歴が積まれていきます</div>
+      </div>`;
+    return;
+  }
+  const evTypeLabel={checkout:'出庫チェック',return:'返却チェック',repair:'修理完了',initial:'初期登録'};
+  const evClass={checkout:'sc-ev-checkout',return:'sc-ev-return',repair:'sc-ev-repair',initial:'sc-ev-initial'};
+  const evIcon={checkout:'🚗',return:'📹',repair:'🔧',initial:'⚡'};
+  let html='';
+  events.forEach((ev,i)=>{
+    const isFirst=(i===0);
+    const newCnt=(ev.new_damages||[]).length;
+    const hasNew=(ev.event_type==='return'&&newCnt>0);
+    const cls=evClass[ev.event_type]||'sc-ev-initial';
+    const icon=evIcon[ev.event_type]||'📋';
+    const label=evTypeLabel[ev.event_type]||ev.event_type;
+    const date=fmtDate(ev.created_at);
+    let detail='';
+    if(ev.resv_no||ev.customer_name) detail+=`予約 ${ev.resv_no||'—'} ／ ${ev.customer_name||'—'} ／ ${ev.staff}`;
+    else detail+=`担当: ${ev.staff}`;
+    if(ev.event_type==='initial') detail=`チェーン起点 ／ 傷${(ev.damages_snapshot||[]).length}件 ／ ${ev.staff}`;
+    if(ev.notes) detail+=`<br>${ev.notes}`;
+    let newHtml='';
+    if(hasNew){
+      const items=(ev.new_damages||[]).map(d=>`• ${d.location} — ${d.desc||d.type||'傷'}`).join('<br>');
+      newHtml=`<div class="sc-ev-new"><div class="sc-ev-new-t">▲ 新規ダメージ ${newCnt}件</div><div class="sc-ev-new-i">${items}</div></div>`;
+    }
+    html+=`
+    <div class="sc-event ${cls}${hasNew?' has-new':''}">
+      <div class="sc-dot">${icon}</div>
+      <div class="sc-body">
+        <div class="sc-ev-header">
+          <div><span class="sc-ev-type">${label}</span>${isFirst?'<span class="sc-now">● 最新</span>':''}</div>
+          <div class="sc-ev-date">${date}</div>
+        </div>
+        <div class="sc-ev-detail">${detail}</div>
+        ${newHtml}
+      </div>
+    </div>`;
+  });
+  if(tl) tl.innerHTML=html;
+}
+
+// ===== 初期登録フロー =====
+function startInitialRegistration(){
+  // 傷編集パネルをそのまま流用：現在の傷をゼロから記録
+  // まず s0-edit-btn と同じ編集フローを開く
+  showToast('🗺 車両図の部位をタップして傷を追加してください');
+  // 編集モード（初期登録用フラグをセット）
+  window._initRegMode=true;
+  const editBtn=document.getElementById('s0EditBtnArea');
+  if(editBtn) editBtn.click();
+  // editパネルが開かれるまで待ってからフラグ表示
+  setTimeout(()=>{
+    const editOverlay=document.querySelector('.edit-overlay');
+    if(!editOverlay||editOverlay.classList.contains('show')) return;
+    // 車体図のタップを有効化するため編集モードをオン
+    document.querySelectorAll('.insp-zone').forEach(z=>z.style.cursor='pointer');
+    // 初期登録完了ボタンを action area に追加
+    const actionArea=document.getElementById('s0ActionArea');
+    if(actionArea){
+      actionArea.innerHTML=`
+        <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
+          <div style="font-size:11px;color:#ffbb55;text-align:center;margin-bottom:10px;">🗺 車体図の部位をタップ → 傷を追加してください</div>
+          <button class="btn-init" onclick="saveInitialRegistration()">⚡ 登録完了 — チェーン起点として保存</button>
+          <button class="btn-ghost" style="margin-top:8px;" onclick="cancelInitReg()">キャンセル</button>
+        </div>`;
+    }
+  },100);
+}
+
+function cancelInitReg(){
+  window._initRegMode=false;
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(v) renderS0(v);
+}
+
+async function saveInitialRegistration(){
+  if(!currentVehicleId||!currentStaff) return;
+  const damages=SAMPLE_DAMAGES||[];
+  const btn=document.querySelector('.btn-init');
+  if(btn){btn.textContent='保存中...';btn.disabled=true;}
+  try{
+    // 1. check_events に初期登録イベントを追加
+    const {data:ev,error:evErr}=await sb.from('check_events').insert({
+      vehicle_id:currentVehicleId,
+      event_type:'initial',
+      staff:currentStaff,
+      damages_snapshot:damages,
+      new_damages:damages,
+      staff_confirmed:true,
+      confirmed_at:new Date().toISOString(),
+      notes:`初期登録 ／ 傷${damages.length}件`
+    }).select().single();
+    if(evErr) throw evErr;
+    // 2. vehicle_twins を更新
+    const {error:twErr}=await sb.from('vehicle_twins').update({
+      current_damages:damages,
+      last_event_id:ev.id,
+      last_check_at:new Date().toISOString(),
+      last_check_staff:currentStaff,
+    }).eq('id',currentVehicleId);
+    if(twErr) throw twErr;
+    // 3. キャッシュを更新
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0){
+      vehiclesCache[idx]={...vehiclesCache[idx],
+        current_damages:damages,
+        last_event_id:ev.id,
+        last_check_at:new Date().toISOString(),
+        last_check_staff:currentStaff,
+      };
+    }
+    window._initRegMode=false;
+    showToast(`✓ 初期登録完了 ／ 傷${damages.length}件 ／ チェーン起点を作成しました`);
+    // S0を再レンダー（登録済み状態に）
+    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+    if(v) renderS0(v);
+  }catch(e){
+    console.error('saveInitialRegistration:',e);
+    showToast('❌ 保存エラー: '+e.message);
+    if(btn){btn.textContent='⚡ 登録完了 — チェーン起点として保存';btn.disabled=false;}
   }
 }
 

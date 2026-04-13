@@ -284,11 +284,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc0-bottom{padding:10px 16px;padding-bottom:max(env(safe-area-inset-bottom),20px);display:flex;flex-direction:column;gap:9px;background:#f2f6fb;border-top:1px solid #e0eaf6;}
 .sc0-confirm-all-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#8899bb;padding:0 2px 6px;}
 .sc0-confirm-all-bar .count{font-weight:800;color:#1a2840;font-size:14px;}
-/* ===== 貸出・返却 共通マップ ===== */
-.check-map-wrap{background:#e8f0f6;border-bottom:1px solid #c8d8ec;flex-shrink:0;}
-.check-map-view{position:relative;width:100%;height:clamp(160px,28vh,260px);background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.check-map-view svg{width:100%;height:100%;}
-.check-map-label{padding:4px 12px 5px;background:#f0f5fb;border-top:1px solid #d0e0f0;font-size:9px;color:#8899bb;text-align:center;font-weight:600;letter-spacing:.5px;}
+/* ===== 貸出・返却 メイン展開図 ===== */
+.chk-map-main{position:relative;width:100%;height:clamp(320px,55vh,520px);background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chk-map-main svg{width:100%;height:100%;}
+.chk-dmg-list{flex:1;overflow-y:auto;padding:8px 14px;background:#f4f8fc;border-top:1px solid #dde8f4;}
 
 /* ===== SR0: 返却チェック ===== */
 #sr0{background:#f2f6fb;}
@@ -558,7 +557,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.4.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.5.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -642,57 +641,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   </div>
 </div>
 
-<!-- ==================== SC0: 出庫チェック ==================== -->
+<!-- ==================== SC0: 貸出 ==================== -->
 <div class="screen" id="sc0">
   <div class="sc0-hd">
-    <button class="back-btn" onclick="goto('s0')">‹</button>
+    <button class="back-btn" onclick="goto('sm')">‹</button>
     <div style="flex:1;">
-      <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">CHECKOUT / 傷確認</div>
-      <div style="font-size:16px;font-weight:700;" id="sc0Title">出庫前 傷確認</div>
+      <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">CHECKOUT / 貸出</div>
+      <div style="font-size:16px;font-weight:700;" id="sc0Title">貸出確認</div>
       <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sc0Sub">—</div>
     </div>
-    <button class="hd-reload-btn" onclick="renderSc0();showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
-  <!-- 傷マップ（完成画像・参照のみ） -->
-  <div class="check-map-wrap">
-    <div class="check-map-view" id="sc0MapView"></div>
-    <div class="check-map-label">現在の傷状態（参照用）</div>
-  </div>
-  <div class="sc0-body" id="sc0Body">
-    <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
-  </div>
+  <!-- メイン：展開図（ピンタップで写真） -->
+  <div class="chk-map-main" id="sc0MapView"></div>
+  <!-- 傷名リスト（コンパクト） -->
+  <div class="chk-dmg-list" id="sc0DmgList"></div>
+  <!-- 承認ボタン -->
   <div class="sc0-bottom">
-    <button class="btn-primary btn-blue" id="sc0CheckoutBtn" onclick="sc0Checkout()">🚗 出庫する</button>
-    <button class="btn-ghost" onclick="goto('s0')">戻る</button>
+    <button class="btn-primary btn-blue" id="sc0CheckoutBtn" onclick="sc0Checkout()" style="font-size:15px;padding:16px;">✅ 承認します — 貸出開始</button>
+    <button class="btn-ghost" onclick="goto('sm')">戻る</button>
   </div>
 </div>
 
-<!-- ==================== SR0: 返却チェック ==================== -->
+<!-- ==================== SR0: 返却 ==================== -->
 <div class="screen" id="sr0">
   <div class="sr0-hd">
-    <button class="back-btn" onclick="goto('s0')">‹</button>
+    <button class="back-btn" onclick="goto('sm')">‹</button>
     <div style="flex:1;">
-      <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">RETURN CHECK / 返却確認</div>
-      <div style="font-size:16px;font-weight:700;" id="sr0Title">返却チェック</div>
+      <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">RETURN / 返却</div>
+      <div style="font-size:16px;font-weight:700;" id="sr0Title">返却確認</div>
       <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sr0Sub">—</div>
     </div>
-    <button class="hd-reload-btn" onclick="renderSr0();showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
-  <!-- 傷マップ（完成画像・参照のみ） -->
-  <div class="check-map-wrap">
-    <div class="check-map-view" id="sr0MapView"></div>
-    <div class="check-map-label">現在の傷状態（参照用）</div>
-  </div>
-  <div class="sr0-body" id="sr0Body">
-    <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
-  </div>
+  <!-- メイン：展開図（ピンタップで写真） -->
+  <div class="chk-map-main" id="sr0MapView"></div>
+  <!-- 傷名リスト（コンパクト）＋新傷追加ボタン -->
+  <div class="chk-dmg-list" id="sr0DmgList"></div>
+  <!-- 承認ボタン -->
   <div class="sr0-bottom">
-    <div class="sr0-confirm-all-bar">
-      <span id="sr0ConfirmCount" class="count">0</span>
-      <span id="sr0TotalLabel">/0件 確認済み</span>
-    </div>
-    <button class="btn-primary btn-green" id="sr0ReturnBtn" style="opacity:.4;pointer-events:none;" onclick="sr0SaveReturn()">✓ 全件確認済み — 返却完了</button>
-    <button class="btn-ghost" onclick="goto('s0')">戻る</button>
+    <button class="btn-primary btn-green" id="sr0ReturnBtn" onclick="sr0SaveReturn()" style="font-size:15px;padding:16px;opacity:1;pointer-events:all;">✅ 承認します — 返却完了</button>
+    <button class="btn-ghost" onclick="goto('sm')">戻る</button>
   </div>
 </div>
 
@@ -1192,14 +1179,19 @@ function renderVehicleList(vehicles, store){
       const resvTxt=v.current_resv_no?(' '+v.current_resv_no):'';
       const isReg=!!v.last_event_id;
       const actionBtns=isReg
-        ?`<button class="sm-act-btn sm-act-edit"     onclick="smAction('${v.id}','edit')">✏️ 傷編集</button>
-           <button class="sm-act-btn sm-act-checkout" onclick="smAction('${v.id}','checkout')">🚗 出庫</button>
-           <button class="sm-act-btn sm-act-return"   onclick="smAction('${v.id}','return')">📹 返却</button>
-           <button class="sm-act-btn" onclick="smAction('${v.id}','chain')" style="border-color:#8899bb;background:#f4f8fc;color:#5577aa;flex:0 0 auto;padding:8px 10px;">⛓</button>`
-        :`<button class="sm-act-btn sm-act-init"      onclick="smAction('${v.id}','init')" style="flex:1;">⚡ 初期登録する（必須）</button>`;
+        ?`<div style="display:flex;gap:5px;margin-bottom:5px;">
+             <button class="sm-act-btn sm-act-status" onclick="smAction('${v.id}','view')" style="flex:1;">📋 現状確認</button>
+             <button class="sm-act-btn sm-act-edit"   onclick="smAction('${v.id}','edit')" style="flex:1;">✏️ 傷編集</button>
+           </div>
+           <div style="display:flex;gap:5px;">
+             <button class="sm-act-btn sm-act-checkout" onclick="smAction('${v.id}','checkout')" style="flex:1;">🚗 貸出</button>
+             <button class="sm-act-btn sm-act-return"   onclick="smAction('${v.id}','return')"   style="flex:1;">📹 返却</button>
+             <button class="sm-act-btn" onclick="smAction('${v.id}','chain')" style="border-color:#8899bb;background:#f4f8fc;color:#5577aa;flex:0 0 auto;padding:8px 10px;font-size:14px;">⛓</button>
+           </div>`
+        :`<button class="sm-act-btn sm-act-init" onclick="smAction('${v.id}','init')" style="flex:1;width:100%;">⚡ 初期登録する（必須）</button>`;
       html+=`
       <div class="sm-card" id="smcard_${v.id}">
-        <div class="sm-card-top" onclick="openVehicle('${v.id}')">
+        <div class="sm-card-top">
           <div class="sm-stripe" style="background:${st.stripe};"></div>
           <div class="sm-info">
             <div class="sm-vno">${vInfo.plate_no||v.id}</div>
@@ -1209,12 +1201,12 @@ function renderVehicleList(vehicles, store){
                 ${statusEmoji(v.status)} ${st.label}${resvTxt}
               </div>
               ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
+              ${!isReg?`<div class="sm-badge-unreg">⚡ 要初期登録</div>`:''}
             </div>
             <div class="sm-presence-inline" id="spres_${v.id}"></div>
           </div>
-          <div class="sm-arr">›</div>
         </div>
-        <div class="sm-card-actions">${actionBtns}</div>
+        <div class="sm-card-actions" style="flex-direction:column;">${actionBtns}</div>
       </div>`;
     });
     html+=`</div>`;
@@ -1247,7 +1239,9 @@ function smAction(vId, action){
   currentVehicleId=vId;
   const v=vehiclesCache.find(x=>x.id===vId);
   if(!v) return;
-  if(action==='edit'){
+  if(action==='view'){
+    openVehicle(vId); // S0（現状確認・展開図表示）
+  } else if(action==='edit'){
     openDamageEdit('s0');
   } else if(action==='checkout'){
     goto('sc0');
@@ -1316,47 +1310,18 @@ function renderS0(v){
   // 初期登録バナー（ボタンで案内済みのため非表示）
   const initBanner=document.getElementById('s0InitBanner');
   if(initBanner) initBanner.innerHTML='';
-  // チェーン履歴リンク
+  // S0は現状確認のみ — アクションボタンは不要（カードから操作）
   const chainSection=document.getElementById('s0ChainSection');
-  if(chainSection){
-    if(isRegistered){
-      chainSection.innerHTML=`
-        <div class="s0-chain-link" onclick="goto('sc')">
-          <div style="font-size:16px;">⛓</div>
-          <div style="flex:1;"><div class="s0-chain-title">チェーン履歴を見る</div><div class="s0-chain-sub">廃車まで繋がる全記録</div></div>
-          <div style="color:#00d4ff28;font-size:16px;">›</div>
-        </div>`;
-    } else {
-      chainSection.innerHTML='';
-    }
-  }
-  // アクションボタン
+  if(chainSection) chainSection.innerHTML='';
   const actionArea=document.getElementById('s0ActionArea');
   if(actionArea){
-    const statusChangeRow=`
-      <div style="margin-top:8px;">
-        <button onclick="openStatusChange()" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid #d0dce8;background:#f4f8fc;color:#5577aa;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">🔄 ステータスを手動変更</button>
-      </div>`;
     if(!isRegistered){
       actionArea.innerHTML=`
         <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
-          <div style="margin:0 0 10px;padding:10px 14px;background:#fff8e6;border:1.5px solid #f5c842;border-radius:12px;font-size:11px;color:#7a5a00;line-height:1.5;">
-            📋 <strong>上のマップは参照用です。</strong><br>
-            「初期登録する」を押すと傷の登録画面が開きます。
-          </div>
-          <button class="btn-init" onclick="startInitialRegistration()">⚡ 初期登録する — 傷を登録してチェーン起点を作成</button>
-          ${statusChangeRow}
+          <button class="btn-init" onclick="startInitialRegistration()">⚡ 初期登録する — チェーン起点を作成</button>
         </div>`;
     } else {
-      actionArea.innerHTML=`
-        <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
-          <div class="s0-action-row" style="display:flex;gap:8px;margin-bottom:10px;">
-            <button class="btn-primary btn-blue" onclick="goto('sc0')" style="flex:1;padding:14px;font-size:13px;">🚗 出庫チェック</button>
-            <button class="btn-primary btn-green" onclick="startReturnCheck()" style="flex:1;padding:14px;font-size:13px;">📹 返却チェック</button>
-          </div>
-          <button onclick="openDamageEdit('s0')" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:10px;">✏️ 傷を編集する</button>
-          ${statusChangeRow}
-        </div>`;
+      actionArea.innerHTML=`<div style="padding-bottom:max(env(safe-area-inset-bottom),20px);"></div>`;
     }
   }
 }
@@ -2238,97 +2203,16 @@ function renderSr0(){
   if(!v) return;
   const damages=v.current_damages||[];
   const vName=v.vehicles?.name||currentVehicleId;
-  document.getElementById('sr0Title').textContent=`返却チェック — ${vName}`;
-  document.getElementById('sr0Sub').textContent=fmtDate(new Date().toISOString()).slice(0,10);
+  const customer=v.current_customer?`${v.current_customer} 様`:'';
+  const resvNo=v.current_resv_no||'';
+  document.getElementById('sr0Title').textContent=vName;
+  document.getElementById('sr0Sub').textContent=customer+(resvNo?' ／ 予約: '+resvNo:'');
 
-  // 完成傷マップを描画（参照のみ）
-  renderMapInto('sr0MapView',null,damages,null,false);
+  // 展開図メイン（ピンタップで写真ポップアップ）
+  renderCheckMap('sr0MapView', damages);
 
-  const body=document.getElementById('sr0Body');
-  const sevC={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
-
-  // 予約バナー
-  const resvBanner=(v.current_resv_no||v.current_customer)?`
-    <div style="margin:12px 16px 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#0e2040,#162d52);border:1.5px solid #4488cc60;display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;">🔑</div>
-      <div style="flex:1;">
-        <div style="font-size:11px;color:#88bbdd;font-weight:700;letter-spacing:1px;margin-bottom:3px;">RETURN — 返却受付</div>
-        <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:2px;">${v.current_customer||'—'} 様</div>
-        <div style="font-size:11px;color:#88aacc;">予約番号: ${v.current_resv_no||'—'}</div>
-      </div>
-    </div>`:'';
-
-  if(damages.length===0){
-    body.innerHTML=resvBanner+`
-      <div class="sc0-customer-banner" style="margin:12px 16px 0;">
-        <div class="sc0-customer-banner-icon">✅</div>
-        <div class="sc0-customer-banner-text">
-          <div class="title">出庫時の傷はありませんでした</div>
-          <div class="body">返却時に新たな傷が見つかった場合は下のボタンから追加してください。</div>
-        </div>
-      </div>
-      <button class="sr0-add-btn" onclick="openDamageEdit('sr0')">✏️ 新しい傷を追加する</button>`;
-    document.getElementById('sr0TotalLabel').textContent='/0件 確認済み';
-    const btn=document.getElementById('sr0ReturnBtn');
-    if(btn){btn.style.opacity='1';btn.style.pointerEvents='all';}
-    return;
-  }
-
-  let html=resvBanner+`
-    <div class="sc0-customer-banner" style="margin-top:10px;">
-      <div class="sc0-customer-banner-icon">🔍</div>
-      <div class="sc0-customer-banner-text">
-        <div class="title">記録済みの傷を確認してください</div>
-        <div class="body">各傷の状態を「変化なし / 悪化 / 修復済み」で選択してください。</div>
-      </div>
-    </div>
-    <div class="sc0-section-label">記録済みの傷 — ${damages.length}件</div>`;
-
-  damages.forEach(d=>{
-    const c=sevC[d.severity]||sevC[d.type]||'#ff8888';
-    const tL=typeLabel(d.type);
-    const sL={minor:'軽微',moderate:'中程度',major:'重大'}[d.severity]||d.severity;
-    const cur=SR0_STATUS[d.id]||'';
-    html+=`
-    <div class="sr0-acc" id="sr0acc_${d.id}">
-      <div class="sr0-acc-hd" onclick="toggleSr0Acc('${d.id}')">
-        <div class="sr0-acc-dot" style="background:${c};"></div>
-        <div class="sr0-acc-info">
-          <div class="sr0-acc-loc">${d.location}</div>
-          <div class="sr0-acc-sub">${tL} ／ ${d.desc||sL}</div>
-        </div>
-        <div class="sr0-acc-right">
-          <div class="sr0-acc-badge" id="sr0badge_${d.id}" style="${cur?'background:#edfaf4;border-color:#00bb55;color:#007733;':''}">
-            ${cur==='ok'?'✓ 変化なし':cur==='worse'?'⬆ 悪化':cur==='repaired'?'🔧 修復済':'未確認'}
-          </div>
-          <div class="sr0-acc-arrow">›</div>
-        </div>
-      </div>
-      <div class="sr0-acc-body" id="sr0body_${d.id}">
-        ${d.photo?`<div class="sr0-acc-photo" onclick="openPhotoLBDirect('${d.id}')">
-          <img src="${d.photo}" style="width:100%;height:100%;object-fit:cover;display:block;">
-          <div class="sr0-acc-photo-badge" style="background:#00000088;">📷 エビデンス写真（出庫時）</div>
-        </div>`:`<div style="padding:10px 14px;font-size:11px;color:#aabbcc;text-align:center;background:#f8fafd;border-bottom:1px solid #eef2f8;">📷 写真なし</div>`}
-        <div style="padding:8px 14px 4px;display:flex;flex-wrap:wrap;gap:5px;">
-          <div class="sc0-acc-tag" style="color:${c};border-color:${c}40;background:${c}10;">⚠ ${tL}</div>
-          <div class="sc0-acc-tag" style="color:#886600;border-color:#ffcc0040;background:#fffbe8;">${sL}</div>
-          ${d.desc?`<div class="sc0-acc-tag" style="color:#5577aa;border-color:#aaccee40;background:#eef4ff;">${d.desc}</div>`:''}
-        </div>
-        <div class="sr0-status-row">
-          <button class="sr0-status-btn ${cur==='ok'?'sel-ok':''}" onclick="sr0SetStatus('${d.id}','ok')">✓ 変化なし</button>
-          <button class="sr0-status-btn ${cur==='worse'?'sel-worse':''}" onclick="sr0SetStatus('${d.id}','worse')">⬆ 悪化</button>
-          <button class="sr0-status-btn ${cur==='repaired'?'sel-repaired':''}" onclick="sr0SetStatus('${d.id}','repaired')">🔧 修復済み</button>
-        </div>
-      </div>
-    </div>`;
-  });
-
-  html+=`<button class="sr0-add-btn" onclick="openDamageEdit('sr0')" style="background:#fff4e6;color:#994400;border:1.5px solid #ff8800;">✏️ 新しい傷を追加する</button>
-    <div class="sc0-note" style="margin:0 16px 8px;">⚠️ 出庫時にはなかった新しい傷が見つかった場合は上のボタンから追加してください。</div>`;
-  body.innerHTML=html;
-
-  document.getElementById('sr0TotalLabel').textContent=`/${damages.length}件 確認済み`;
-  document.getElementById('sr0ConfirmCount').textContent='0';
+  // 傷リスト＋新傷追加ボタン（返却モード）
+  renderChkDmgList('sr0DmgList', damages, true);
 }
 
 function toggleSr0Acc(dmgId){
@@ -2814,6 +2698,62 @@ async function siComplete(){
   }
 }
 
+// ===== 貸出・返却 共通: 展開図メイン描画 =====
+function renderCheckMap(viewId, damages){
+  renderMapInto(viewId, null, damages, null, false);
+  const view=document.getElementById(viewId);
+  if(!view) return;
+  // ピンをタップ → 写真ポップアップ
+  view.querySelectorAll('.ipin[data-dmg-id]').forEach(pin=>{
+    pin.style.cursor='pointer';
+    pin.style.pointerEvents='all';
+    const dmgId=pin.dataset.dmgId;
+    pin.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      // vehiclesCacheから傷を検索
+      const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+      const d=(v?.current_damages||[]).find(x=>x.id===dmgId);
+      if(!d) return;
+      if(d.photo){
+        openPhotoLBDirect(dmgId);
+      } else {
+        // 写真なし → 傷詳細をトースト表示
+        const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+        const sLMap={minor:'軽微',moderate:'中程度',major:'重大'};
+        showToast(`📍 ${d.location} ／ ${tLMap[d.type]||d.type} ／ ${sLMap[d.severity]||''}`);
+      }
+    });
+  });
+}
+
+// 傷リスト（コンパクト）
+function renderChkDmgList(listId, damages, isReturn){
+  const el=document.getElementById(listId);
+  if(!el) return;
+  if(damages.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:10px 0;font-size:11px;color:#8899bb;">傷の記録なし</div>
+      ${isReturn?`<button onclick="openDamageEdit('sr0')" style="width:100%;margin-top:8px;padding:12px;border-radius:12px;border:1.5px solid #ff8800;background:#fff4e6;color:#994400;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">✏️ 新しい傷を追加する</button>`:''}`;
+    return;
+  }
+  const sevC={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333'};
+  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+  let html=`<div style="font-size:9px;color:#8899bb;font-weight:700;letter-spacing:1px;margin-bottom:6px;">傷 ${damages.length}件 — ピンをタップで写真を確認</div>`;
+  html+=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:${isReturn?'10px':'0'};">`;
+  damages.forEach(d=>{
+    const c=sevC[d.severity]||'#ff8888';
+    const tL=tLMap[d.type]||d.type;
+    html+=`<div style="display:flex;align-items:center;gap:4px;padding:4px 9px;background:#fff;border:1px solid ${c}40;border-radius:20px;font-size:10px;font-weight:600;color:#1a2840;">
+      <div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0;"></div>
+      ${d.location}${d.photo?'<span style="font-size:8px;color:#4488cc;margin-left:2px;">📷</span>':''}
+    </div>`;
+  });
+  html+=`</div>`;
+  if(isReturn){
+    html+=`<button onclick="openDamageEdit('sr0')" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid #ff8800;background:#fff4e6;color:#994400;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">✏️ 新しい傷を追加する</button>`;
+  }
+  el.innerHTML=html;
+}
+
 // ===== SC0: 出庫説明画面（シンプル表示） =====
 function renderSc0(){
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
@@ -2825,67 +2765,14 @@ function renderSc0(){
 
   const titleEl=document.getElementById('sc0Title');
   const subEl=document.getElementById('sc0Sub');
-  if(titleEl) titleEl.textContent=`出庫確認 — ${vName}`;
+  if(titleEl) titleEl.textContent=vName;
   if(subEl) subEl.textContent=customer+(resvNo?' ／ 予約: '+resvNo:'');
 
-  // 傷マップ（参照のみ）
-  renderMapInto('sc0MapView',null,damages,null,false);
+  // 展開図メイン（ピンタップで写真ポップアップ）
+  renderCheckMap('sc0MapView', damages);
 
-  // 出庫ボタンは常に有効
-  const okBtn=document.getElementById('sc0CheckoutBtn');
-  if(okBtn){okBtn.style.opacity='1';okBtn.style.pointerEvents='all';}
-
-  const body=document.getElementById('sc0Body');
-  if(!body) return;
-
-  const sevColors={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
-
-  // 予約バナー
-  const resvBanner=(v.current_resv_no||v.current_customer)?`
-    <div style="margin:12px 16px 0;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,#0e2040,#162d52);border:1.5px solid #4488cc60;display:flex;align-items:center;gap:12px;">
-      <div style="font-size:24px;">🚗</div>
-      <div style="flex:1;">
-        <div style="font-size:10px;color:#88bbdd;font-weight:700;letter-spacing:1px;margin-bottom:3px;">CHECKOUT</div>
-        <div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:2px;">${v.current_customer||'—'} 様</div>
-        <div style="font-size:11px;color:#88aacc;">${resvNo?'予約番号: '+resvNo:fmtDate(new Date().toISOString()).slice(0,10)}</div>
-      </div>
-    </div>`:'';
-
-  if(damages.length===0){
-    body.innerHTML=resvBanner+`
-      <div style="margin:14px 16px;padding:16px;border-radius:14px;background:#edfaf4;border:1.5px solid #00bb5540;text-align:center;">
-        <div style="font-size:28px;margin-bottom:6px;">✅</div>
-        <div style="font-size:13px;font-weight:700;color:#007733;">記録済みの傷はありません</div>
-        <div style="font-size:11px;color:#5599aa;margin-top:4px;">そのまま出庫できます</div>
-      </div>`;
-    return;
-  }
-
-  let html=resvBanner+`
-    <div style="margin:10px 16px 4px;font-size:9px;font-weight:700;color:#8899bb;letter-spacing:1.5px;">記録済みの傷 — ${damages.length}件（お客様にご説明ください）</div>`;
-
-  damages.forEach(d=>{
-    const c=sevColors[d.severity]||sevColors[d.type]||'#ff8888';
-    const sevLabel={minor:'軽微',moderate:'中程度',major:'重大'}[d.severity]||d.severity;
-    const tL=typeLabel(d.type);
-    html+=`
-    <div style="margin:0 16px 8px;background:#fff;border:1px solid #dde8f4;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(30,50,100,.06);">
-      ${d.photo?`<div style="width:100%;height:130px;overflow:hidden;cursor:pointer;" onclick="openPhotoLBDirect('${d.id}')">
-        <img src="${d.photo}" style="width:100%;height:100%;object-fit:cover;">
-      </div>`:''}
-      <div style="padding:10px 14px;display:flex;align-items:center;gap:10px;">
-        <div style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0;box-shadow:0 0 0 3px ${c}25;"></div>
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:700;color:#1a2840;">${d.location}</div>
-          <div style="font-size:10px;color:#8899bb;margin-top:1px;">${tL} ／ ${sevLabel}${d.desc&&d.desc!=='手動追加'?' ／ '+d.desc:''}</div>
-        </div>
-        ${d.severity==='major'?`<div style="font-size:9px;font-weight:800;color:#cc1111;border:1px solid #cc111130;padding:2px 7px;border-radius:6px;">重大</div>`:''}
-      </div>
-    </div>`;
-  });
-
-  html+=`<div style="margin:4px 16px 8px;padding:10px 14px;background:#fff8ec;border:1px solid #ffd58060;border-radius:10px;font-size:10px;color:#886622;line-height:1.6;">⚠️ 上記以外の傷が返却時に発見された場合、お客様にご負担いただく場合があります。</div>`;
-  body.innerHTML=html;
+  // 傷名リスト（コンパクト）
+  renderChkDmgList('sc0DmgList', damages, false);
 }
 
 // toggleAcc / toggleConfirm は SC0シンプル化により不要（削除）

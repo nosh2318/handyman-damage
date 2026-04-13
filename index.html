@@ -716,7 +716,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   </div>
   <!-- 承認ボタン -->
   <div class="sc0-bottom">
-    <button class="btn-primary btn-blue" id="sc0CheckoutBtn" onclick="sc0Checkout()" style="font-size:15px;padding:16px;">✅ 承認します — 貸出開始</button>
+    <button class="btn-primary btn-blue" id="sc0CheckoutBtn" onclick="sc0Checkout()" style="font-size:15px;padding:16px;opacity:0.4;pointer-events:none;">⏳ 読み込み中...</button>
     <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
 </div>
@@ -739,7 +739,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   </div>
   <!-- 承認ボタン -->
   <div class="sr0-bottom">
-    <button class="btn-primary btn-green" id="sr0ReturnBtn" onclick="sr0SaveReturn()" style="font-size:15px;padding:16px;opacity:1;pointer-events:all;">✅ 承認します — 返却完了</button>
+    <button class="btn-primary btn-green" id="sr0ReturnBtn" onclick="sr0SaveReturn()" style="font-size:15px;padding:16px;opacity:0.4;pointer-events:none;">⏳ 読み込み中...</button>
     <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
 </div>
@@ -2436,11 +2436,19 @@ async function renderSr0(){
       returnBtn.style.pointerEvents='none';
       returnBtn.style.opacity='0.6';
     } else {
-      // 'out' または 'returning' → 承認ボタン有効（傷確認後に opacity 調整）
-      returnBtn.textContent='✅ 承認します — 返却完了';
+      // 'out' または 'returning' → タップ貫通防止: 350ms後に有効化
+      returnBtn.textContent='⏳ 読み込み中...';
       returnBtn.style.background='linear-gradient(135deg,#00aa55,#007733)';
-      returnBtn.style.pointerEvents='all';
-      returnBtn.style.opacity='1';
+      returnBtn.style.pointerEvents='none';
+      returnBtn.style.opacity='0.5';
+      setTimeout(()=>{
+        const b=document.getElementById('sr0ReturnBtn');
+        if(b&&b.textContent.includes('読み込み中')){
+          b.textContent='✅ 承認します — 返却完了';
+          b.style.pointerEvents='all';
+          b.style.opacity='1';
+        }
+      },350);
     }
   }
 
@@ -3055,10 +3063,19 @@ async function renderSc0(){
       btn2.style.pointerEvents='none';
       btn2.style.opacity='0.6';
     } else {
-      btn2.textContent='✅ 承認します — 貸出開始';
+      // タップ貫通防止: 300ms後に有効化（前画面のtouchendが届かないように）
+      btn2.textContent='⏳ 読み込み中...';
       btn2.style.background='linear-gradient(135deg,#2266dd,#1144bb)';
-      btn2.style.pointerEvents='all';
-      btn2.style.opacity='1';
+      btn2.style.pointerEvents='none';
+      btn2.style.opacity='0.5';
+      setTimeout(()=>{
+        const b=document.getElementById('sc0CheckoutBtn');
+        if(b&&b.textContent.includes('読み込み中')){
+          b.textContent='✅ 承認します — 貸出開始';
+          b.style.pointerEvents='all';
+          b.style.opacity='1';
+        }
+      },350);
     }
   }
 

@@ -98,7 +98,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .s0-vno{font-size:26px;font-weight:800;margin-bottom:2px;color:#ffffff;}
 .s0-model{font-size:11px;color:#88aaccaa;font-family:monospace;}
 .s0-car{margin:0 16px 0;background:#ffffff;border:1px solid #dde8f4;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.1);}
-.s0-car-view{position:relative;width:100%;height:220px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.s0-car-view{position:relative;width:100%;height:280px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .s0-car-view svg{width:100%;height:100%;}
 .insp-zone{cursor:default;transition:opacity .2s;}
 .insp-zone.has-dmg{opacity:1;}
@@ -400,7 +400,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:28px 28px 20px;}
   .s0-car{margin:0 24px;}
-  .s0-car-view{height:240px;}
+  .s0-car-view{height:300px;}
   .s0-chips{margin:10px 24px 0;}
   .s0-chain-link{margin:10px 24px 0;}
   .s0-actions{margin:auto 24px 0;padding-bottom:28px;}
@@ -459,7 +459,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:36px 48px 20px;}
   .s0-car{margin:0 48px;}
-  .s0-car-view{height:260px;}
+  .s0-car-view{height:320px;}
   .s0-chips{margin:12px 48px 0;}
   .s0-chain-link{margin:12px 48px 0;}
   .s0-actions{margin:auto 48px 0;padding-bottom:36px;}
@@ -544,7 +544,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.4</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.5</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1262,22 +1262,9 @@ function renderS0(v){
     <div class="s0-stat"><span class="k">記録傷</span><span class="v" style="color:${isRegistered?'#ff8888':'#ffcc66'};">${isRegistered?(v.current_damages||[]).length+'件':'未登録'}</span></div>`;
   // チップ
   updateS0Chips(v.current_damages||[], isRegistered);
-  // 初期登録バナー
+  // 初期登録バナー（ボタンで案内済みのため非表示）
   const initBanner=document.getElementById('s0InitBanner');
-  if(initBanner){
-    if(!isRegistered){
-      initBanner.innerHTML=`
-        <div class="s0-init-banner">
-          <div class="s0-init-icon">⚡</div>
-          <div>
-            <div class="s0-init-title">初期登録が必要です</div>
-            <div class="s0-init-desc">この車両はまだチェーン起点が作られていません。<br>現在の傷をすべて記録して、チェーンをスタートさせてください。</div>
-          </div>
-        </div>`;
-    } else {
-      initBanner.innerHTML='';
-    }
-  }
+  if(initBanner) initBanner.innerHTML='';
   // チェーン履歴リンク
   const chainSection=document.getElementById('s0ChainSection');
   if(chainSection){
@@ -1556,7 +1543,7 @@ async function reloadVehicles(){
 (()=>{const d=new Date();const smDate=document.getElementById('smDate');if(smDate)smDate.textContent=d.getFullYear()+'/'+(d.getMonth()+1+'').padStart(2,'0')+'/'+(d.getDate()+'').padStart(2,'0');})();
 
 // ===== 車両俯瞰図（カーチェックシート形式） =====
-const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;max-height:220px;">
+const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
 <defs>
   <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#dce8f0"/>

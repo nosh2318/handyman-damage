@@ -537,7 +537,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1665,38 +1665,38 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 </g>
 </svg>`;
 
-// ゾーンID → {name, cx%, cy%} マッピング（横向き+90°: フロント=左、リア=右、左=上、右=下）
-// new_cx = 100 - old_cx, new_cy = 100 - old_cy（前後・左右ともに反転）
+// ゾーンID → {name, cx%, cy%} マッピング（横向き+90°: フロント=左、リア=右、右=上(運転席)、左=下(助手席)）
+// +90°回転後: SVGのlf/lr(左)要素 → 画面上側 = 右(運転席) / SVGのrf/rr(右)要素 → 画面下側 = 左(助手席)
 const ZONE_MAP={
   'フロントバンパー':   {id:'iz-front-bumper', cx:5.6,  cy:50  },
   'ボンネット':         {id:'iz-hood',          cx:13.7, cy:50  },
   'フロントガラス':     {id:'iz-front-glass',   cx:31.8, cy:50  },
-  '左フロントフェンダー':{id:'iz-lf-fender',   cx:25,   cy:22  },
-  '右フロントフェンダー':{id:'iz-rf-fender',   cx:25,   cy:78  },
-  '左フロントドア':     {id:'iz-lf-door',       cx:38,   cy:16  },
-  '右フロントドア':     {id:'iz-rf-door',       cx:38,   cy:84  },
+  '右フロントフェンダー':{id:'iz-lf-fender',   cx:25,   cy:22  },
+  '左フロントフェンダー':{id:'iz-rf-fender',   cx:25,   cy:78  },
+  '右フロントドア':     {id:'iz-lf-door',       cx:38,   cy:16  },
+  '左フロントドア':     {id:'iz-rf-door',       cx:38,   cy:84  },
   'ルーフ':             {id:'iz-roof',           cx:48,   cy:50  },
-  '左リアドア':         {id:'iz-lr-door',        cx:57,   cy:16  },
-  '右リアドア':         {id:'iz-rr-door',        cx:57,   cy:84  },
-  '左リアフェンダー':   {id:'iz-lr-fender',      cx:70,   cy:22  },
-  '右リアフェンダー':   {id:'iz-rr-fender',      cx:70,   cy:78  },
-  'リアバンパー右':     {id:'iz-rear-bumper',    cx:93,   cy:62  },
-  'リアバンパー左':     {id:'iz-rear-bumper',    cx:93,   cy:38  },
+  '右リアドア':         {id:'iz-lr-door',        cx:57,   cy:16  },
+  '左リアドア':         {id:'iz-rr-door',        cx:57,   cy:84  },
+  '右リアフェンダー':   {id:'iz-lr-fender',      cx:70,   cy:22  },
+  '左リアフェンダー':   {id:'iz-rr-fender',      cx:70,   cy:78  },
+  'リアバンパー右':     {id:'iz-rear-bumper',    cx:93,   cy:38  },
+  'リアバンパー左':     {id:'iz-rear-bumper',    cx:93,   cy:62  },
   'リアバンパー':       {id:'iz-rear-bumper',    cx:93,   cy:50  },
   'バックドア':         {id:'iz-trunk',          cx:86.7, cy:50  },
-  '左ドアミラー':       {id:'iz-l-mirror',       cx:29.5, cy:28  },
-  '右ドアミラー':       {id:'iz-r-mirror',       cx:29.5, cy:76  },
+  '右ドアミラー':       {id:'iz-l-mirror',       cx:29.5, cy:28  },
+  '左ドアミラー':       {id:'iz-r-mirror',       cx:29.5, cy:76  },
   // タイヤ
-  '左後タイヤ':         {id:'iz-lr-tire',        cx:74.4, cy:15.4},
-  '右後タイヤ':         {id:'iz-rr-tire',        cx:74.4, cy:84.6},
-  '左前タイヤ':         {id:'iz-lf-tire',        cx:23.1, cy:15.4},
-  '右前タイヤ':         {id:'iz-rf-tire',        cx:23.1, cy:84.6},
+  '右後タイヤ':         {id:'iz-lr-tire',        cx:74.4, cy:15.4},
+  '左後タイヤ':         {id:'iz-rr-tire',        cx:74.4, cy:84.6},
+  '右前タイヤ':         {id:'iz-lf-tire',        cx:23.1, cy:15.4},
+  '左前タイヤ':         {id:'iz-rf-tire',        cx:23.1, cy:84.6},
   // ガラス
   'リアガラス':         {id:'iz-rear-glass',     cx:73.6, cy:50  },
-  '左リア窓':           {id:'iz-lr-window',      cx:63.1, cy:42.3},
-  '右リア窓':           {id:'iz-rr-window',      cx:63.1, cy:57.7},
-  '左フロント窓':       {id:'iz-lf-window',      cx:42.8, cy:42.3},
-  '右フロント窓':       {id:'iz-rf-window',      cx:42.8, cy:57.7},
+  '右リア窓':           {id:'iz-lr-window',      cx:63.1, cy:42.3},
+  '左リア窓':           {id:'iz-rr-window',      cx:63.1, cy:57.7},
+  '右フロント窓':       {id:'iz-lf-window',      cx:42.8, cy:42.3},
+  '左フロント窓':       {id:'iz-rf-window',      cx:42.8, cy:57.7},
   'ルーフ（リア）':     {id:'iz-rear-glass',     cx:71.5, cy:50  },
 };
 

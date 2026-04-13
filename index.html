@@ -644,7 +644,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <!-- ==================== SC0: 貸出 ==================== -->
 <div class="screen" id="sc0">
   <div class="sc0-hd">
-    <button class="back-btn" onclick="goto('sm')">‹</button>
+    <button class="back-btn" onclick="goto('s0')">‹</button>
     <div style="flex:1;">
       <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">CHECKOUT / 貸出</div>
       <div style="font-size:16px;font-weight:700;" id="sc0Title">貸出確認</div>
@@ -658,14 +658,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   <!-- 承認ボタン -->
   <div class="sc0-bottom">
     <button class="btn-primary btn-blue" id="sc0CheckoutBtn" onclick="sc0Checkout()" style="font-size:15px;padding:16px;">✅ 承認します — 貸出開始</button>
-    <button class="btn-ghost" onclick="goto('sm')">戻る</button>
+    <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
 </div>
 
 <!-- ==================== SR0: 返却 ==================== -->
 <div class="screen" id="sr0">
   <div class="sr0-hd">
-    <button class="back-btn" onclick="goto('sm')">‹</button>
+    <button class="back-btn" onclick="goto('s0')">‹</button>
     <div style="flex:1;">
       <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">RETURN / 返却</div>
       <div style="font-size:16px;font-weight:700;" id="sr0Title">返却確認</div>
@@ -679,7 +679,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   <!-- 承認ボタン -->
   <div class="sr0-bottom">
     <button class="btn-primary btn-green" id="sr0ReturnBtn" onclick="sr0SaveReturn()" style="font-size:15px;padding:16px;opacity:1;pointer-events:all;">✅ 承認します — 返却完了</button>
-    <button class="btn-ghost" onclick="goto('sm')">戻る</button>
+    <button class="btn-ghost" onclick="goto('s0')">戻る</button>
   </div>
 </div>
 
@@ -1182,19 +1182,12 @@ function renderVehicleList(vehicles, store){
       const dmgCnt=(v.current_damages||[]).length;
       const resvTxt=v.current_resv_no?(' '+v.current_resv_no):'';
       const isReg=!!v.last_event_id;
-      const actionBtns=isReg
-        ?`<div style="display:flex;gap:5px;margin-bottom:5px;">
-             <button class="sm-act-btn sm-act-status" onclick="smAction('${v.id}','view')" style="flex:1;">📋 現状確認</button>
-             <button class="sm-act-btn sm-act-edit"   onclick="smAction('${v.id}','edit')" style="flex:1;">✏️ 傷編集</button>
-           </div>
-           <div style="display:flex;gap:5px;">
-             <button class="sm-act-btn sm-act-checkout" onclick="smAction('${v.id}','checkout')" style="flex:1;">🚗 貸出</button>
-             <button class="sm-act-btn sm-act-return"   onclick="smAction('${v.id}','return')"   style="flex:1;">📹 返却</button>
-             <button class="sm-act-btn" onclick="smAction('${v.id}','chain')" style="border-color:#8899bb;background:#f4f8fc;color:#5577aa;flex:0 0 auto;padding:8px 10px;font-size:14px;">⛓</button>
-           </div>`
-        :`<button class="sm-act-btn sm-act-init" onclick="smAction('${v.id}','init')" style="flex:1;width:100%;">⚡ 初期登録する（必須）</button>`;
+      // SM カードはタップのみ → S0へ（アクションはS0内で操作）
+      const bottomArea=isReg
+        ?''
+        :`<div style="padding:0 12px 10px;"><button class="sm-act-btn sm-act-init" onclick="event.stopPropagation();smAction('${v.id}','init')" style="width:100%;touch-action:manipulation;">⚡ 初期登録する（必須）</button></div>`;
       html+=`
-      <div class="sm-card" id="smcard_${v.id}">
+      <div class="sm-card" id="smcard_${v.id}" onclick="openVehicle('${v.id}')" style="cursor:pointer;" ontouchstart="">
         <div class="sm-card-top">
           <div class="sm-stripe" style="background:${st.stripe};"></div>
           <div class="sm-info">
@@ -1209,8 +1202,9 @@ function renderVehicleList(vehicles, store){
             </div>
             <div class="sm-presence-inline" id="spres_${v.id}"></div>
           </div>
+          <div style="color:#b0c4dd;font-size:18px;padding-right:8px;flex-shrink:0;">›</div>
         </div>
-        <div class="sm-card-actions" style="flex-direction:column;">${actionBtns}</div>
+        ${bottomArea}
       </div>`;
     });
     html+=`</div>`;
@@ -1314,7 +1308,6 @@ function renderS0(v){
   // 初期登録バナー（ボタンで案内済みのため非表示）
   const initBanner=document.getElementById('s0InitBanner');
   if(initBanner) initBanner.innerHTML='';
-  // S0は現状確認のみ — アクションボタンは不要（カードから操作）
   const chainSection=document.getElementById('s0ChainSection');
   if(chainSection) chainSection.innerHTML='';
   const actionArea=document.getElementById('s0ActionArea');
@@ -1325,7 +1318,18 @@ function renderS0(v){
           <button class="btn-init" onclick="startInitialRegistration()">⚡ 初期登録する — チェーン起点を作成</button>
         </div>`;
     } else {
-      actionArea.innerHTML=`<div style="padding-bottom:max(env(safe-area-inset-bottom),20px);"></div>`;
+      // S0がハブ画面：チェーン・貸出・返却・傷編集をここから操作
+      actionArea.innerHTML=`
+        <div style="padding:10px 0 max(env(safe-area-inset-bottom),20px);">
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button onclick="goto('sc0')" style="flex:1;padding:14px 6px;border-radius:13px;border:none;background:linear-gradient(135deg,#2266dd,#1144bb);color:#fff;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">🚗 貸出</button>
+            <button onclick="startReturnCheck()" style="flex:1;padding:14px 6px;border-radius:13px;border:none;background:linear-gradient(135deg,#cc5500,#994400);color:#fff;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;">📹 返却</button>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="openDamageEdit('s0')" style="flex:1;padding:12px 6px;border-radius:13px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">✏️ 傷編集</button>
+            <button onclick="goto('sc')" style="flex:1;padding:12px 6px;border-radius:13px;border:1.5px solid #8899bb;background:#f4f8fc;color:#445566;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">⛓ 履歴</button>
+          </div>
+        </div>`;
     }
   }
 }
@@ -1756,9 +1760,26 @@ const ZONE_ID_TO_NAME={};
 Object.entries(ZONE_MAP).forEach(([name,{id}])=>{ if(!ZONE_ID_TO_NAME[id]) ZONE_ID_TO_NAME[id]=name; });
 
 // ===== 汎用マップ描画 =====
+// SVG viewBox: width=270, height=430（縦向き、フロント=上）
+const SVG_VB_W=270, SVG_VB_H=430;
+// ピン座標をコンテナ比率→実際のSVG描画領域へ補正
+function pinPct(cx, cy, W, H){
+  if(!W||!H) return {l:cx,t:cy};
+  const scale=Math.min(W/SVG_VB_W, H/SVG_VB_H);
+  const rw=SVG_VB_W*scale, rh=SVG_VB_H*scale;
+  const xOff=(W-rw)/2, yOff=(H-rh)/2;
+  return {
+    l:(xOff + cx/100*rw)/W*100,
+    t:(yOff + cy/100*rh)/H*100
+  };
+}
+
 function renderMapInto(viewId, legendId, damages, newIds, clickable){
   const view=document.getElementById(viewId);
   if(!view) return;
+  // コンテナサイズを先取得（SVG挿入前）
+  const W=view.clientWidth||view.offsetWidth||0;
+  const H=view.clientHeight||view.offsetHeight||0;
   view.innerHTML=INSP_SVG;
   const damagedZoneIds=new Set();
 
@@ -1777,7 +1798,9 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
     const c=isNew?'#ff3333':dmgColor(d);
     const pin=document.createElement('div');
     pin.className='ipin'+(clickable?' clickable':'');
-    pin.style.cssText=`left:${zone.cx}%;top:${zone.cy}%;`;
+    // PCでもピンが正確な位置に来るよう、SVG描画領域を考慮した座標補正
+    const p=pinPct(zone.cx, zone.cy, W, H);
+    pin.style.cssText=`left:${p.l}%;top:${p.t}%;`;
     pin.dataset.dmgId=d.id;
     const newBadge=isNew?`<div class="ipin-new">NEW</div>`:'';
     pin.innerHTML=`${newBadge}<div class="ipin-r" style="border-color:${c}80;${isNew?'box-shadow:0 0 10px '+c+'50;':''}"><div class="ipin-c" style="background:${c};"></div></div><div class="ipin-lbl" style="background:${isNew?'#ff3333':'#1a2840'}ee;color:#fff;">${d.location}</div>`;
@@ -1832,10 +1855,10 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
   }
 }
 
-// S0: 参照のみ（ゾーンクリック不可・ピンタップで写真表示）
+// S0: ゾーンクリック不可・ピンタップで写真表示
 function renderInspectionMap(damages){
   renderMapInto('s0CarView','s0InspLegend',damages,null,false);
-  // ピンをタップ → 写真ポップアップ（S0も同様に有効化）
+  // ピンをタップ → 写真ポップアップ
   const view=document.getElementById('s0CarView');
   if(!view) return;
   view.querySelectorAll('.ipin[data-dmg-id]').forEach(pin=>{
@@ -2714,7 +2737,8 @@ async function siComplete(){
       vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,current_damages:damages};
     }
     siMode=false; siEditMode=false; siLocalDamages=[];
-    goto('sm');
+    // 初期登録完了 → S0（現状確認ハブ）へ遷移してから車両詳細を再描画
+    await openVehicle(currentVehicleId);
     setTimeout(()=>showToast(`✓ 初期登録完了 ／ 傷${damages.length}件 ／ チェーンを開始しました`),200);
   }catch(e){
     console.error('siComplete:',e);

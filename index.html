@@ -63,8 +63,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sm-hd-top{display:flex;justify-content:space-between;margin-bottom:6px;}
 .sm-logo{font-size:9px;font-weight:900;letter-spacing:3px;color:#88bbdd;}
 .sm-hd .sm-hd-top+*,.sm-hd>div:not(.sm-hd-top){color:#fff;}
-.sm-list{flex:1;overflow-y:auto;padding:10px 16px 40px;}
-.sm-card{background:#ffffff;border:1px solid #dde8f4;border-radius:14px;margin-bottom:9px;padding:13px 13px 13px 0;display:flex;align-items:stretch;cursor:pointer;transition:background .15s,box-shadow .15s;overflow:hidden;box-shadow:0 2px 8px rgba(30,50,100,.06);}
+.sm-list{flex:1;overflow-y:auto;padding:10px 16px max(calc(env(safe-area-inset-bottom) + 60px),80px);-webkit-overflow-scrolling:touch;}
+.sm-card{background:#ffffff;border:1px solid #dde8f4;border-radius:14px;margin-bottom:9px;padding:13px 13px 13px 0;display:flex;align-items:stretch;cursor:pointer;transition:background .15s,box-shadow .15s;overflow:hidden;box-shadow:0 2px 8px rgba(30,50,100,.06);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;}
 .sm-card:active{background:#f0f5fc;}
 .sm-stripe{width:4px;flex-shrink:0;margin-right:12px;}
 .st-returning .sm-stripe{background:#ff4444;}
@@ -204,6 +204,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc-ev-new-i{font-size:11px;color:#cc4444;line-height:1.6;}
 .sc-now{display:inline-flex;align-items:center;gap:4px;background:#eef4ff;border:1px solid #aaccee;color:#2266cc;font-size:9px;padding:2px 7px;border-radius:7px;font-weight:700;margin-left:5px;}
 
+/* ===== SI: 初期登録専用画面 ===== */
+#si{background:#f2f6fb;}
+.si-hd{padding:52px 20px 14px;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(180deg,#1a2e48,#1e3354);color:#fff;}
+.si-map-wrap{margin:12px 16px 0;background:#fff;border-radius:16px;border:1px solid #dde8f4;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.08);}
+.si-map-view{position:relative;width:100%;height:210px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.si-map-view svg{width:100%;height:100%;}
+.si-list-wrap{flex:1;overflow-y:auto;padding:10px 16px 0;}
+.si-section-hd{font-size:10px;font-weight:700;color:#6688aa;letter-spacing:1px;padding:6px 0 6px;display:flex;align-items:center;justify-content:space-between;}
+.si-dmg-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;border:1px solid #e0e8f4;padding:10px 12px;margin-bottom:7px;}
+.si-dmg-thumb{width:44px;height:44px;border-radius:8px;background:#e8f0f6;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
+.si-dmg-thumb img{width:100%;height:100%;object-fit:cover;}
+.si-dmg-info{flex:1;min-width:0;}
+.si-dmg-loc{font-size:13px;font-weight:700;color:#1a2840;}
+.si-dmg-meta{font-size:10px;color:#6688aa;margin-top:2px;}
+.si-dmg-del{background:none;border:none;color:#cc4444;font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;}
+.si-bottom{padding:12px 16px;background:#fff;border-top:1px solid #e0e8f4;}
+.si-stat{font-size:10px;color:#8899bb;text-align:center;margin-bottom:4px;}
+.si-last-upd{font-size:10px;color:#4488cc;text-align:center;margin-bottom:10px;font-weight:600;}
+.si-empty{text-align:center;padding:28px 0;color:#8899bb;}
+.si-empty-icon{font-size:32px;margin-bottom:8px;}
+
 /* ===== SC0: 出庫チェック（折りたたみ式） ===== */
 #sc0{background:#f2f6fb;}
 .sc0-hd{padding:52px 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #d8e4f0;background:linear-gradient(180deg,#1a2e48,#1e3354);color:#fff;}
@@ -311,6 +332,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .photo-lb-desc{font-size:13px;color:#ccd8e8;line-height:1.7;}
 .photo-lb-meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
 .photo-lb-tag{font-size:10px;padding:4px 10px;border-radius:8px;border:1px solid #ffffff20;color:#aabbcc;font-weight:700;background:#ffffff08;}
+
+/* ===== マルチユーザー同期UI ===== */
+/* RTドット */
+.rt-dot{width:7px;height:7px;border-radius:50%;background:#446688;display:inline-block;flex-shrink:0;vertical-align:middle;margin-left:4px;transition:background .4s;}
+.rt-dot.live{background:#00dd88;box-shadow:0 0 6px #00dd8866;animation:rtPulse 2.8s ease-in-out infinite;}
+.rt-dot.error{background:#ff5544;}
+@keyframes rtPulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* 在席バッジ（SMカード内） */
+.sm-presence-inline{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;min-height:0;}
+.sm-presence-dot{font-size:8px;padding:1px 6px;border-radius:7px;background:#0e2040;border:1px solid #4488cc55;color:#88ccff;font-weight:800;}
+/* 同時編集警告（S0） */
+.s0-editing-warn{display:none;margin:6px 16px 0;padding:9px 14px;border-radius:12px;background:#2a1600;border:1.5px solid #ffaa0070;align-items:center;gap:10px;font-size:11px;color:#ffcc66;font-weight:600;}
+/* 更新通知バナー（全画面上部） */
+.update-banner{position:fixed;top:0;left:0;right:0;z-index:750;background:linear-gradient(90deg,#0e2040,#1a3a6a);color:#88ccff;font-size:11px;font-weight:700;padding:11px 16px 11px 14px;display:flex;align-items:center;gap:10px;max-width:520px;margin:0 auto;transform:translateY(-100%);transition:transform .32s cubic-bezier(.32,1,.58,1);border-bottom:1px solid #4488cc40;pointer-events:none;}
+.update-banner.show{transform:translateY(0);}
+/* ヘッダー内リロードボタン共通 */
+.hd-reload-btn{background:none;border:1px solid #ffffff22;color:#7799bb;font-size:11px;width:30px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+.hd-reload-btn:active{background:#ffffff18;}
+/* SMカード position:relative for presence */
+.sm-card{position:relative;}
 
 /* ===================================================
    レスポンシブ 3段階
@@ -496,7 +537,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo">HANDYMAN</div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -530,8 +571,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <div style="display:inline-block;font-size:10px;padding:4px 11px;border-radius:16px;font-weight:700;margin-top:7px;" id="s0StatusBadge">—</div>
       <div style="font-size:10px;color:#88aacc;margin-top:6px;" id="s0LastCheck">📅 最終チェック: —</div>
     </div>
-    <button class="back-btn" onclick="goto('sm')" style="margin-top:4px;">‹</button>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+      <button class="back-btn" onclick="goto('sm')">‹</button>
+      <button class="hd-reload-btn" onclick="reloadS0()" title="最新に更新">🔄</button>
+    </div>
   </div>
+  <div class="s0-editing-warn" id="s0EditingWarn"><span>⚠</span><span id="s0EditingWarnNames"></span></div>
   <div class="s0-car">
     <div class="s0-car-view" id="s0CarView">
       <!-- 俯瞰図SVGがここに挿入される -->
@@ -559,7 +604,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sc">
   <div class="sc-hd">
     <button class="back-btn" onclick="goto('s0')">‹</button>
-    <div><div style="font-size:16px;font-weight:700;" id="scTitle">チェーン履歴</div><div style="font-size:10px;color:#88aacc;margin-top:2px;">追記のみ・削除不可 — 廃車まで繋がる</div></div>
+    <div style="flex:1;"><div style="font-size:16px;font-weight:700;" id="scTitle">チェーン履歴</div><div style="font-size:10px;color:#88aacc;margin-top:2px;">追記のみ・削除不可 — 廃車まで繋がる</div></div>
+    <button class="hd-reload-btn" onclick="loadChain(currentVehicleId);showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
   <div class="sc-list">
     <div class="sc-timeline" id="scTimeline">
@@ -573,11 +619,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sc0">
   <div class="sc0-hd">
     <button class="back-btn" onclick="goto('s0')">‹</button>
-    <div>
+    <div style="flex:1;">
       <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">CHECKOUT / 傷確認</div>
       <div style="font-size:16px;font-weight:700;" id="sc0Title">出庫前 傷確認</div>
       <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sc0Sub">—</div>
     </div>
+    <button class="hd-reload-btn" onclick="renderSc0();showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
   <div class="sc0-body" id="sc0Body">
     <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
@@ -593,11 +640,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sr0">
   <div class="sr0-hd">
     <button class="back-btn" onclick="goto('s0')">‹</button>
-    <div>
+    <div style="flex:1;">
       <div style="font-size:9px;color:#88bbdd;font-weight:700;letter-spacing:1.5px;margin-bottom:3px;">RETURN CHECK / 返却確認</div>
       <div style="font-size:16px;font-weight:700;" id="sr0Title">返却チェック</div>
       <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sr0Sub">—</div>
     </div>
+    <button class="hd-reload-btn" onclick="renderSr0();showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
   <div class="sr0-body" id="sr0Body">
     <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
@@ -609,6 +657,43 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     </div>
     <button class="btn-primary btn-green" id="sr0ReturnBtn" style="opacity:.4;pointer-events:none;" onclick="sr0SaveReturn()">✓ 全件確認済み — 返却完了</button>
     <button class="btn-ghost" onclick="goto('s0')">戻る</button>
+  </div>
+</div>
+
+<!-- ==================== SI: 初期登録 ==================== -->
+<div class="screen" id="si">
+  <div class="si-hd">
+    <button class="back-btn" onclick="siCancel()" style="flex-shrink:0;margin-top:2px;">‹</button>
+    <div style="flex:1;">
+      <div style="font-size:9px;font-weight:900;letter-spacing:3px;color:#00d4ff45;margin-bottom:3px;">INITIAL REGISTRATION</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;" id="siTitle">初期登録</div>
+      <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="siSub">現在の傷を全て記録してください</div>
+    </div>
+    <button class="hd-reload-btn" onclick="siRenderMap();siRenderList();showToast('🔄 更新')" title="最新に更新">🔄</button>
+  </div>
+  <div class="si-map-wrap">
+    <div class="si-map-view" id="siMapView"></div>
+    <div style="padding:5px 12px 6px;background:#f0f5fb;border-top:1px solid #e0eaf4;font-size:9px;color:#6688aa;text-align:center;">
+      ゾーンをタップ → 傷を追加 ／ ピンをタップ → 削除
+    </div>
+  </div>
+  <div class="si-list-wrap" id="siListWrap">
+    <div class="si-section-hd">
+      <span>登録済みの傷</span>
+      <span id="siDmgCount" style="font-size:12px;font-weight:800;color:#ff8888;">0件</span>
+    </div>
+    <div id="siDmgList">
+      <div class="si-empty">
+        <div class="si-empty-icon">🔍</div>
+        <div style="font-size:12px;font-weight:600;color:#4466aa;margin-bottom:4px;">まだ傷は登録されていません</div>
+        <div style="font-size:10px;">上の展開図のゾーンをタップして傷を追加</div>
+      </div>
+    </div>
+  </div>
+  <div class="si-bottom">
+    <div class="si-last-upd" id="siLastUpd"></div>
+    <button class="btn-primary btn-green" onclick="siComplete()" id="siCompleteBtn">✓ 登録完了 — チェーン起点を作成</button>
+    <button class="btn-ghost" style="margin-top:8px;" onclick="siCancel()">キャンセル（保存しません）</button>
   </div>
 </div>
 
@@ -705,24 +790,38 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <div class="edit-zones" id="editZones"></div>
     </div>
     <div id="editStep2" style="display:none;">
-      <div class="edit-section">STEP 2 — 傷の種類</div>
-      <div class="edit-types" id="editTypes">
-        <button class="edit-type-btn" data-val="scratch" onclick="selEditType(this)">擦り傷</button>
-        <button class="edit-type-btn" data-val="dent" onclick="selEditType(this)">凹み</button>
-        <button class="edit-type-btn" data-val="chip" onclick="selEditType(this)">塗装欠け</button>
-        <button class="edit-type-btn" data-val="crack" onclick="selEditType(this)">ひび割れ</button>
-        <button class="edit-type-btn" data-val="other" onclick="selEditType(this)">その他</button>
+      <div class="edit-section">STEP 2 — 損傷の種類（国際基準）</div>
+      <div class="edit-types" id="editTypes" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+        <button class="edit-type-btn" data-val="scratch" onclick="selEditType(this)">擦り傷<br><span style="font-size:8px;opacity:.7;">Scratch</span></button>
+        <button class="edit-type-btn" data-val="dent" onclick="selEditType(this)">凹み<br><span style="font-size:8px;opacity:.7;">Dent</span></button>
+        <button class="edit-type-btn" data-val="chip" onclick="selEditType(this)">塗装欠け<br><span style="font-size:8px;opacity:.7;">Paint Chip</span></button>
+        <button class="edit-type-btn" data-val="crack" onclick="selEditType(this)">ひび割れ<br><span style="font-size:8px;opacity:.7;">Crack</span></button>
+        <button class="edit-type-btn" data-val="break" onclick="selEditType(this)">破損<br><span style="font-size:8px;opacity:.7;">Break</span></button>
+        <button class="edit-type-btn" data-val="stain" onclick="selEditType(this)">汚れ・シミ<br><span style="font-size:8px;opacity:.7;">Stain</span></button>
+        <button class="edit-type-btn" data-val="burn" onclick="selEditType(this)">焦げ痕<br><span style="font-size:8px;opacity:.7;">Burn</span></button>
+        <button class="edit-type-btn" data-val="rust" onclick="selEditType(this)">錆び<br><span style="font-size:8px;opacity:.7;">Rust</span></button>
+        <button class="edit-type-btn" data-val="missing" onclick="selEditType(this)">部品欠損<br><span style="font-size:8px;opacity:.7;">Missing</span></button>
+        <button class="edit-type-btn" data-val="tire_flat" onclick="selEditType(this)">パンク<br><span style="font-size:8px;opacity:.7;">Flat Tire</span></button>
+        <button class="edit-type-btn" data-val="tire_wear" onclick="selEditType(this)">タイヤ摩耗<br><span style="font-size:8px;opacity:.7;">Tire Wear</span></button>
+        <button class="edit-type-btn" data-val="other" onclick="selEditType(this)">その他<br><span style="font-size:8px;opacity:.7;">Other</span></button>
       </div>
-      <div class="edit-section">STEP 3 — 程度</div>
+      <div class="edit-section">STEP 3 — 大きさ</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-bottom:10px;" id="editSizeRow">
+        <button class="edit-sev-btn" data-val="XS" onclick="selEditSize(this)" style="font-size:11px;">XS<br><span style="font-size:8px;opacity:.7;">&lt;1cm</span></button>
+        <button class="edit-sev-btn" data-val="S"  onclick="selEditSize(this)" style="font-size:11px;">S<br><span style="font-size:8px;opacity:.7;">1-3cm</span></button>
+        <button class="edit-sev-btn" data-val="M"  onclick="selEditSize(this)" style="font-size:11px;">M<br><span style="font-size:8px;opacity:.7;">3-10cm</span></button>
+        <button class="edit-sev-btn" data-val="L"  onclick="selEditSize(this)" style="font-size:11px;">L<br><span style="font-size:8px;opacity:.7;">&gt;10cm</span></button>
+      </div>
+      <div class="edit-section">STEP 4 — 程度</div>
       <div class="edit-sev">
-        <button class="edit-sev-btn edit-sev-minor" data-val="minor" onclick="selEditSev(this)">軽微</button>
-        <button class="edit-sev-btn edit-sev-moderate" data-val="moderate" onclick="selEditSev(this)">中程度</button>
-        <button class="edit-sev-btn edit-sev-major" data-val="major" onclick="selEditSev(this)">重大</button>
+        <button class="edit-sev-btn edit-sev-minor" data-val="minor" onclick="selEditSev(this)">軽微<br><span style="font-size:8px;">Minor</span></button>
+        <button class="edit-sev-btn edit-sev-moderate" data-val="moderate" onclick="selEditSev(this)">中程度<br><span style="font-size:8px;">Moderate</span></button>
+        <button class="edit-sev-btn edit-sev-major" data-val="major" onclick="selEditSev(this)">重大<br><span style="font-size:8px;">Major</span></button>
       </div>
       <div class="edit-section">メモ（任意）</div>
       <input class="edit-desc-input" id="editDescInput" placeholder="例: 縦15cm、ドア中央部" type="text">
-      <div class="edit-section" style="margin-top:4px;">写真（任意）</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <div class="edit-section" style="margin-top:4px;">写真（任意）<span id="editPhotoHint" style="color:#ffaa44;font-size:9px;font-weight:600;margin-left:6px;display:none;">← 種類・程度を先に選択</span></div>
+      <div id="editPhotoBtns" style="display:flex;gap:8px;margin-bottom:10px;transition:opacity .2s;">
         <button onclick="triggerCamera()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:600;cursor:pointer;">📷 撮影</button>
         <button onclick="triggerLibrary()" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:12px;font-weight:600;cursor:pointer;">📁 選択</button>
       </div>
@@ -738,6 +837,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     </div>
   </div>
 </div>
+
+<!-- 更新通知バナー（全画面共通） -->
+<div class="update-banner" id="updateBanner">
+  <span style="font-size:14px;flex-shrink:0;">🔔</span>
+  <span class="update-banner-msg" style="flex:1;"></span>
+</div>
+
+<!-- キャンバス（写真圧縮用） -->
+<canvas id="compressCanvas" style="display:none;"></canvas>
+<!-- カメラ・ライブラリ入力 -->
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoSelect(this)">
+<input type="file" id="libraryInput" accept="image/*" style="display:none;" onchange="handlePhotoSelect(this)">
 
 <script>
 // ===== Supabase 初期化 =====
@@ -877,7 +988,10 @@ function selectStaff(id,name){
   localStorage.setItem('hm_staff',name);
   localStorage.setItem('hm_store',currentStore);
   updateStaffHeader();
-  goto('sm'); // goto('sm')内でloadVehicles()が呼ばれる
+  goto('sm');
+  initPresence();
+  startAutoRefresh();
+  subscribeRealtime();
 }
 function updateStaffHeader(){
   const el=document.getElementById('smStaffLabel');
@@ -1048,8 +1162,8 @@ function renderVehicleList(vehicles, store){
           ${dmgCnt>0?'<circle cx="25" cy="21" r="3" fill="#ff444470" stroke="#ff4444" stroke-width="1"/>':''}
         </svg></div>
         <div class="sm-info">
-          <div class="sm-vno">${vInfo.name||v.id}</div>
-          <div class="sm-model">${v.id} <span style="color:#9bb;">/ ${vInfo.plate_no||'—'}</span></div>
+          <div class="sm-vno">${vInfo.plate_no||v.id}</div>
+          <div class="sm-model">${vInfo.name||''} <span style="color:#9bb;">/ ${v.id}</span></div>
           <div class="sm-status-row">
             <div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">
               ${statusEmoji(v.status)} ${st.label}${resvTxt}
@@ -1057,6 +1171,7 @@ function renderVehicleList(vehicles, store){
             ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
             ${!v.last_event_id?`<div class="sm-badge-unreg">⚡ 要初期登録</div>`:''}
           </div>
+          <div class="sm-presence-inline" id="spres_${v.id}"></div>
         </div>
         <div class="sm-arr">›</div>
       </div>`;
@@ -1115,8 +1230,8 @@ function renderS0(v){
   const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
   const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
   setText('s0StoreLabel',`HANDYMAN / ${storeLabel}`);
-  setText('s0Vno',vInfo.name||v.id);
-  setText('s0Model',`${v.id} ／ ${vInfo.plate_no||'—'}`);
+  setText('s0Vno',vInfo.plate_no||v.id);
+  setText('s0Model',`${vInfo.name||''} ／ ${v.id}`);
   const badge=document.getElementById('s0StatusBadge');
   if(badge){
     badge.textContent=`${statusEmoji(v.status)} ${st.label}${v.current_resv_no?' — '+v.current_resv_no+' '+(v.current_customer||''):''}`;
@@ -1172,10 +1287,15 @@ function renderS0(v){
   // アクションボタン
   const actionArea=document.getElementById('s0ActionArea');
   if(actionArea){
+    const statusChangeRow=`
+      <div style="margin-top:8px;">
+        <button onclick="openStatusChange()" style="width:100%;padding:11px;border-radius:12px;border:1.5px solid #d0dce8;background:#f4f8fc;color:#5577aa;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">🔄 ステータスを手動変更</button>
+      </div>`;
     if(!isRegistered){
       actionArea.innerHTML=`
         <div style="padding:0 0 max(env(safe-area-inset-bottom),28px);">
           <button class="btn-init" onclick="startInitialRegistration()">⚡ 初期登録する — チェーン起点を作成</button>
+          ${statusChangeRow}
         </div>`;
     } else {
       actionArea.innerHTML=`
@@ -1184,6 +1304,7 @@ function renderS0(v){
             <button class="btn-primary btn-blue" onclick="goto('sc0')" style="flex:1;padding:14px;font-size:13px;">🚗 出庫チェック</button>
             <button class="btn-primary btn-green" onclick="startReturnCheck()" style="flex:1;padding:14px;font-size:13px;">📹 返却チェック</button>
           </div>
+          ${statusChangeRow}
         </div>`;
     }
   }
@@ -1211,27 +1332,181 @@ function fmtDate(iso){
     ' '+(d.getHours()+'').padStart(2,'0')+':'+(d.getMinutes()+'').padStart(2,'0');
 }
 
-// ===== Realtime: 他スタッフの更新を即反映 =====
-function subscribeRealtime(){
-  sb.channel('vehicle_twins')
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'vehicle_twins'},payload=>{
-      const updated=payload.new;
-      const idx=vehiclesCache.findIndex(v=>v.id===updated.id);
-      if(idx>=0){
-        vehiclesCache[idx]={...vehiclesCache[idx],...updated};
-        // リスト上のカードを更新
-        const card=document.getElementById('smcard_'+updated.id);
-        if(card){
-          const tmp=document.createElement('div');
-          tmp.innerHTML=renderVehicleCard(vehiclesCache[idx]);
-          card.replaceWith(tmp.firstElementChild);
+// ============================================================
+// ===== マルチユーザー同期システム =====
+// ============================================================
+
+// ----- 1. 安全な書き込み（常に最新DBデータを取得してから更新） -----
+// vehiclesCacheが古くても、直前にSupabaseから最新を取得するのでロストアップデートを防ぐ
+async function safeWriteDamages(vehicleId, mutationFn){
+  const{data,error}=await sb.from('vehicle_twins')
+    .select('current_damages')
+    .eq('id',vehicleId)
+    .single();
+  if(error) throw error;
+  const fresh=data?.current_damages||[];
+  const next=mutationFn(fresh);
+  // ローカルキャッシュも即反映
+  const idx=vehiclesCache.findIndex(v=>v.id===vehicleId);
+  if(idx>=0) vehiclesCache[idx].current_damages=next;
+  return next;
+}
+
+// ----- 2. 接続ステータス -----
+function setRtStatus(s){
+  const dot=document.getElementById('rtDot');
+  if(!dot) return;
+  dot.className='rt-dot'+(s==='live'?' live':s==='error'?' error':'');
+  dot.title=s==='live'?'🟢 リアルタイム同期中':s==='error'?'🔴 接続エラー — 自動リトライ中':'⚪ 接続中...';
+}
+
+// ----- 3. 更新通知バナー -----
+let _bannerTimer=null;
+function showUpdateBanner(msg){
+  const b=document.getElementById('updateBanner');
+  if(!b) return;
+  b.querySelector('.update-banner-msg').textContent=msg;
+  b.classList.add('show');
+  if(_bannerTimer) clearTimeout(_bannerTimer);
+  _bannerTimer=setTimeout(()=>b.classList.remove('show'),5000);
+}
+
+// ----- 4. Presence（在席管理） -----
+let presenceCh=null;
+let presenceState={}; // staffKey → {staff, screen, vehicleId}
+
+function initPresence(){
+  if(!currentStaff) return;
+  if(presenceCh){ try{sb.removeChannel(presenceCh);}catch(e){} }
+  // ランダムサフィックスで同一スタッフの複数デバイス対応
+  const myKey=currentStaff+'_'+Math.random().toString(36).slice(2,6);
+  presenceCh=sb.channel('hm-presence-v1',{config:{presence:{key:myKey}}});
+  presenceCh
+    .on('presence',{event:'sync'},()=>{
+      const state=presenceCh.presenceState();
+      presenceState={};
+      Object.entries(state).forEach(([k,arr])=>{
+        const p=arr[0];
+        if(p&&p.staff&&p.staff!==currentStaff){
+          presenceState[k]=p;
         }
-        updateSmStats(vehiclesCache);
-        // 現在開いている車両なら S0 も更新
-        if(currentVehicleId===updated.id) renderS0(vehiclesCache[idx]);
-      }
+      });
+      renderPresenceBadges();
+      refreshS0EditingWarn();
     })
-    .subscribe();
+    .subscribe(async(status)=>{
+      if(status==='SUBSCRIBED'){
+        setRtStatus('live');
+        await updatePresence('sm',null);
+      } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+        setRtStatus('error');
+      }
+    });
+}
+
+async function updatePresence(screen,vehicleId){
+  if(!presenceCh||!currentStaff) return;
+  try{ await presenceCh.track({staff:currentStaff,screen,vehicleId:vehicleId||null}); }catch(e){}
+}
+
+function renderPresenceBadges(){
+  // 全バッジをリセット
+  document.querySelectorAll('.sm-presence-inline').forEach(el=>el.innerHTML='');
+  // 各スタッフの位置にバッジを追加
+  Object.values(presenceState).forEach(p=>{
+    if(!p.vehicleId) return;
+    const el=document.getElementById('spres_'+p.vehicleId);
+    if(el){
+      const dot=document.createElement('span');
+      dot.className='sm-presence-dot';
+      dot.textContent='👁 '+p.staff;
+      el.appendChild(dot);
+    }
+  });
+}
+
+function refreshS0EditingWarn(){
+  const warn=document.getElementById('s0EditingWarn');
+  const names=document.getElementById('s0EditingWarnNames');
+  if(!warn||!names) return;
+  const others=Object.values(presenceState)
+    .filter(p=>p.vehicleId===currentVehicleId);
+  if(others.length>0){
+    warn.style.display='flex';
+    names.textContent=others.map(p=>p.staff+'さんが同時に閲覧中').join(' ／ ');
+  } else {
+    warn.style.display='none';
+  }
+}
+
+// ----- 5. 自動更新（SM画面：30秒間隔） -----
+let _autoRefreshTimer=null;
+function startAutoRefresh(){
+  if(_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer=setInterval(()=>{
+    if(document.getElementById('sm')?.classList.contains('active')){
+      loadVehicles().then(()=>{
+        // SM上のバッジも再描画
+        setTimeout(()=>renderPresenceBadges(),100);
+      });
+    }
+  },30000);
+}
+
+// ----- 6. S0リロード -----
+async function reloadS0(){
+  if(!currentVehicleId) return;
+  await openVehicle(currentVehicleId);
+  showToast('🔄 最新データに更新しました');
+}
+
+function subscribeRealtime(){
+  sb.channel('hm-vehicle-twins-all')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'vehicle_twins'},payload=>{
+      handleVehicleTwinChange(payload.new,'insert');
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'vehicle_twins'},payload=>{
+      handleVehicleTwinChange(payload.new,'update');
+    })
+    .subscribe(status=>{
+      if(status==='SUBSCRIBED') setRtStatus('live');
+      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT') setRtStatus('error');
+    });
+}
+
+function handleVehicleTwinChange(updated, event){
+  if(updated.store!==currentStore) return;
+  const idx=vehiclesCache.findIndex(v=>v.id===updated.id);
+  if(idx<0){
+    if(event==='insert') loadVehicles(); // 新規車両は一覧再ロード
+    return;
+  }
+  const prevDmgCnt=(vehiclesCache[idx].current_damages||[]).length;
+  vehiclesCache[idx]={...vehiclesCache[idx],...updated};
+  // SMカード更新
+  const card=document.getElementById('smcard_'+updated.id);
+  if(card){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=renderVehicleCard(vehiclesCache[idx]);
+    card.replaceWith(tmp.firstElementChild);
+  }
+  updateSmStats(vehiclesCache);
+  // 在席バッジは維持
+  renderPresenceBadges();
+  // S0が同じ車両なら更新
+  if(currentVehicleId===updated.id){
+    renderS0(vehiclesCache[idx]);
+    renderInspectionMap(vehiclesCache[idx].current_damages||[]);
+    refreshS0EditingWarn();
+  }
+  // 自分以外が更新したら通知バナー
+  if(updated.last_check_staff&&updated.last_check_staff!==currentStaff){
+    const newDmgCnt=(updated.current_damages||[]).length;
+    const diff=newDmgCnt-prevDmgCnt;
+    const diffTxt=diff>0?` / 傷+${diff}件`:diff<0?` / 傷${diff}件`:' / 更新';
+    const plate=vehiclesCache[idx]?.vehicles?.plate_no||updated.id;
+    showUpdateBanner(`${updated.last_check_staff}さんが ${plate} を更新${diffTxt}`);
+  }
 }
 function renderVehicleCard(v){
   const vInfo=v.vehicles||{};
@@ -1241,8 +1516,8 @@ function renderVehicleCard(v){
   return `<div class="sm-card" onclick="openVehicle('${v.id}')" id="smcard_${v.id}">
     <div class="sm-stripe" style="background:${st.stripe};"></div>
     <div class="sm-thumb"><svg viewBox="0 0 68 40"><rect width="68" height="40" fill="#0a0e18"/><path d="M7,14 L61,14 L61,30 L7,30Z" fill="#d0d0cc"/><path d="M15,14 L53,14 L50,29 L18,29Z" fill="#1a2836" fill-opacity=".88"/><circle cx="18" cy="35" r="4.5" fill="#222"/><circle cx="50" cy="35" r="4.5" fill="#222"/>${dmgCnt>0?'<circle cx="25" cy="21" r="3" fill="#ff444470" stroke="#ff4444" stroke-width="1"/>':''}</svg></div>
-    <div class="sm-info"><div class="sm-vno">${v.id} <span style="font-size:10px;font-weight:400;color:#ffffff35;">${vInfo.name||''}</span></div><div class="sm-model">${vInfo.plate_no||'—'}</div>
-    <div class="sm-status-row"><div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">${statusEmoji(v.status)} ${st.label}${resvTxt}</div>${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}</div></div>
+    <div class="sm-info"><div class="sm-vno">${vInfo.plate_no||v.id}</div><div class="sm-model">${vInfo.name||''} <span style="color:#9bb;">/ ${v.id}</span></div>
+    <div class="sm-status-row"><div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">${statusEmoji(v.status)} ${st.label}${resvTxt}</div>${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}</div><div class="sm-presence-inline" id="spres_${v.id}"></div></div>
     <div class="sm-arr">›</div></div>`;
 }
 
@@ -1254,6 +1529,8 @@ if(currentStaff){
   goto('sm');
   loadVehicles();
   subscribeRealtime();
+  initPresence();
+  startAutoRefresh();
 }
 // AIキーボタン初期状態
 setTimeout(()=>updateSmAiBtn(), 100);
@@ -1282,22 +1559,25 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
     <stop offset="100%" stop-color="#c8d8e4"/>
   </linearGradient>
 </defs>
-<!-- 方向ラベル（回転外 → 文字が読める） -->
-<text x="-60" y="142" fill="#334466" font-size="7" letter-spacing="2" font-family="monospace" font-weight="600">◄ REAR</text>
-<text x="278" y="142" fill="#334466" font-size="7" letter-spacing="2" font-family="monospace" font-weight="600">FRONT ►</text>
-<!-- 車両本体: -90°回転 中心(130,195) -->
-<g transform="rotate(-90, 130, 195)">
+<!-- 方向バッジ（左=フロント / 右=リア） -->
+<rect x="-64" y="182" width="48" height="28" rx="6" fill="#1a8844" opacity=".88"/>
+<text x="-40" y="194" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">フロント</text>
+<text x="-40" y="204" text-anchor="middle" fill="#bbffcc" font-size="6" font-weight="700" font-family="monospace">◄ FRONT</text>
+
+<rect x="281" y="182" width="48" height="28" rx="6" fill="#d44422" opacity=".88"/>
+<text x="305" y="194" text-anchor="middle" fill="#fff" font-size="8" font-weight="900" font-family="-apple-system,sans-serif">リア</text>
+<text x="305" y="204" text-anchor="middle" fill="#ffd0bb" font-size="6" font-weight="700" font-family="monospace">REAR ►</text>
+<!-- 車両本体: +90°回転 中心(130,195) -->
+<g transform="rotate(90, 130, 195)">
 <rect width="260" height="390" fill="#e8f0f6" rx="6"/>
 
 <!-- ===== リアバンパー ===== -->
-<rect id="iz-rear-bumper" x="85" y="18" width="90" height="22" rx="4" fill="#b8ccd8" stroke="#4477aa" stroke-width="1.5"/>
-<text x="130" y="32" text-anchor="middle" fill="#223355" font-size="7" font-weight="700">リアバンパー</text>
+<rect id="iz-rear-bumper" x="85" y="18" width="90" height="22" rx="4" fill="#c8aaa0" stroke="#aa4422" stroke-width="1.5"/>
 
 <!-- ===== トランク / リアゲート ===== -->
 <rect id="iz-trunk" x="85" y="40" width="90" height="38" rx="2" fill="url(#gBody)" stroke="#4477aa" stroke-width="1.5"/>
 <!-- リアガラス -->
 <rect x="97" y="45" width="66" height="24" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
-<text x="130" y="60" text-anchor="middle" fill="#22446688" font-size="6" font-weight="600">リアガラス</text>
 
 <!-- ===== 左リアフェンダー ===== -->
 <path id="iz-lr-fender" d="M85,42 L56,52 L56,128 L85,128Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
@@ -1305,12 +1585,12 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 <path id="iz-rr-fender" d="M175,42 L204,52 L204,128 L175,128Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
 
 <!-- ===== 後輪（左） ===== -->
-<ellipse cx="40" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse id="iz-lr-tire" cx="40" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
 <ellipse cx="40" cy="100" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
 <line x1="40" y1="85" x2="40" y2="115" stroke="#ffffff60" stroke-width="0.8"/>
 <line x1="25" y1="100" x2="55" y2="100" stroke="#ffffff60" stroke-width="0.8"/>
 <!-- ===== 後輪（右） ===== -->
-<ellipse cx="220" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse id="iz-rr-tire" cx="220" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
 <ellipse cx="220" cy="100" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
 <line x1="220" y1="85" x2="220" y2="115" stroke="#ffffff60" stroke-width="0.8"/>
 <line x1="205" y1="100" x2="235" y2="100" stroke="#ffffff60" stroke-width="0.8"/>
@@ -1326,15 +1606,15 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 <!-- ===== 車体中央（ルーフ） ===== -->
 <rect id="iz-roof" x="85" y="78" width="90" height="234" rx="4" fill="url(#gBody)" stroke="#4477aa" stroke-width="1.5"/>
 <!-- リアガラス帯 -->
-<rect x="93" y="84" width="74" height="38" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
+<rect id="iz-rear-glass" x="93" y="84" width="74" height="38" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
 <!-- リア席窓 -->
-<rect x="94" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
-<rect x="134" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-lr-window" x="94" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-rr-window" x="134" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
 <!-- フロント席窓 -->
-<rect x="94" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
-<rect x="134" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-lf-window" x="94" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-rf-window" x="134" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
 <!-- フロントガラス帯 -->
-<rect x="93" y="248" width="74" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
+<rect id="iz-front-glass" x="93" y="248" width="74" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
 <!-- Bピラー -->
 <rect x="128" y="126" width="4" height="122" fill="#9aaabb" opacity=".9"/>
 <!-- ドア境界線 -->
@@ -1363,12 +1643,12 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 <path id="iz-rf-fender" d="M175,260 L204,266 L204,330 L175,312Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
 
 <!-- ===== 前輪（左） ===== -->
-<ellipse cx="40" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse id="iz-lf-tire" cx="40" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
 <ellipse cx="40" cy="300" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
 <line x1="40" y1="285" x2="40" y2="315" stroke="#ffffff60" stroke-width="0.8"/>
 <line x1="25" y1="300" x2="55" y2="300" stroke="#ffffff60" stroke-width="0.8"/>
 <!-- ===== 前輪（右） ===== -->
-<ellipse cx="220" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse id="iz-rf-tire" cx="220" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
 <ellipse cx="220" cy="300" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
 <line x1="220" y1="285" x2="220" y2="315" stroke="#ffffff60" stroke-width="0.8"/>
 <line x1="205" y1="300" x2="235" y2="300" stroke="#ffffff60" stroke-width="0.8"/>
@@ -1378,32 +1658,45 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 <line x1="130" y1="314" x2="130" y2="354" stroke="#33446640" stroke-width="0.8"/>
 
 <!-- ===== フロントバンパー ===== -->
-<rect id="iz-front-bumper" x="85" y="356" width="90" height="22" rx="4" fill="#b8ccd8" stroke="#4477aa" stroke-width="1.5"/>
-<rect x="105" y="360" width="50" height="12" rx="1" fill="#e8eee8" stroke="#33446640" stroke-width="0.5"/>
+<rect id="iz-front-bumper" x="85" y="356" width="90" height="22" rx="4" fill="#9acca8" stroke="#1a7744" stroke-width="1.5"/>
+<rect x="105" y="360" width="50" height="12" rx="1" fill="#d4eed8" stroke="#33886640" stroke-width="0.5"/>
 <text x="130" y="369" text-anchor="middle" fill="#2a3a50" font-size="5" font-family="monospace" font-weight="600"></text>
 </g>
 </svg>`;
 
-// ゾーンID → {name, cx%, cy%} マッピング（横向き: new_cx=old_cy, new_cy=100-old_cx）
+// ゾーンID → {name, cx%, cy%} マッピング（横向き+90°: フロント=左、リア=右、左=上、右=下）
+// new_cx = 100 - old_cx, new_cy = 100 - old_cy（前後・左右ともに反転）
 const ZONE_MAP={
-  'フロントバンパー':   {id:'iz-front-bumper', cx:94.4, cy:50  },
-  'ボンネット':         {id:'iz-hood',          cx:86.3, cy:50  },
-  'フロントガラス':     {id:'iz-roof',          cx:71.5, cy:50  },
-  '左フロントフェンダー':{id:'iz-lf-fender',   cx:75,   cy:78  },
-  '右フロントフェンダー':{id:'iz-rf-fender',   cx:75,   cy:22  },
-  '左フロントドア':     {id:'iz-lf-door',       cx:62,   cy:84  },
-  '右フロントドア':     {id:'iz-rf-door',       cx:62,   cy:16  },
-  'ルーフ':             {id:'iz-roof',           cx:52,   cy:50  },
-  '左リアドア':         {id:'iz-lr-door',        cx:43,   cy:84  },
-  '右リアドア':         {id:'iz-rr-door',        cx:43,   cy:16  },
-  '左リアフェンダー':   {id:'iz-lr-fender',      cx:30,   cy:78  },
-  '右リアフェンダー':   {id:'iz-rr-fender',      cx:30,   cy:22  },
-  'リアバンパー右':     {id:'iz-rear-bumper',    cx:7,    cy:38  },
-  'リアバンパー左':     {id:'iz-rear-bumper',    cx:7,    cy:62  },
-  'リアバンパー':       {id:'iz-rear-bumper',    cx:7,    cy:50  },
-  'バックドア':         {id:'iz-trunk',          cx:13.3, cy:50  },
-  '左ドアミラー':       {id:'iz-l-mirror',       cx:70.5, cy:72  },
-  '右ドアミラー':       {id:'iz-r-mirror',       cx:70.5, cy:24  },
+  'フロントバンパー':   {id:'iz-front-bumper', cx:5.6,  cy:50  },
+  'ボンネット':         {id:'iz-hood',          cx:13.7, cy:50  },
+  'フロントガラス':     {id:'iz-front-glass',   cx:31.8, cy:50  },
+  '左フロントフェンダー':{id:'iz-lf-fender',   cx:25,   cy:22  },
+  '右フロントフェンダー':{id:'iz-rf-fender',   cx:25,   cy:78  },
+  '左フロントドア':     {id:'iz-lf-door',       cx:38,   cy:16  },
+  '右フロントドア':     {id:'iz-rf-door',       cx:38,   cy:84  },
+  'ルーフ':             {id:'iz-roof',           cx:48,   cy:50  },
+  '左リアドア':         {id:'iz-lr-door',        cx:57,   cy:16  },
+  '右リアドア':         {id:'iz-rr-door',        cx:57,   cy:84  },
+  '左リアフェンダー':   {id:'iz-lr-fender',      cx:70,   cy:22  },
+  '右リアフェンダー':   {id:'iz-rr-fender',      cx:70,   cy:78  },
+  'リアバンパー右':     {id:'iz-rear-bumper',    cx:93,   cy:62  },
+  'リアバンパー左':     {id:'iz-rear-bumper',    cx:93,   cy:38  },
+  'リアバンパー':       {id:'iz-rear-bumper',    cx:93,   cy:50  },
+  'バックドア':         {id:'iz-trunk',          cx:86.7, cy:50  },
+  '左ドアミラー':       {id:'iz-l-mirror',       cx:29.5, cy:28  },
+  '右ドアミラー':       {id:'iz-r-mirror',       cx:29.5, cy:76  },
+  // タイヤ
+  '左後タイヤ':         {id:'iz-lr-tire',        cx:74.4, cy:15.4},
+  '右後タイヤ':         {id:'iz-rr-tire',        cx:74.4, cy:84.6},
+  '左前タイヤ':         {id:'iz-lf-tire',        cx:23.1, cy:15.4},
+  '右前タイヤ':         {id:'iz-rf-tire',        cx:23.1, cy:84.6},
+  // ガラス
+  'リアガラス':         {id:'iz-rear-glass',     cx:73.6, cy:50  },
+  '左リア窓':           {id:'iz-lr-window',      cx:63.1, cy:42.3},
+  '右リア窓':           {id:'iz-rr-window',      cx:63.1, cy:57.7},
+  '左フロント窓':       {id:'iz-lf-window',      cx:42.8, cy:42.3},
+  '右フロント窓':       {id:'iz-rf-window',      cx:42.8, cy:57.7},
+  'ルーフ（リア）':     {id:'iz-rear-glass',     cx:71.5, cy:50  },
 };
 
 // damage severity → color
@@ -1437,6 +1730,7 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
     const pin=document.createElement('div');
     pin.className='ipin'+(clickable?' clickable':'');
     pin.style.cssText=`left:${zone.cx}%;top:${zone.cy}%;`;
+    pin.dataset.dmgId=d.id;
     const newBadge=isNew?`<div class="ipin-new">NEW</div>`:'';
     pin.innerHTML=`${newBadge}<div class="ipin-r" style="border-color:${c}80;${isNew?'box-shadow:0 0 10px '+c+'50;':''}"><div class="ipin-c" style="background:${c};"></div></div><div class="ipin-lbl" style="background:${isNew?'#ff3333':'#1a2840'}ee;color:#fff;">${d.location}</div>`;
     if(clickable) pin.addEventListener('click',(e)=>{ e.stopPropagation(); openDmgEdit(d.id); });
@@ -1515,10 +1809,13 @@ function goto(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const target=document.getElementById(id);
   if(target) target.classList.add('active');
-  if(id==='sm') loadVehicles();
+  if(id==='sm'){ loadVehicles(); updatePresence('sm',null); }
   if(id==='sc') loadChain(currentVehicleId);
   if(id==='sc0') renderSc0();
   if(id==='sr0') renderSr0();
+  if(id==='si') openSi();
+  if(id==='s0'){ updatePresence('s0',currentVehicleId); refreshS0EditingWarn(); }
+  if(id==='login'){ updatePresence('login',null); }
   if(id==='login'){
     currentStaff=null;
     localStorage.removeItem('hm_staff');
@@ -1587,43 +1884,57 @@ async function loadChain(vehicleId){
   if(tl) tl.innerHTML=html;
 }
 
-// ===== 初期登録: チェーン起点を作成 =====
-async function startInitialRegistration(){
+// ===== ステータス手動変更 =====
+function openStatusChange(){
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   if(!v) return;
-  const damages=v.current_damages||[];
-  const btn=document.querySelector('.btn-init');
-  if(btn){btn.textContent='⏳ 登録中...';btn.style.pointerEvents='none';}
+  const STATUS_OPTS=[
+    {val:'ready',      label:'🟢 空車（準備完了）'},
+    {val:'out',        label:'🟡 貸出中'},
+    {val:'returning',  label:'🔴 返却待ち'},
+    {val:'maintenance',label:'🔧 整備中'},
+  ];
+  const btns=STATUS_OPTS.map(o=>
+    `<button onclick="setStatusManual('${o.val}')" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid #d0dce8;background:${v.status===o.val?'#1a3a6a':'#f4f8fc'};color:${v.status===o.val?'#88ccff':'#1a2840'};font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;touch-action:manipulation;">${o.label}${v.status===o.val?' ← 現在':''}</button>`
+  ).join('');
+  const overlay=document.createElement('div');
+  overlay.id='statusChangeOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:#00000066;z-index:500;display:flex;align-items:flex-end;justify-content:center;max-width:520px;margin:0 auto;';
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px max(env(safe-area-inset-bottom),24px);width:100%;max-height:80vh;overflow-y:auto;">
+      <div style="width:40px;height:4px;background:#d0d8e8;border-radius:2px;margin:0 auto 16px;"></div>
+      <div style="font-size:15px;font-weight:800;color:#1a2840;margin-bottom:4px;text-align:center;">ステータスを変更</div>
+      <div style="font-size:11px;color:#8899bb;text-align:center;margin-bottom:16px;">${v.vehicles?.plate_no||currentVehicleId} / ${v.vehicles?.name||''}</div>
+      ${btns}
+      <button onclick="document.getElementById('statusChangeOverlay').remove()" style="width:100%;padding:13px;border-radius:12px;border:1.5px solid #d0dce8;background:#fff;color:#8899bb;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;">キャンセル</button>
+    </div>`;
+  overlay.addEventListener('click',e=>{if(e.target===overlay) overlay.remove();});
+  document.body.appendChild(overlay);
+}
+async function setStatusManual(newStatus){
+  const overlay=document.getElementById('statusChangeOverlay');
+  if(overlay) overlay.remove();
   try{
-    const now=new Date().toISOString();
-    const{data:ev,error:evErr}=await sb.from('check_events').insert({
-      vehicle_id:currentVehicleId,
-      event_type:'initial',
-      staff:currentStaff,
-      damages_snapshot:damages,
-      new_damages:damages,
-      staff_confirmed:true,
-      confirmed_at:now,
-      notes:`初期登録 ／ 傷${damages.length}件 ／ チェーン起点`
-    }).select().single();
-    if(evErr) throw evErr;
-    await sb.from('vehicle_twins').update({
-      last_event_id:ev.id,
-      last_check_at:now,
-      last_check_staff:currentStaff,
-    }).eq('id',currentVehicleId);
-    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    await sb.from('vehicle_twins').upsert({
+      id:currentVehicleId,
+      store:currentStore,
+      status:newStatus,
+      updated_at:new Date().toISOString()
+    },{onConflict:'id'});
+    const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
     if(idx>=0){
-      vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff};
+      vehiclesCache[idx]={...vehiclesCache[idx],status:newStatus};
       renderS0(vehiclesCache[idx]);
-      renderInspectionMap(vehiclesCache[idx].current_damages||[]);
     }
-    showToast(`✓ 初期登録完了 ／ 傷${damages.length}件 ／ チェーンを開始しました`);
+    showToast(`✓ ステータスを「${STATUS_DEF[newStatus]?.label||newStatus}」に変更しました`);
   }catch(e){
-    console.error('startInitialRegistration:',e);
-    showToast('❌ 保存エラー: '+e.message.slice(0,40));
-    if(btn){btn.textContent='⚡ 初期登録する — チェーン起点を作成';btn.style.pointerEvents='all';}
+    showToast('❌ 変更エラー: '+e.message.slice(0,40));
   }
+}
+
+// ===== 初期登録: 専用画面(#si)を開く =====
+function startInitialRegistration(){
+  goto('si');
 }
 
 function startReturnCheck(){
@@ -1680,13 +1991,11 @@ async function markRepaired(){
   if(!currentEditDmgId) return;
   const d=currentDamages().find(x=>x.id===currentEditDmgId);
   const loc=d?d.location:'';
-  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-  const updated=(v?.current_damages||[]).filter(x=>x.id!==currentEditDmgId);
+  const dmgId=currentEditDmgId;
   try{
+    const updated=await safeWriteDamages(currentVehicleId,fresh=>fresh.filter(x=>x.id!==dmgId));
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
-    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
-    if(idx>=0) vehiclesCache[idx].current_damages=updated;
     renderInspectionMap(updated);
     document.getElementById('dmgEditOverlay').classList.remove('show');
     currentEditDmgId=null;
@@ -1970,7 +2279,7 @@ function compressPhoto(file,maxPx,quality){
 
 // ===== 空きゾームタップ → 傷追加シート =====
 function openAddDmgSheet(zoneName){
-  editZone=zoneName;editType=null;editSev=null;
+  editZone=zoneName;editType=null;editSev=null;editSize=null;
   resetEditPhoto();
   document.getElementById('editTitle').textContent=zoneName+' — 傷を追加';
   document.getElementById('editSub').textContent='傷の種類と程度を選んでください';
@@ -1985,10 +2294,10 @@ function openAddDmgSheet(zoneName){
 
 // ===== 手動編集パネル（全ゾーン選択モード） =====
 const ZONE_NAMES=Object.keys(ZONE_MAP);
-let editZone=null,editType=null,editSev=null;
+let editZone=null,editType=null,editSev=null,editSize=null;
 
 function openEditPanel(){
-  editZone=null;editType=null;editSev=null;
+  editZone=null;editType=null;editSev=null;editSize=null;
   const zc=document.getElementById('editZones');
   zc.innerHTML=ZONE_NAMES.map(z=>`<button class="edit-zone-btn" onclick="selEditZone(this,'${z}')">${z}</button>`).join('');
   document.getElementById('editStep2').style.display='none';
@@ -2021,6 +2330,12 @@ function selEditSev(btn){
   btn.classList.add('sel');
   updateEditBtns();
 }
+function selEditSize(btn){
+  editSize=btn.dataset.val;
+  document.querySelectorAll('#editSizeRow .edit-sev-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateEditBtns();
+}
 function updateEditBtns(){
   const ok=editZone&&editType&&editSev;
   const repair=!!editZone;
@@ -2028,22 +2343,39 @@ function updateEditBtns(){
   document.getElementById('editOkBtn').style.pointerEvents=ok?'all':'none';
   document.getElementById('editRepairBtn').style.opacity=repair?'1':'.4';
   document.getElementById('editRepairBtn').style.pointerEvents=repair?'all':'none';
+  // 写真ボタン：常時有効（種類・程度の選択は不要）
+  const photoBtns=document.getElementById('editPhotoBtns');
+  const photoHint=document.getElementById('editPhotoHint');
+  if(photoBtns){photoBtns.style.opacity='1';photoBtns.style.pointerEvents='all';}
+  if(photoHint){photoHint.style.display='none';}
 }
 async function submitEdit(){
   if(!editZone||!editType||!editSev) return;
   const desc=document.getElementById('editDescInput').value.trim()||'手動追加';
   const now=new Date();
   const ts=now.getFullYear()+'/'+(now.getMonth()+1+'').padStart(2,'0')+'/'+(now.getDate()+'').padStart(2,'0')+' '+(now.getHours()+'').padStart(2,'0')+':'+(now.getMinutes()+'').padStart(2,'0');
-  const newDmg={id:'dmg_'+Date.now(),location:editZone,type:editType,severity:editSev,desc,addedAt:ts,photo:editPhoto||null,addedBy:currentStaff};
+  const newDmg={id:'dmg_'+Date.now(),location:editZone,type:editType,severity:editSev,size:editSize||null,desc,addedAt:ts,photo:editPhoto||null,addedBy:currentStaff};
+
+  // ===== SI モード: ローカル追加のみ（Supabase保存は登録完了時） =====
+  if(siMode){
+    siLocalDamages.push(newDmg);
+    document.getElementById('editOverlay').classList.remove('show');
+    resetEditPhoto();
+    siRenderMap();
+    siRenderList();
+    const lu=document.getElementById('siLastUpd');
+    if(lu) lu.textContent='最終更新: '+ts;
+    showToast('✓ '+editZone+'の傷を追加しました');
+    return;
+  }
+
+  // ===== 通常モード: 最新データ取得→追記→保存 =====
   const btn=document.getElementById('editOkBtn');
   if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
   try{
-    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-    const updated=[...(v?.current_damages||[]),newDmg];
+    const updated=await safeWriteDamages(currentVehicleId,fresh=>[...fresh,newDmg]);
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
-    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
-    if(idx>=0) vehiclesCache[idx].current_damages=updated;
     renderInspectionMap(updated);
     document.getElementById('editOverlay').classList.remove('show');
     resetEditPhoto();
@@ -2057,14 +2389,14 @@ async function submitEdit(){
 }
 async function repairZone(){
   if(!editZone) return;
+  const zone=editZone;
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-  const updated=(v?.current_damages||[]).filter(d=>d.location!==editZone);
-  const removed=(v?.current_damages||[]).length-updated.length;
+  const beforeCnt=(v?.current_damages||[]).length;
   try{
+    const updated=await safeWriteDamages(currentVehicleId,fresh=>fresh.filter(d=>d.location!==zone));
+    const removed=beforeCnt-updated.length;
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
-    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
-    if(idx>=0) vehiclesCache[idx].current_damages=updated;
     renderInspectionMap(updated);
     document.getElementById('editOverlay').classList.remove('show');
     showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
@@ -2078,6 +2410,143 @@ function showToast(msg){
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>t.style.opacity='1',10);
   setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),400);},3000);
+}
+
+// ===== SI: 初期登録専用フロー =====
+let siLocalDamages=[];
+let siMode=false;
+
+function openSi(){
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v) return;
+  siLocalDamages=[];
+  siMode=true;
+  const vName=v.vehicles?.name||currentVehicleId;
+  setText('siTitle','初期登録 — '+vName);
+  setText('siSub','現在の傷を全て記録してください');
+  const lu=document.getElementById('siLastUpd');
+  if(lu) lu.textContent='';
+  siRenderMap();
+  siRenderList();
+}
+
+function siRenderMap(){
+  // レンダリング（クリック無効モードで描画→後でSI用ハンドラを追加）
+  renderMapInto('siMapView',null,siLocalDamages,null,false);
+  const view=document.getElementById('siMapView');
+  if(!view) return;
+  // ゾーンタップ → 傷追加
+  view.querySelectorAll('[id^="iz-"]').forEach(el=>{
+    el.style.cursor='pointer';
+    const zId=el.id;
+    el.addEventListener('click',(e)=>{ e.stopPropagation(); siTapZone(zId); });
+  });
+  // ピンタップ → 削除
+  view.querySelectorAll('.ipin[data-dmg-id]').forEach(pin=>{
+    const dmgId=pin.dataset.dmgId;
+    pin.style.cursor='pointer';
+    pin.style.pointerEvents='all';
+    pin.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const d=siLocalDamages.find(x=>x.id===dmgId);
+      if(d&&confirm(d.location+'の傷を削除しますか？')){ siDeleteDmg(dmgId); }
+    });
+  });
+  // ヒントラベル
+  const hint=document.createElement('div');
+  hint.style.cssText='position:absolute;bottom:5px;right:8px;font-size:8px;color:#4488cc66;pointer-events:none;font-weight:600;';
+  hint.textContent='ゾーンをタップ → 傷追加';
+  view.appendChild(hint);
+}
+
+function siTapZone(zoneId){
+  const name=ZONE_ID_TO_NAME[zoneId];
+  if(name) openAddDmgSheet(name);
+}
+
+function siDeleteDmg(dmgId){
+  siLocalDamages=siLocalDamages.filter(d=>d.id!==dmgId);
+  siRenderMap();
+  siRenderList();
+  showToast('削除しました');
+}
+
+function siRenderList(){
+  const listEl=document.getElementById('siDmgList');
+  const countEl=document.getElementById('siDmgCount');
+  if(countEl) countEl.textContent=siLocalDamages.length+'件';
+  if(!listEl) return;
+  if(siLocalDamages.length===0){
+    listEl.innerHTML=`<div class="si-empty">
+      <div class="si-empty-icon">🔍</div>
+      <div style="font-size:12px;font-weight:600;color:#4466aa;margin-bottom:4px;">まだ傷は登録されていません</div>
+      <div style="font-size:10px;">上の展開図のゾーンをタップして傷を追加</div>
+    </div>`;
+    return;
+  }
+  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ・シミ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+  const sLMap={minor:'軽微',moderate:'中程度',major:'重大'};
+  listEl.innerHTML=siLocalDamages.map(d=>{
+    const tL=tLMap[d.type]||d.type;
+    const sL=sLMap[d.severity]||d.severity;
+    const c=dmgColor(d);
+    const sizeLabel=d.size?` ／ ${d.size}`:'';
+    return `<div class="si-dmg-row">
+      <div class="si-dmg-thumb">${d.photo?`<img src="${d.photo}">`:`<span style="font-size:18px;opacity:.6;">⚠</span>`}</div>
+      <div class="si-dmg-info">
+        <div class="si-dmg-loc">${d.location}</div>
+        <div class="si-dmg-meta" style="color:${c};">${tL}${sizeLabel} ／ ${sL}${d.desc&&d.desc!=='手動追加'?' ／ '+d.desc:''}</div>
+      </div>
+      <button class="si-dmg-del" onclick="siDeleteDmg('${d.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function siCancel(){
+  siMode=false;
+  siLocalDamages=[];
+  goto('s0');
+}
+
+async function siComplete(){
+  const damages=siLocalDamages;
+  const btn=document.getElementById('siCompleteBtn');
+  if(btn){btn.textContent='⏳ 登録中...';btn.style.pointerEvents='none';}
+  try{
+    const now=new Date().toISOString();
+    const{data:ev,error:evErr}=await sb.from('check_events').insert({
+      vehicle_id:currentVehicleId,
+      event_type:'initial',
+      staff:currentStaff,
+      damages_snapshot:damages,
+      new_damages:damages,
+      staff_confirmed:true,
+      confirmed_at:now,
+      notes:`初期登録 ／ 傷${damages.length}件 ／ チェーン起点`
+    }).select().single();
+    if(evErr) throw evErr;
+    await sb.from('vehicle_twins').upsert({
+      id:currentVehicleId,
+      store:currentStore==='naha'?'naha':'sapporo',
+      status:'ready',
+      current_damages:damages,
+      last_event_id:ev.id,
+      last_check_at:now,
+      last_check_staff:currentStaff,
+    },{onConflict:'id'});
+    const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
+    if(idx>=0){
+      vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,current_damages:damages};
+    }
+    siMode=false;
+    siLocalDamages=[];
+    goto('sm');
+    setTimeout(()=>showToast(`✓ 初期登録完了 ／ 傷${damages.length}件 ／ チェーンを開始しました`),200);
+  }catch(e){
+    console.error('siComplete:',e);
+    showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    if(btn){btn.textContent='✓ 登録完了 — チェーン起点を作成';btn.style.pointerEvents='all';}
+  }
 }
 
 // ===== SC0: 動的レンダリング =====

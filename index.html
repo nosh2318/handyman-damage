@@ -150,6 +150,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .s0-edit-btn{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 16px 0;padding:10px;border-radius:12px;background:#fff;border:1.5px solid #4488cc;color:#2266cc;font-size:13px;font-weight:700;cursor:pointer;}
 .s0-edit-btn:active{background:#eef4fc;}
 
+/* ===== 確認・汎用モーダル ===== */
+.conf-overlay{position:fixed;inset:0;background:#00000055;z-index:300;opacity:0;pointer-events:none;transition:opacity .22s;max-width:520px;margin:0 auto;}
+.conf-overlay.show{opacity:1;pointer-events:all;}
+.conf-sheet{position:absolute;bottom:0;left:0;right:0;background:#ffffff;border-radius:22px 22px 0 0;padding:20px 20px;padding-bottom:max(env(safe-area-inset-bottom),24px);border-top:1px solid #dde8f4;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,1,.58,1);max-height:85vh;overflow-y:auto;}
+.conf-overlay.show .conf-sheet{transform:translateY(0);}
+.conf-handle{width:38px;height:4px;border-radius:2px;background:#d0dce8;margin:0 auto 16px;}
+
 /* ===== 編集パネル（ゾーン選択 → 傷種別） ===== */
 .edit-overlay{position:fixed;inset:0;background:#00000055;z-index:200;opacity:0;pointer-events:none;transition:opacity .22s;max-width:520px;margin:0 auto;}
 .edit-overlay.show{opacity:1;pointer-events:all;}
@@ -537,7 +544,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.3</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.4</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>

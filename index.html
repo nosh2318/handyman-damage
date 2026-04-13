@@ -94,9 +94,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 
 /* ===== S0: 車両詳細 ===== */
 #s0{background:#f2f6fb;}
-.s0-hd{padding:52px 20px 0;display:flex;justify-content:space-between;align-items:flex-start;background:linear-gradient(180deg,#1a2e48 0%,#1a2e48 80%,#f2f6fb 100%);padding-bottom:20px;}
-.s0-vno{font-size:26px;font-weight:800;margin-bottom:2px;color:#ffffff;}
-.s0-model{font-size:11px;color:#88aaccaa;font-family:monospace;}
+.s0-hd{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;background:linear-gradient(180deg,#1a2e48 0%,#1a2e48 80%,#f2f6fb 100%);}
+.s0-vno{font-size:22px;font-weight:800;margin-bottom:1px;color:#ffffff;}
+.s0-model{font-size:10px;color:#88aaccaa;font-family:monospace;}
 .s0-car{margin:0 16px 0;background:#ffffff;border:1px solid #dde8f4;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.1);}
 .s0-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .s0-car-view{position:relative;width:100%;height:clamp(260px,48vh,440px);background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
@@ -399,7 +399,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   .sm-stats{padding:10px 24px 8px;}
 
   /* S0 */
-  .s0-hd{padding:28px 28px 20px;}
+  .s0-hd{padding:16px 28px 10px;}
   .s0-car{margin:0 24px;}
   .s0-car-view{height:clamp(300px,52vh,500px);}
   .s0-chips{margin:10px 24px 0;}
@@ -458,7 +458,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   .sm-card:hover{box-shadow:0 4px 16px rgba(30,50,100,.12);}
 
   /* S0 */
-  .s0-hd{padding:36px 48px 20px;}
+  .s0-hd{padding:20px 48px 12px;}
   .s0-car{margin:0 48px;}
   .s0-car-view{height:clamp(340px,55vh,560px);}
   .s0-chips{margin:12px 48px 0;}
@@ -545,7 +545,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -574,13 +574,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="s0">
   <div class="s0-hd">
     <div>
-      <div style="font-size:9px;font-weight:900;letter-spacing:3px;color:#00d4ff45;margin-bottom:4px;" id="s0StoreLabel">HANDYMAN</div>
+      <div style="font-size:8px;font-weight:900;letter-spacing:2px;color:#00d4ff45;margin-bottom:2px;" id="s0StoreLabel">HANDYMAN</div>
       <div class="s0-vno" id="s0Vno">—</div>
       <div class="s0-model" id="s0Model">—</div>
-      <div style="display:inline-block;font-size:10px;padding:4px 11px;border-radius:16px;font-weight:700;margin-top:7px;" id="s0StatusBadge">—</div>
-      <div style="font-size:10px;color:#88aacc;margin-top:6px;" id="s0LastCheck">📅 最終チェック: —</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-top:5px;">
+        <span style="display:inline-block;font-size:10px;padding:3px 10px;border-radius:16px;font-weight:700;" id="s0StatusBadge">—</span>
+        <span style="font-size:9px;color:#88aacc;" id="s0LastCheck">—</span>
+      </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+    <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px;">
       <button class="back-btn" onclick="goto('sm')">‹</button>
       <button class="hd-reload-btn" onclick="reloadS0()" title="最新に更新">🔄</button>
     </div>

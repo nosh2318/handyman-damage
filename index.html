@@ -98,7 +98,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .s0-vno{font-size:26px;font-weight:800;margin-bottom:2px;color:#ffffff;}
 .s0-model{font-size:11px;color:#88aaccaa;font-family:monospace;}
 .s0-car{margin:0 16px 0;background:#ffffff;border:1px solid #dde8f4;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.1);}
-.s0-car-view{position:relative;width:100%;height:400px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.s0-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.s0-car-view{position:relative;width:100%;height:clamp(260px,48vh,440px);background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .s0-car-view svg{width:100%;height:100%;}
 .insp-zone{cursor:default;transition:opacity .2s;}
 .insp-zone.has-dmg{opacity:1;}
@@ -400,7 +401,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:28px 28px 20px;}
   .s0-car{margin:0 24px;}
-  .s0-car-view{height:430px;}
+  .s0-car-view{height:clamp(300px,52vh,500px);}
   .s0-chips{margin:10px 24px 0;}
   .s0-chain-link{margin:10px 24px 0;}
   .s0-actions{margin:auto 24px 0;padding-bottom:28px;}
@@ -459,7 +460,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:36px 48px 20px;}
   .s0-car{margin:0 48px;}
-  .s0-car-view{height:460px;}
+  .s0-car-view{height:clamp(340px,55vh,560px);}
   .s0-chips{margin:12px 48px 0;}
   .s0-chain-link{margin:12px 48px 0;}
   .s0-actions{margin:auto 48px 0;padding-bottom:36px;}
@@ -544,7 +545,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -585,27 +586,30 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     </div>
   </div>
   <div class="s0-editing-warn" id="s0EditingWarn"><span>⚠</span><span id="s0EditingWarnNames"></span></div>
-  <div class="s0-car">
-    <div class="s0-car-view" id="s0CarView">
-      <!-- 俯瞰図SVGがここに挿入される -->
+  <!-- スクロール領域 -->
+  <div class="s0-scroll">
+    <div class="s0-car">
+      <div class="s0-car-view" id="s0CarView">
+        <!-- 俯瞰図SVGがここに挿入される -->
+      </div>
+      <div class="s0-insp-legend" id="s0InspLegend"></div>
+      <div class="s0-stats-row">
+        <div class="s0-stat"><span class="k">走行距離</span><span class="v">38,450 km</span></div>
+        <div class="s0-stat"><span class="k">貸出回数</span><span class="v">127 回</span></div>
+        <div class="s0-stat"><span class="k">記録傷</span><span class="v" style="color:#ff8888;">4 件</span></div>
+      </div>
+      <div style="padding:6px 14px 8px;background:#f8fafd;border-top:1px solid #e8f0f6;font-size:9px;color:#8899bb;display:flex;align-items:center;gap:5px;">
+        <span>🕐</span>
+        <span>この傷状態は</span>
+        <strong style="color:#5577aa;" id="s0SnapTime">2026/04/12 09:05</strong>
+        <span>時点 — 出庫チェック前に必ず確認</span>
+      </div>
     </div>
-    <div class="s0-insp-legend" id="s0InspLegend"></div>
-    <div class="s0-stats-row">
-      <div class="s0-stat"><span class="k">走行距離</span><span class="v">38,450 km</span></div>
-      <div class="s0-stat"><span class="k">貸出回数</span><span class="v">127 回</span></div>
-      <div class="s0-stat"><span class="k">記録傷</span><span class="v" style="color:#ff8888;">4 件</span></div>
-    </div>
-    <div style="padding:6px 14px 8px;background:#f8fafd;border-top:1px solid #e8f0f6;font-size:9px;color:#8899bb;display:flex;align-items:center;gap:5px;">
-      <span>🕐</span>
-      <span>この傷状態は</span>
-      <strong style="color:#5577aa;">2026/04/12 09:05</strong>
-      <span>時点 — 出庫チェック前に必ず確認</span>
-    </div>
+    <div id="s0ChipsList" class="s0-chips"></div>
+    <div id="s0InitBanner"></div>
+    <div id="s0ChainSection"></div>
+    <div id="s0ActionArea" class="s0-actions"></div>
   </div>
-  <div id="s0ChipsList" class="s0-chips"></div>
-  <div id="s0InitBanner"></div>
-  <div id="s0ChainSection"></div>
-  <div id="s0ActionArea" class="s0-actions"></div>
 </div>
 
 <!-- ==================== SC: チェーン履歴 ==================== -->
@@ -1669,6 +1673,12 @@ const INSP_SVG=`<svg viewBox="-5 -25 270 430" xmlns="http://www.w3.org/2000/svg"
 
 <!-- ===== 左サイドスポイラー（助手席 = 画面下） ===== -->
 <rect id="iz-lside-spoiler" x="235" y="148" width="9" height="158" rx="3" fill="#88aabb" stroke="#4477aa" stroke-width="1"/>
+
+<!-- ===== タイヤ透明クリック領域（PC pointer-events対策・最上層）===== -->
+<rect data-tire="iz-lr-tire" x="18" y="68" width="44" height="64" rx="10" fill="transparent" stroke="none" style="cursor:pointer;pointer-events:all;"/>
+<rect data-tire="iz-rr-tire" x="198" y="68" width="44" height="64" rx="10" fill="transparent" stroke="none" style="cursor:pointer;pointer-events:all;"/>
+<rect data-tire="iz-lf-tire" x="18" y="268" width="44" height="64" rx="10" fill="transparent" stroke="none" style="cursor:pointer;pointer-events:all;"/>
+<rect data-tire="iz-rf-tire" x="198" y="268" width="44" height="64" rx="10" fill="transparent" stroke="none" style="cursor:pointer;pointer-events:all;"/>
 </g>
 </svg>`;
 
@@ -1773,6 +1783,12 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
       el.style.cursor='pointer';
       const zId=el.id;
       el.addEventListener('click',(e)=>{ e.stopPropagation(); tapZone(zId); });
+    });
+    // タイヤ透明クリック領域（PCクリック対応）
+    view.querySelectorAll('[data-tire]').forEach(el=>{
+      el.style.cursor='pointer';
+      const tId=el.getAttribute('data-tire');
+      el.addEventListener('click',(e)=>{ e.stopPropagation(); tapZone(tId); });
     });
     // 「タップで追加」ヒントラベル
     const hint=document.createElement('div');

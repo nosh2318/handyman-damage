@@ -953,6 +953,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
         <button class="edit-type-btn" data-val="scratch" onclick="selEditType(this)">擦り傷<br><span style="font-size:8px;opacity:.7;">Scratch</span></button>
         <button class="edit-type-btn" data-val="dent" onclick="selEditType(this)">凹み<br><span style="font-size:8px;opacity:.7;">Dent</span></button>
         <button class="edit-type-btn" data-val="chip" onclick="selEditType(this)">塗装欠け<br><span style="font-size:8px;opacity:.7;">Paint Chip</span></button>
+        <button class="edit-type-btn" data-val="stone_chip" onclick="selEditType(this)" style="background:#e8f4ff;border-color:#4499dd;">飛び石<br><span style="font-size:8px;opacity:.7;">Stone Chip</span></button>
         <button class="edit-type-btn" data-val="crack" onclick="selEditType(this)">ひび割れ<br><span style="font-size:8px;opacity:.7;">Crack</span></button>
         <button class="edit-type-btn" data-val="break" onclick="selEditType(this)">破損<br><span style="font-size:8px;opacity:.7;">Break</span></button>
         <button class="edit-type-btn" data-val="stain" onclick="selEditType(this)">汚れ・シミ<br><span style="font-size:8px;opacity:.7;">Stain</span></button>
@@ -1886,7 +1887,7 @@ const ZONE_MAP={
 };
 
 // damage severity → color
-const SEV_COLOR={major:'#ff3333',moderate:'#ff8800',minor:'#ffcc00',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
+const SEV_COLOR={major:'#ff3333',moderate:'#ff8800',minor:'#ffcc00',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff',stone_chip:'#22aaee'};
 function dmgColor(d){ return SEV_COLOR[d.severity]||SEV_COLOR[d.type]||'#ff8888'; }
 
 // ゾーンID → 正式名称（逆引き）
@@ -1943,8 +1944,8 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
 
     const el=view.querySelector('#'+zone.id);
     if(el){
-      const hFill={major:'#ffcccc',moderate:'#ffe0b8',minor:'#fff3cc',scratch:'#ffcccc',dent:'#ffe0b8',chip:'#fff0b0',crack:'#cce0ff'};
-      const hStroke={major:'#dd2222',moderate:'#cc6600',minor:'#cc9900',scratch:'#dd2222',dent:'#cc6600',chip:'#cc8800',crack:'#2255cc'};
+      const hFill={major:'#ffcccc',moderate:'#ffe0b8',minor:'#fff3cc',scratch:'#ffcccc',dent:'#ffe0b8',chip:'#fff0b0',crack:'#cce0ff',stone_chip:'#bbebff'};
+      const hStroke={major:'#dd2222',moderate:'#cc6600',minor:'#cc9900',scratch:'#dd2222',dent:'#cc6600',chip:'#cc8800',crack:'#2255cc',stone_chip:'#0088cc'};
       if(isNew){
         el.style.fill='#ffdddd'; el.setAttribute('stroke','#ee2222'); el.setAttribute('stroke-width','2.5');
       } else {
@@ -2083,7 +2084,7 @@ async function loadChain(vehicleId){
   const evTypeLabel={checkout:'出庫',return:'返却',repair:'修理完了',initial:'初期登録'};
   const evIcon={checkout:'🚗',return:'📹',repair:'🔧',initial:'⚡'};
   const evColor={checkout:'#2266cc',return:'#cc6600',repair:'#228833',initial:'#996600'};
-  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
   const sLMap={minor:'軽微',moderate:'中程度',major:'重大'};
 
   // 傷カードHTML生成（写真・詳細・日付）
@@ -2335,7 +2336,7 @@ function openDmgEdit(dmgId){
   const d=currentDamages().find(x=>x.id===dmgId);
   if(!d) return;
   currentEditDmgId=dmgId;
-  const typeNames={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他'};
+  const typeNames={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',other:'その他'};
   const sevNames={minor:'軽微',moderate:'中程度',major:'重大'};
   const sevColors={minor:'#cc9900',moderate:'#cc5500',major:'#cc1111'};
   const sevBgs={minor:'#fffbe8',moderate:'#fff3e0',major:'#ffe8e8'};
@@ -2960,7 +2961,7 @@ function renderCheckMap(viewId, damages){
         openPhotoLBDirect(dmgId);
       } else {
         // 写真なし → 傷詳細をトースト表示
-        const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+        const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
         const sLMap={minor:'軽微',moderate:'中程度',major:'重大'};
         showToast(`📍 ${d.location} ／ ${tLMap[d.type]||d.type} ／ ${sLMap[d.severity]||''}`);
       }
@@ -2979,7 +2980,7 @@ function renderChkDmgList(listId, damages, isReturn, addReturnTo){
     return;
   }
   const sevC={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333'};
-  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+  const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
   let html=`<div style="font-size:9px;color:#8899bb;font-weight:700;letter-spacing:1px;margin-bottom:6px;">傷 ${damages.length}件 — ピンをタップで写真を確認</div>`;
   html+=`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:${returnTo?'10px':'0'};">`;
   damages.forEach(d=>{

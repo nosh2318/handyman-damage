@@ -537,10 +537,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
+        <button onclick="openTestReset()" style="font-size:9px;color:#ff8888;background:#ffffff10;border:1px solid #ff444430;border-radius:6px;padding:3px 8px;cursor:pointer;touch-action:manipulation;" title="テストリセット">🗑️</button>
         <button onclick="openApiKeySetting()" id="smAiBtn" style="font-size:9px;color:#ffaa44;background:#ffffff10;border:1px solid #ffaa4430;border-radius:6px;padding:3px 8px;cursor:pointer;" title="Claude APIキー設定">🤖</button>
         <button onclick="goto('login')" style="font-size:9px;color:#4488aa;background:#ffffff15;border:1px solid #ffffff20;border-radius:6px;padding:3px 8px;cursor:pointer;">切替</button>
       </div>
@@ -1882,6 +1883,86 @@ async function loadChain(vehicleId){
     </div>`;
   });
   if(tl) tl.innerHTML=html;
+}
+
+// ===== テストリセット =====
+function openTestReset(){
+  const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
+  const overlay=document.createElement('div');
+  overlay.id='testResetOverlay';
+  overlay.style.cssText='position:fixed;inset:0;background:#00000088;z-index:600;display:flex;align-items:flex-end;justify-content:center;max-width:520px;margin:0 auto;';
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:22px 22px 0 0;padding:24px 20px max(env(safe-area-inset-bottom),28px);width:100%;">
+      <div style="width:40px;height:4px;background:#d0d8e8;border-radius:2px;margin:0 auto 18px;"></div>
+      <div style="font-size:22px;text-align:center;margin-bottom:8px;">🗑️</div>
+      <div style="font-size:16px;font-weight:800;color:#cc2222;text-align:center;margin-bottom:6px;">テストデータをリセット</div>
+      <div style="font-size:12px;color:#6688aa;text-align:center;line-height:1.7;margin-bottom:20px;">
+        <b>${storeLabel}</b> の全車両を初期状態に戻します<br>
+        ・ステータス → <b>空車</b><br>
+        ・傷データ → <b>全削除</b><br>
+        ・チェーン起点 → <b>リセット</b><br>
+        ・チェック履歴（check_events）→ <b>全削除</b>
+      </div>
+      <button onclick="execTestReset()" style="width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#cc2222,#991111);color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;touch-action:manipulation;">⚠️ 全てリセットする</button>
+      <button onclick="document.getElementById('testResetOverlay').remove()" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid #d0dce8;background:#fff;color:#8899bb;font-size:14px;font-weight:600;cursor:pointer;touch-action:manipulation;">キャンセル</button>
+    </div>`;
+  overlay.addEventListener('click',e=>{if(e.target===overlay) overlay.remove();});
+  document.body.appendChild(overlay);
+}
+
+async function execTestReset(){
+  const overlay=document.getElementById('testResetOverlay');
+  if(overlay) overlay.remove();
+
+  showToast('⏳ リセット中...');
+  const store=currentStore;
+  const storeName=store==='naha'?'naha':'sapporo';
+
+  try{
+    // 1. vehicle_twins を全件リセット（当該ストアのみ）
+    const{error:e1}=await sb.from('vehicle_twins').update({
+      status:'ready',
+      current_damages:[],
+      current_resv_no:null,
+      current_customer:null,
+      last_event_id:null,
+      last_check_at:null,
+      last_check_staff:null,
+      odometer:0,
+      rental_count:0,
+    }).eq('store',storeName);
+    if(e1) throw e1;
+
+    // 2. check_events を全件削除（当該ストアの vehicle_twins に紐づくもの）
+    // まず vehicle_ids を取得してから削除
+    const{data:twins}=await sb.from('vehicle_twins').select('id').eq('store',storeName);
+    if(twins&&twins.length>0){
+      const ids=twins.map(t=>t.id);
+      const{error:e2}=await sb.from('check_events').delete().in('vehicle_id',ids);
+      if(e2) throw e2;
+    }
+
+    // 3. キャッシュをリセット
+    vehiclesCache=vehiclesCache.map(v=>({
+      ...v,
+      status:'ready',
+      current_damages:[],
+      current_resv_no:null,
+      current_customer:null,
+      last_event_id:null,
+      last_check_at:null,
+      last_check_staff:null,
+      odometer:0,
+      rental_count:0,
+    }));
+
+    // 4. 一覧を再描画
+    await loadVehicles();
+    showToast('✅ リセット完了 — 全車両を初期状態に戻しました');
+  }catch(e){
+    console.error('testReset error:',e);
+    showToast('❌ リセットエラー: '+e.message.slice(0,50));
+  }
 }
 
 // ===== ステータス手動変更 =====

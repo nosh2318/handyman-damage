@@ -537,7 +537,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.3</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1662,6 +1662,20 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 <rect id="iz-front-bumper" x="85" y="356" width="90" height="22" rx="4" fill="#9acca8" stroke="#1a7744" stroke-width="1.5"/>
 <rect x="105" y="360" width="50" height="12" rx="1" fill="#d4eed8" stroke="#33886640" stroke-width="0.5"/>
 <text x="130" y="369" text-anchor="middle" fill="#2a3a50" font-size="5" font-family="monospace" font-weight="600"></text>
+
+<!-- ===== フロントスポイラー（ロアスカート） ===== -->
+<rect id="iz-front-spoiler" x="88" y="378" width="84" height="7" rx="2" fill="#5bb876" stroke="#1a7744" stroke-width="1"/>
+<text x="130" y="384" text-anchor="middle" fill="#ffffff88" font-size="4" font-family="monospace">SPOILER</text>
+
+<!-- ===== テールゲートスポイラー ===== -->
+<rect id="iz-rear-spoiler" x="90" y="11" width="80" height="7" rx="2" fill="#cc6644" stroke="#aa3322" stroke-width="1"/>
+<text x="130" y="17" text-anchor="middle" fill="#ffffff88" font-size="4" font-family="monospace">SPOILER</text>
+
+<!-- ===== 右サイドスポイラー（運転席 = 画面上） ===== -->
+<rect id="iz-rside-spoiler" x="16" y="148" width="9" height="158" rx="3" fill="#88aabb" stroke="#4477aa" stroke-width="1"/>
+
+<!-- ===== 左サイドスポイラー（助手席 = 画面下） ===== -->
+<rect id="iz-lside-spoiler" x="235" y="148" width="9" height="158" rx="3" fill="#88aabb" stroke="#4477aa" stroke-width="1"/>
 </g>
 </svg>`;
 
@@ -1698,6 +1712,11 @@ const ZONE_MAP={
   '右フロント窓':       {id:'iz-lf-window',      cx:42.8, cy:42.3},
   '左フロント窓':       {id:'iz-rf-window',      cx:42.8, cy:57.7},
   'ルーフ（リア）':     {id:'iz-rear-glass',     cx:71.5, cy:50  },
+  // スポイラー
+  'フロントスポイラー': {id:'iz-front-spoiler',   cx:2.3,  cy:50  },
+  'テールゲートスポイラー':{id:'iz-rear-spoiler', cx:97.7, cy:50  },
+  '右サイドスポイラー': {id:'iz-rside-spoiler',   cx:46,   cy:12  },
+  '左サイドスポイラー': {id:'iz-lside-spoiler',   cx:46,   cy:88  },
 };
 
 // damage severity → color

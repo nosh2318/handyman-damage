@@ -276,6 +276,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .sc0-bottom{padding:10px 16px;padding-bottom:max(env(safe-area-inset-bottom),20px);display:flex;flex-direction:column;gap:9px;background:#f2f6fb;border-top:1px solid #e0eaf6;}
 .sc0-confirm-all-bar{display:flex;align-items:center;gap:8px;font-size:11px;color:#8899bb;padding:0 2px 6px;}
 .sc0-confirm-all-bar .count{font-weight:800;color:#1a2840;font-size:14px;}
+/* ===== 貸出・返却 共通マップ ===== */
+.check-map-wrap{background:#e8f0f6;border-bottom:1px solid #c8d8ec;flex-shrink:0;}
+.check-map-view{position:relative;width:100%;height:clamp(160px,28vh,260px);background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.check-map-view svg{width:100%;height:100%;}
+.check-map-label{padding:4px 12px 5px;background:#f0f5fb;border-top:1px solid #d0e0f0;font-size:9px;color:#8899bb;text-align:center;font-weight:600;letter-spacing:.5px;}
 
 /* ===== SR0: 返却チェック ===== */
 #sr0{background:#f2f6fb;}
@@ -545,7 +550,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.4</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.5</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -640,6 +645,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
     </div>
     <button class="hd-reload-btn" onclick="renderSc0();showToast('🔄 更新')" title="最新に更新">🔄</button>
   </div>
+  <!-- 傷マップ（完成画像・参照のみ） -->
+  <div class="check-map-wrap">
+    <div class="check-map-view" id="sc0MapView"></div>
+    <div class="check-map-label">現在の傷状態（参照用）</div>
+  </div>
   <div class="sc0-body" id="sc0Body">
     <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
   </div>
@@ -660,6 +670,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <div style="font-size:10px;color:#88aacc;margin-top:2px;" id="sr0Sub">—</div>
     </div>
     <button class="hd-reload-btn" onclick="renderSr0();showToast('🔄 更新')" title="最新に更新">🔄</button>
+  </div>
+  <!-- 傷マップ（完成画像・参照のみ） -->
+  <div class="check-map-wrap">
+    <div class="check-map-view" id="sr0MapView"></div>
+    <div class="check-map-label">現在の傷状態（参照用）</div>
   </div>
   <div class="sr0-body" id="sr0Body">
     <div style="text-align:center;padding:40px 0;color:#88aacc;font-size:13px;">読み込み中...</div>
@@ -2144,6 +2159,9 @@ function renderSr0(){
   document.getElementById('sr0Title').textContent=`返却チェック — ${vName}`;
   document.getElementById('sr0Sub').textContent=fmtDate(new Date().toISOString()).slice(0,10);
 
+  // 完成傷マップを描画（参照のみ）
+  renderMapInto('sr0MapView',null,damages,null,false);
+
   const body=document.getElementById('sr0Body');
   const sevC={minor:'#ff8800',moderate:'#ff4444',major:'#ff3333',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff'};
 
@@ -2499,6 +2517,9 @@ async function submitEdit(){
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
+    // SR0表示中ならSR0マップも更新
+    const activeSc=document.querySelector('.screen.active');
+    if(activeSc&&activeSc.id==='sr0') renderMapInto('sr0MapView',null,updated,null,false);
     document.getElementById('editOverlay').classList.remove('show');
     resetEditPhoto();
     showToast('✓ '+editZone+'の傷を保存しました');
@@ -2692,6 +2713,9 @@ function renderSc0(){
 
   SC0_CONFIRMED.clear();
   sc0TotalDmgIds=damages.map(d=>d.id);
+
+  // 完成傷マップを描画（参照のみ）
+  renderMapInto('sc0MapView',null,damages,null,false);
 
   const body=document.getElementById('sc0Body');
   if(!body) return;

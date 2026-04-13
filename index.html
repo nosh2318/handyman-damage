@@ -98,7 +98,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .s0-vno{font-size:26px;font-weight:800;margin-bottom:2px;color:#ffffff;}
 .s0-model{font-size:11px;color:#88aaccaa;font-family:monospace;}
 .s0-car{margin:0 16px 0;background:#ffffff;border:1px solid #dde8f4;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.1);}
-.s0-car-view{position:relative;width:100%;height:280px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.s0-car-view{position:relative;width:100%;height:400px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .s0-car-view svg{width:100%;height:100%;}
 .insp-zone{cursor:default;transition:opacity .2s;}
 .insp-zone.has-dmg{opacity:1;}
@@ -215,7 +215,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 #si{background:#f2f6fb;}
 .si-hd{padding:52px 20px 14px;display:flex;align-items:flex-start;gap:12px;background:linear-gradient(180deg,#1a2e48,#1e3354);color:#fff;}
 .si-map-wrap{margin:12px 16px 0;background:#fff;border-radius:16px;border:1px solid #dde8f4;overflow:hidden;box-shadow:0 4px 16px rgba(30,50,100,.08);}
-.si-map-view{position:relative;width:100%;height:210px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.si-map-view{position:relative;width:100%;height:380px;background:#e8f0f6;overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .si-map-view svg{width:100%;height:100%;}
 .si-list-wrap{flex:1;overflow-y:auto;padding:10px 16px 0;}
 .si-section-hd{font-size:10px;font-weight:700;color:#6688aa;letter-spacing:1px;padding:6px 0 6px;display:flex;align-items:center;justify-content:space-between;}
@@ -400,7 +400,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:28px 28px 20px;}
   .s0-car{margin:0 24px;}
-  .s0-car-view{height:300px;}
+  .s0-car-view{height:430px;}
   .s0-chips{margin:10px 24px 0;}
   .s0-chain-link{margin:10px 24px 0;}
   .s0-actions{margin:auto 24px 0;padding-bottom:28px;}
@@ -459,7 +459,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   /* S0 */
   .s0-hd{padding:36px 48px 20px;}
   .s0-car{margin:0 48px;}
-  .s0-car-view{height:320px;}
+  .s0-car-view{height:460px;}
   .s0-chips{margin:12px 48px 0;}
   .s0-chain-link{margin:12px 48px 0;}
   .s0-actions{margin:auto 48px 0;padding-bottom:36px;}
@@ -544,7 +544,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.2.5</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.3.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1543,7 +1543,7 @@ async function reloadVehicles(){
 (()=>{const d=new Date();const smDate=document.getElementById('smDate');if(smDate)smDate.textContent=d.getFullYear()+'/'+(d.getMonth()+1+'').padStart(2,'0')+'/'+(d.getDate()+'').padStart(2,'0');})();
 
 // ===== 車両俯瞰図（カーチェックシート形式） =====
-const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+const INSP_SVG=`<svg viewBox="-5 -25 270 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
 <defs>
   <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0%" stop-color="#dce8f0"/>
@@ -1554,16 +1554,15 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
     <stop offset="100%" stop-color="#c8d8e4"/>
   </linearGradient>
 </defs>
-<!-- 方向バッジ（左=フロント / 右=リア） -->
-<rect x="-64" y="182" width="48" height="28" rx="6" fill="#1a8844" opacity=".88"/>
-<text x="-40" y="194" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">フロント</text>
-<text x="-40" y="204" text-anchor="middle" fill="#bbffcc" font-size="6" font-weight="700" font-family="monospace">◄ FRONT</text>
-
-<rect x="281" y="182" width="48" height="28" rx="6" fill="#d44422" opacity=".88"/>
-<text x="305" y="194" text-anchor="middle" fill="#fff" font-size="8" font-weight="900" font-family="-apple-system,sans-serif">リア</text>
-<text x="305" y="204" text-anchor="middle" fill="#ffd0bb" font-size="6" font-weight="700" font-family="monospace">REAR ►</text>
-<!-- 車両本体: +90°回転 中心(130,195) -->
-<g transform="rotate(90, 130, 195)">
+<!-- 方向バッジ（上=フロント / 下=リア / 左=左(助手席) / 右=右(運転席)） -->
+<rect x="80" y="-22" width="100" height="18" rx="5" fill="#1a8844" opacity=".88"/>
+<text x="130" y="-10" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">▲ フロント FRONT</text>
+<rect x="80" y="389" width="100" height="18" rx="5" fill="#d44422" opacity=".88"/>
+<text x="130" y="401" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">リア REAR ▼</text>
+<text x="0" y="198" text-anchor="start" fill="#88aabb" font-size="7" font-family="-apple-system,sans-serif">左</text>
+<text x="260" y="198" text-anchor="end" fill="#88aabb" font-size="7" font-family="-apple-system,sans-serif">右</text>
+<!-- 車両本体: 縦向き フロント=上・リア=下（Y軸反転） -->
+<g transform="translate(130,195) scale(1,-1) translate(-130,-195)">
 <rect width="260" height="390" fill="#e8f0f6" rx="6"/>
 
 <!-- ===== リアバンパー ===== -->
@@ -1673,44 +1672,48 @@ const INSP_SVG=`<svg viewBox="-65 65 390 260" xmlns="http://www.w3.org/2000/svg"
 </g>
 </svg>`;
 
-// ゾーンID → {name, cx%, cy%} マッピング（横向き+90°: フロント=左、リア=右、右=上(運転席)、左=下(助手席)）
-// +90°回転後: SVGのlf/lr(左)要素 → 画面上側 = 右(運転席) / SVGのrf/rr(右)要素 → 画面下側 = 左(助手席)
+// ゾーンID → {name, cx%, cy%} マッピング
+// 縦向き: フロント=上(cy小), リア=下(cy大)
+// 左=画面左(助手席/cx小), 右=画面右(運転席/cx大)
+// lf/lr要素=SVG左=画面左=左(助手席), rf/rr要素=SVG右=画面右=右(運転席)
+// viewBox: -5,-25 ~ 265,405 (w=270,h=430)
+// cx%=(x_svg+5)/270*100, cy%=(415-y_svg)/430*100
 const ZONE_MAP={
-  'フロントバンパー':   {id:'iz-front-bumper', cx:5.6,  cy:50  },
-  'ボンネット':         {id:'iz-hood',          cx:13.7, cy:50  },
-  'フロントガラス':     {id:'iz-front-glass',   cx:31.8, cy:50  },
-  '右フロントフェンダー':{id:'iz-lf-fender',   cx:25,   cy:22  },
-  '左フロントフェンダー':{id:'iz-rf-fender',   cx:25,   cy:78  },
-  '右フロントドア':     {id:'iz-lf-door',       cx:38,   cy:16  },
-  '左フロントドア':     {id:'iz-rf-door',       cx:38,   cy:84  },
-  'ルーフ':             {id:'iz-roof',           cx:48,   cy:50  },
-  '右リアドア':         {id:'iz-lr-door',        cx:57,   cy:16  },
-  '左リアドア':         {id:'iz-rr-door',        cx:57,   cy:84  },
-  '右リアフェンダー':   {id:'iz-lr-fender',      cx:70,   cy:22  },
-  '左リアフェンダー':   {id:'iz-rr-fender',      cx:70,   cy:78  },
-  'リアバンパー右':     {id:'iz-rear-bumper',    cx:93,   cy:38  },
-  'リアバンパー左':     {id:'iz-rear-bumper',    cx:93,   cy:62  },
-  'リアバンパー':       {id:'iz-rear-bumper',    cx:93,   cy:50  },
-  'バックドア':         {id:'iz-trunk',          cx:86.7, cy:50  },
-  '右ドアミラー':       {id:'iz-l-mirror',       cx:29.5, cy:28  },
-  '左ドアミラー':       {id:'iz-r-mirror',       cx:29.5, cy:76  },
-  // タイヤ
-  '右後タイヤ':         {id:'iz-lr-tire',        cx:74.4, cy:15.4},
-  '左後タイヤ':         {id:'iz-rr-tire',        cx:74.4, cy:84.6},
-  '右前タイヤ':         {id:'iz-lf-tire',        cx:23.1, cy:15.4},
-  '左前タイヤ':         {id:'iz-rf-tire',        cx:23.1, cy:84.6},
+  'フロントバンパー':    {id:'iz-front-bumper',  cx:50,   cy:11.2},
+  'ボンネット':          {id:'iz-hood',           cx:50,   cy:18.8},
+  'フロントガラス':      {id:'iz-front-glass',    cx:50,   cy:34.7},
+  '左フロントフェンダー':{id:'iz-lf-fender',      cx:25.9, cy:28.6},
+  '右フロントフェンダー':{id:'iz-rf-fender',      cx:74.1, cy:28.6},
+  '左フロントドア':      {id:'iz-lf-door',        cx:22.2, cy:40.9},
+  '右フロントドア':      {id:'iz-rf-door',        cx:77.8, cy:40.9},
+  'ルーフ':              {id:'iz-roof',            cx:50,   cy:51.2},
+  '左リアドア':          {id:'iz-lr-door',         cx:22.2, cy:58.1},
+  '右リアドア':          {id:'iz-rr-door',         cx:77.8, cy:58.1},
+  '左リアフェンダー':    {id:'iz-lr-fender',       cx:25.9, cy:76.0},
+  '右リアフェンダー':    {id:'iz-rr-fender',       cx:74.1, cy:76.0},
+  'リアバンパー左':      {id:'iz-rear-bumper',     cx:40.7, cy:89.8},
+  'リアバンパー右':      {id:'iz-rear-bumper',     cx:59.3, cy:89.8},
+  'リアバンパー':        {id:'iz-rear-bumper',     cx:50,   cy:89.8},
+  'バックドア':          {id:'iz-trunk',           cx:50,   cy:82.8},
+  '左ドアミラー':        {id:'iz-l-mirror',        cx:28.5, cy:32.4},
+  '右ドアミラー':        {id:'iz-r-mirror',        cx:71.3, cy:32.4},
+  // タイヤ: lf/lr=左=助手席, rf/rr=右=運転席
+  '左前タイヤ':          {id:'iz-lf-tire',         cx:16.7, cy:26.7},
+  '右前タイヤ':          {id:'iz-rf-tire',         cx:83.3, cy:26.7},
+  '左後タイヤ':          {id:'iz-lr-tire',         cx:16.7, cy:73.3},
+  '右後タイヤ':          {id:'iz-rr-tire',         cx:83.3, cy:73.3},
   // ガラス
-  'リアガラス':         {id:'iz-rear-glass',     cx:73.6, cy:50  },
-  '右リア窓':           {id:'iz-lr-window',      cx:63.1, cy:42.3},
-  '左リア窓':           {id:'iz-rr-window',      cx:63.1, cy:57.7},
-  '右フロント窓':       {id:'iz-lf-window',      cx:42.8, cy:42.3},
-  '左フロント窓':       {id:'iz-rf-window',      cx:42.8, cy:57.7},
-  'ルーフ（リア）':     {id:'iz-rear-glass',     cx:71.5, cy:50  },
-  // スポイラー
-  'フロントスポイラー': {id:'iz-front-spoiler',   cx:2.3,  cy:50  },
-  'テールゲートスポイラー':{id:'iz-rear-spoiler', cx:97.7, cy:50  },
-  '右サイドスポイラー': {id:'iz-rside-spoiler',   cx:46,   cy:12  },
-  '左サイドスポイラー': {id:'iz-lside-spoiler',   cx:46,   cy:88  },
+  'リアガラス':          {id:'iz-rear-glass',      cx:50,   cy:72.6},
+  '左リア窓':            {id:'iz-lr-window',       cx:42.6, cy:63.0},
+  '右リア窓':            {id:'iz-rr-window',       cx:57.4, cy:63.0},
+  '左フロント窓':        {id:'iz-lf-window',       cx:42.6, cy:44.7},
+  '右フロント窓':        {id:'iz-rf-window',       cx:57.4, cy:44.7},
+  'ルーフ（リア）':      {id:'iz-rear-glass',      cx:50,   cy:70.0},
+  // スポイラー: iz-rside-spoiler=SVG左x=16=画面左=左(助手席)
+  'フロントスポイラー':  {id:'iz-front-spoiler',   cx:50,   cy:7.8 },
+  'テールゲートスポイラー':{id:'iz-rear-spoiler',  cx:50,   cy:93.1},
+  '左サイドスポイラー':  {id:'iz-rside-spoiler',   cx:9.4,  cy:43.7},
+  '右サイドスポイラー':  {id:'iz-lside-spoiler',   cx:90.6, cy:43.7},
 };
 
 // damage severity → color

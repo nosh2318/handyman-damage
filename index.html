@@ -650,6 +650,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
         <span style="display:inline-block;font-size:10px;padding:3px 10px;border-radius:16px;font-weight:700;" id="s0StatusBadge">—</span>
         <span style="font-size:9px;color:#88aacc;" id="s0LastCheck">—</span>
       </div>
+      <div id="s0ResvInfo" style="margin-top:6px;"></div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px;">
       <button class="back-btn" onclick="goto('sm')">‹</button>
@@ -1437,8 +1438,26 @@ function renderS0(v){
   setText('s0Model',`${vInfo.name||''} ／ ${v.id}`);
   const badge=document.getElementById('s0StatusBadge');
   if(badge){
-    badge.textContent=`${statusEmoji(v.status)} ${st.label}${v.current_resv_no?' — '+v.current_resv_no+' '+(v.current_customer||''):''}`;
+    badge.textContent=`${statusEmoji(v.status)} ${st.label}`;
     badge.style.cssText=`display:inline-block;font-size:10px;padding:4px 11px;border-radius:16px;font-weight:700;border:1px solid ${st.bc};background:${st.bg};color:${st.color};margin-top:7px;`;
+  }
+  // 予約情報バナー
+  const resvInfoEl=document.getElementById('s0ResvInfo');
+  if(resvInfoEl){
+    const resv=v.current_resv;
+    if(resv){
+      resvInfoEl.innerHTML=`<div style="background:#162d52;border:1px solid #2a4a70;border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">📋</span>
+        <div style="flex:1;">
+          <div style="font-size:11px;font-weight:700;color:#fff;">${resv.name||'—'} 様 <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:#ffffff15;color:#88ccff;margin-left:4px;">${resv.ota||''}</span></div>
+          <div style="font-size:9px;color:#88aabb;margin-top:2px;">予約: <b style="color:#aaddff;">${resv.id||''}</b> ／ ${resv.lend_date||''} ${resv.lend_time||''} 〜 ${resv.return_date||''} ${resv.return_time||''}</div>
+        </div>
+      </div>`;
+    } else if(v.current_resv_no){
+      resvInfoEl.innerHTML=`<div style="background:#162d52;border:1px solid #2a4a70;border-radius:10px;padding:8px 12px;font-size:10px;color:#88aabb;">📋 ${v.current_customer||''} — ${v.current_resv_no}</div>`;
+    } else {
+      resvInfoEl.innerHTML='';
+    }
   }
   const lastCheck=v.last_check_at?fmtDate(v.last_check_at):'—';
   const staff=v.last_check_staff||'—';
@@ -2138,10 +2157,17 @@ async function loadChain(vehicleId){
     const newDmgs=ev.new_damages||[];
     const snapDmgs=ev.damages_snapshot||[];
 
-    // サブ情報
-    let sub='';
-    if(ev.customer_name||ev.resv_no) sub=`${ev.customer_name||'—'} 様 ／ 予約: ${ev.resv_no||'—'} ／ 担当: ${ev.staff}`;
-    else sub=`担当: ${ev.staff}`;
+    // サブ情報（予約バナー + 担当）
+    let resvBanner='';
+    if(ev.customer_name||ev.resv_no){
+      resvBanner=`<div style="background:#0d1f3c;border:1px solid #1e3a5f;border-radius:8px;padding:5px 10px;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:12px;">📋</span>
+        <span style="font-size:10px;font-weight:700;color:#ddeeff;">${ev.customer_name||'—'} 様</span>
+        <span style="font-size:9px;color:#6699bb;">／</span>
+        <span style="font-size:9px;color:#88bbdd;font-family:monospace;">${ev.resv_no||'—'}</span>
+      </div>`;
+    }
+    let sub=`<span style="font-size:9px;color:#99aabb;">担当: ${ev.staff}</span>`;
 
     // 傷リストHTML
     let dmgsHtml='';
@@ -2171,7 +2197,8 @@ async function loadChain(vehicleId){
           </div>
           <span style="font-size:10px;color:#8899bb;flex-shrink:0;">${date}</span>
         </div>
-        <div style="font-size:10px;color:#8899bb;margin-bottom:4px;">${sub}</div>
+        ${resvBanner}
+        <div style="margin-bottom:4px;">${sub}</div>
         ${dmgsHtml}
       </div>
     </div>`;

@@ -1207,7 +1207,7 @@ async function loadVehicles(){
       }));
     } else {
       // 札幌: vehicles + vehicle_twins(ダメージ状態) + fleet/reservations(予約連動)
-      const today=new Date().toISOString().slice(0,10);
+      const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
         sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo'),
@@ -1337,7 +1337,7 @@ function renderVehicleList(vehicles, store){
       const resv=v.current_resv;
       let resvLine='';
       if(resv){
-        const todayStr=new Date().toISOString().slice(0,10);
+        const _td=new Date();const todayStr=_td.getFullYear()+'-'+String(_td.getMonth()+1).padStart(2,'0')+'-'+String(_td.getDate()).padStart(2,'0');
         const isLend=resv.lend_date===todayStr;
         const isReturn=resv.return_date===todayStr;
         const tag=isLend&&isReturn?'🚗 本日貸出／返却':isLend?'🚗 本日貸出':isReturn?'📹 本日返却':'📋';
@@ -1457,7 +1457,7 @@ function renderS0(v){
   if(resvInfoEl){
     const resv=v.current_resv;
     if(resv){
-      const todayStr=new Date().toISOString().slice(0,10);
+      const _td=new Date();const todayStr=_td.getFullYear()+'-'+String(_td.getMonth()+1).padStart(2,'0')+'-'+String(_td.getDate()).padStart(2,'0');
       const isLend=resv.lend_date===todayStr;
       const isReturn=resv.return_date===todayStr;
       const tag=isLend&&isReturn?'🚗📹 本日貸出／返却':isLend?'🚗 本日貸出':isReturn?'📹 本日返却':'📋';
@@ -3230,7 +3230,7 @@ async function fetchReservationForVehicle(vehicleId, mode){
     const resvIds=fleetRows.map(f=>f.reservation_id);
 
     // 2. reservationsから該当予約を検索
-    const today=new Date().toISOString().slice(0,10);
+    const _n2=new Date();const today=_n2.getFullYear()+'-'+String(_n2.getMonth()+1).padStart(2,'0')+'-'+String(_n2.getDate()).padStart(2,'0');
     let query=sb.from('reservations')
       .select('id,name,lend_date,lend_time,return_date,return_time,ota,people,vehicle,insurance,tel')
       .in('id',resvIds)

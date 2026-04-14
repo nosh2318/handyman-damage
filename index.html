@@ -1202,25 +1202,40 @@ async function loadVehicles(){
         vehicles:{name:car.name,plate_no:car.plate,code:car.id,class_id:car.class_id}
       }));
     } else {
-      // 札幌: vehicles + vehicle_twins(ダメージ状態)
-      const [{data:cars},{data:twins}]=await Promise.all([
+      // 札幌: vehicles + vehicle_twins(ダメージ状態) + fleet/reservations(予約連動)
+      const today=new Date().toISOString().slice(0,10);
+      const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo')
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo'),
+        sb.from('fleet').select('reservation_id,vehicle_code'),
+        sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').gte('return_date',today).order('lend_date',{ascending:true})
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
-      vehicles=(cars||[]).map(car=>({
+      // fleet→reservationsのマップ: vehicle_code → 直近予約
+      const vcResvMap={};
+      if(fleetAll&&resvAll){
+        const resvMap={};resvAll.forEach(r=>resvMap[r.id]=r);
+        fleetAll.forEach(f=>{
+          const r=resvMap[f.reservation_id];
+          if(r&&!vcResvMap[f.vehicle_code]) vcResvMap[f.vehicle_code]=r;
+        });
+      }
+      vehicles=(cars||[]).map(car=>{
+        const resv=vcResvMap[car.code];
+        return {
         id:car.code,
         status:twMap[car.code]?.status||'ready',
         current_damages:twMap[car.code]?.current_damages||[],
-        current_resv_no:twMap[car.code]?.current_resv_no||null,
-        current_customer:twMap[car.code]?.current_customer||null,
+        current_resv_no:resv?.id||twMap[car.code]?.current_resv_no||null,
+        current_customer:resv?.name||twMap[car.code]?.current_customer||null,
+        current_resv:resv||null,
         last_check_at:twMap[car.code]?.last_check_at||null,
         last_check_staff:twMap[car.code]?.last_check_staff||null,
         last_event_id:twMap[car.code]?.last_event_id||null,
         odometer:twMap[car.code]?.odometer||0,
         rental_count:twMap[car.code]?.rental_count||0,
         vehicles:{name:car.name,plate_no:car.plate_no,code:car.code,year:car.year,class_id:spkClass(car.name)}
-      }));
+      };});
     }
     vehiclesCache=vehicles;
     renderVehicleList(vehiclesCache,currentStore);
@@ -1314,8 +1329,10 @@ function renderVehicleList(vehicles, store){
       const vInfo=v.vehicles||{};
       const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
       const dmgCnt=(v.current_damages||[]).length;
-      const resvTxt=v.current_resv_no?(' '+v.current_resv_no):'';
       const isReg=!!v.last_event_id;
+      const resv=v.current_resv;
+      const resvLine=resv?`<div style="font-size:9px;color:#6688aa;margin-top:3px;line-height:1.4;">📋 ${resv.name||''} <span style="color:#4488cc;font-family:monospace;">${resv.id||''}</span><br><span style="color:#99aabb;">${resv.lend_date||''} ${resv.lend_time||''} 〜 ${resv.return_date||''} ${resv.return_time||''}</span></div>`
+        :(v.current_resv_no?`<div style="font-size:9px;color:#6688aa;margin-top:3px;">📋 ${v.current_customer||''} <span style="color:#4488cc;">${v.current_resv_no}</span></div>`:'');
       // SM カードはタップのみ → S0へ（アクションはS0内で操作）
       const bottomArea=isReg
         ?''
@@ -1329,11 +1346,12 @@ function renderVehicleList(vehicles, store){
             <div class="sm-model">${vInfo.name||''} <span style="color:#9bb;">/ ${v.id}</span></div>
             <div class="sm-status-row">
               <div class="sm-badge" style="color:${st.color};border-color:${st.bc};background:${st.bg};">
-                ${statusEmoji(v.status)} ${st.label}${resvTxt}
+                ${statusEmoji(v.status)} ${st.label}
               </div>
               ${dmgCnt>0?`<div class="sm-dmg">傷${dmgCnt}件</div>`:''}
               ${!isReg?`<div class="sm-badge-unreg">⚡ 要初期登録</div>`:''}
             </div>
+            ${resvLine}
             <div class="sm-presence-inline" id="spres_${v.id}"></div>
           </div>
           <div style="color:#b0c4dd;font-size:18px;padding-right:8px;flex-shrink:0;">›</div>
@@ -2409,13 +2427,20 @@ async function renderSr0(){
   const damages=v.current_damages||[];
   const vName=v.vehicles?.name||currentVehicleId;
 
-  // ③ 予約情報（vehicle_twinsのcurrent_resv_no/current_customerを使用）
-  const customer=v.current_customer||'';
-  const resvNo=v.current_resv_no||'';
+  // ③ 予約情報（fleet→reservationsから取得、フォールバックでvehicle_twins）
   let sr0ResvObj=null;
-  if(resvNo||customer){
-    sr0ResvObj={id:resvNo, name:customer, lend_date:'', lend_time:'', return_date:'', return_time:''};
+  const resvFromDb=await fetchReservationForVehicle(currentVehicleId,'return');
+  if(resvFromDb){
+    sr0ResvObj=resvFromDb;
+  } else {
+    const customer=v.current_customer||'';
+    const resvNo=v.current_resv_no||'';
+    if(resvNo||customer){
+      sr0ResvObj={id:resvNo, name:customer, lend_date:'', lend_time:'', return_date:'', return_time:''};
+    }
   }
+  const customer=sr0ResvObj?.name||'';
+  const resvNo=sr0ResvObj?.id||'';
 
   document.getElementById('sr0Title').textContent=vName;
   const sub=document.getElementById('sr0Sub');
@@ -3020,15 +3045,19 @@ async function renderSc0(){
   const damages=v.current_damages||[];
   const vName=v.vehicles?.name||currentVehicleId||'車両';
 
-  // ③ 予約情報（vehicle_twinsのcurrent_resv_no優先 → なければ配車表から検索）
-  let resvName=v.current_customer||'';
-  let resvNo=v.current_resv_no||'';
-  sc0ResvData=null;
-  if(!resvNo){
-    sc0ResvData=await fetchTodayReservation(currentVehicleId);
-    if(sc0ResvData){ resvName=sc0ResvData.name||''; resvNo=sc0ResvData.id||''; }
+  // ③ 予約情報（fleet→reservationsから取得、フォールバックでvehicle_twins）
+  sc0ResvData=await fetchReservationForVehicle(currentVehicleId,'checkout');
+  let resvName='';
+  let resvNo='';
+  if(sc0ResvData){
+    resvName=sc0ResvData.name||'';
+    resvNo=sc0ResvData.id||'';
   } else {
-    sc0ResvData={id:resvNo, name:resvName, lend_date:'', lend_time:'', return_date:'', return_time:''};
+    resvName=v.current_customer||'';
+    resvNo=v.current_resv_no||'';
+    if(resvNo||resvName){
+      sc0ResvData={id:resvNo, name:resvName, lend_date:'', lend_time:'', return_date:'', return_time:''};
+    }
   }
 
   const titleEl=document.getElementById('sc0Title');
@@ -3148,26 +3177,42 @@ async function markVehicleReady(){
 // ===== 本日の予約を取得（札幌のみ）=====
 let sc0ResvData=null; // SC0で取得した予約データ
 
-async function fetchTodayReservation(vehicleId){
+async function fetchReservationForVehicle(vehicleId, mode){
+  // mode: 'checkout' = 本日以降の直近貸出予約, 'return' = 現在貸出中（返却日が今日以降）
   if(currentStore!=='sapporo') return null;
   try{
+    // 1. fleetテーブルからこの車両に配車されている予約IDを全取得
+    const{data:fleetRows}=await sb.from('fleet')
+      .select('reservation_id')
+      .eq('vehicle_code',vehicleId);
+    if(!fleetRows||fleetRows.length===0) return null;
+    const resvIds=fleetRows.map(f=>f.reservation_id);
+
+    // 2. reservationsから該当予約を検索
     const today=new Date().toISOString().slice(0,10);
-    // 本日以降の直近予約を取得（car_id = 配車済み車両コード）
-    const{data}=await sb.from('reservations')
-      .select('id,name,lend_date,lend_time,return_date,return_time,ota')
-      .eq('car_id',vehicleId)
-      .gte('lend_date',today)
-      .not('status','eq','キャンセル')
+    let query=sb.from('reservations')
+      .select('id,name,lend_date,lend_time,return_date,return_time,ota,people,vehicle,insurance,tel')
+      .in('id',resvIds)
       .not('status','eq','cancelled')
-      .order('lend_date',{ascending:true})
-      .limit(1)
-      .maybeSingle();
+      .not('status','eq','キャンセル');
+
+    if(mode==='checkout'){
+      // 貸出: 本日以降の直近予約
+      query=query.gte('lend_date',today).order('lend_date',{ascending:true});
+    } else {
+      // 返却: 貸出日が今日以前 & 返却日が今日以降 → 現在利用中
+      // または直近の返却予定（返却日降順で直近）
+      query=query.lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false});
+    }
+    const{data}=await query.limit(1).maybeSingle();
     return data||null;
   }catch(e){
-    console.warn('fetchTodayReservation:',e);
+    console.warn('fetchReservationForVehicle:',e);
     return null;
   }
 }
+// 後方互換
+async function fetchTodayReservation(vehicleId){ return fetchReservationForVehicle(vehicleId,'checkout'); }
 
 // 予約バナーHTML生成
 function resvBannerHtml(resv, mode){

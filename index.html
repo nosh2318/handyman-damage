@@ -1209,7 +1209,7 @@ async function loadVehicles(){
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
         sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo'),
         sb.from('fleet').select('reservation_id,vehicle_code'),
-        sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').gte('return_date',today).order('lend_date',{ascending:true})
+        sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false})
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
       // fleet→reservationsのマップ: vehicle_code → 直近予約
@@ -1332,8 +1332,16 @@ function renderVehicleList(vehicles, store){
       const dmgCnt=(v.current_damages||[]).length;
       const isReg=!!v.last_event_id;
       const resv=v.current_resv;
-      const resvLine=resv?`<div style="font-size:9px;color:#6688aa;margin-top:3px;line-height:1.4;">📋 ${resv.name||''} <span style="color:#4488cc;font-family:monospace;">${resv.id||''}</span><br><span style="color:#99aabb;">${resv.lend_date||''} ${resv.lend_time||''} 〜 ${resv.return_date||''} ${resv.return_time||''}</span></div>`
-        :(v.current_resv_no?`<div style="font-size:9px;color:#6688aa;margin-top:3px;">📋 ${v.current_customer||''} <span style="color:#4488cc;">${v.current_resv_no}</span></div>`:'');
+      let resvLine='';
+      if(resv){
+        const todayStr=new Date().toISOString().slice(0,10);
+        const isLend=resv.lend_date===todayStr;
+        const isReturn=resv.return_date===todayStr;
+        const tag=isLend&&isReturn?'🚗 本日貸出／返却':isLend?'🚗 本日貸出':isReturn?'📹 本日返却':'📋';
+        resvLine=`<div style="font-size:9px;color:#6688aa;margin-top:3px;line-height:1.4;">${tag} ${resv.name||''} <span style="color:#4488cc;font-family:monospace;">${resv.id||''}</span></div>`;
+      } else if(v.current_resv_no){
+        resvLine=`<div style="font-size:9px;color:#6688aa;margin-top:3px;">📋 ${v.current_customer||''} <span style="color:#4488cc;">${v.current_resv_no}</span></div>`;
+      }
       // SM カードはタップのみ → S0へ（アクションはS0内で操作）
       const bottomArea=isReg
         ?''
@@ -1446,11 +1454,14 @@ function renderS0(v){
   if(resvInfoEl){
     const resv=v.current_resv;
     if(resv){
+      const todayStr=new Date().toISOString().slice(0,10);
+      const isLend=resv.lend_date===todayStr;
+      const isReturn=resv.return_date===todayStr;
+      const tag=isLend&&isReturn?'🚗📹 本日貸出／返却':isLend?'🚗 本日貸出':isReturn?'📹 本日返却':'📋';
       resvInfoEl.innerHTML=`<div style="background:#162d52;border:1px solid #2a4a70;border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
-        <span style="font-size:16px;">📋</span>
         <div style="flex:1;">
-          <div style="font-size:11px;font-weight:700;color:#fff;">${resv.name||'—'} 様 <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:#ffffff15;color:#88ccff;margin-left:4px;">${resv.ota||''}</span></div>
-          <div style="font-size:9px;color:#88aabb;margin-top:2px;">予約: <b style="color:#aaddff;">${resv.id||''}</b> ／ ${resv.lend_date||''} ${resv.lend_time||''} 〜 ${resv.return_date||''} ${resv.return_time||''}</div>
+          <div style="font-size:11px;font-weight:700;color:#fff;">${tag} ${resv.name||'—'} 様 <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:#ffffff15;color:#88ccff;margin-left:4px;">${resv.ota||''}</span></div>
+          <div style="font-size:9px;color:#88aabb;margin-top:2px;">予約: <b style="color:#aaddff;">${resv.id||''}</b> ／ ${resv.lend_time||''} 〜 ${resv.return_date||''} ${resv.return_time||''}</div>
         </div>
       </div>`;
     } else if(v.current_resv_no){
@@ -3224,12 +3235,11 @@ async function fetchReservationForVehicle(vehicleId, mode){
       .not('status','eq','キャンセル');
 
     if(mode==='checkout'){
-      // 貸出: 本日以降の直近予約
-      query=query.gte('lend_date',today).order('lend_date',{ascending:true});
+      // 貸出チェック: 今日が貸出日の予約のみ
+      query=query.eq('lend_date',today).order('lend_time',{ascending:true});
     } else {
-      // 返却: 貸出日が今日以前 & 返却日が今日以降 → 現在利用中
-      // または直近の返却予定（返却日降順で直近）
-      query=query.lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false});
+      // 返却チェック: 今日が返却日の予約（貸出日≤今日 & 返却日=今日）
+      query=query.lte('lend_date',today).eq('return_date',today).order('return_time',{ascending:true});
     }
     const{data}=await query.limit(1).maybeSingle();
     return data||null;

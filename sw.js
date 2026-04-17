@@ -1,5 +1,5 @@
 // HANDYMAN 車両チェック Service Worker v7
-const CACHE = 'handyman-damage-v8';
+const CACHE = 'handyman-damage-v9';
 
 self.addEventListener('install', e => {
   // キャッシュはしない（常に最新を取得）

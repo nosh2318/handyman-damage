@@ -614,7 +614,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.5.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.6.0</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1226,12 +1226,15 @@ async function loadVehicles(){
       }
       vehicles=(cars||[]).map(car=>{
         const resv=vcResvMap[car.code];
+        const twStatus=twMap[car.code]?.status||'ready';
+        // vehicle_twinsが'out'でも予約が無ければ返却済み→readyに自動リセット
+        const effectiveStatus=(twStatus==='out'&&!resv)?'ready':twStatus;
         return {
         id:car.code,
-        status:twMap[car.code]?.status||'ready',
+        status:effectiveStatus,
         current_damages:twMap[car.code]?.current_damages||[],
-        current_resv_no:resv?.id||twMap[car.code]?.current_resv_no||null,
-        current_customer:resv?.name||twMap[car.code]?.current_customer||null,
+        current_resv_no:resv?.id||(effectiveStatus==='out'?twMap[car.code]?.current_resv_no:null)||null,
+        current_customer:resv?.name||(effectiveStatus==='out'?twMap[car.code]?.current_customer:null)||null,
         current_resv:resv||null,
         last_check_at:twMap[car.code]?.last_check_at||null,
         last_check_staff:twMap[car.code]?.last_check_staff||null,
@@ -1244,6 +1247,10 @@ async function loadVehicles(){
     vehiclesCache=vehicles;
     renderVehicleList(vehiclesCache,currentStore);
     updateSmStats(vehiclesCache);
+    // vehicle_twinsが'out'なのに予約がない車両をDBでもreadyにクリーンアップ（バックグラウンド）
+    vehicles.filter(v=>twMap[v.id]?.status==='out'&&!vcResvMap[v.id]).forEach(v=>{
+      sb.from('vehicle_twins').update({status:'ready',current_resv_no:null,current_customer:null}).eq('id',v.id).then(()=>console.log('[cleanup] reset',v.id,'to ready'));
+    });
     const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
     const el=document.getElementById('smHdStore');
     if(el) el.textContent=`${storeLabel} — ${vehicles.length}台`;

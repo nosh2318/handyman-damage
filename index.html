@@ -1243,14 +1243,14 @@ async function loadVehicles(){
         rental_count:twMap[car.code]?.rental_count||0,
         vehicles:{name:car.name,plate_no:car.plate_no,code:car.code,year:car.year,class_id:spkClass(car.name)}
       };});
+      // vehicle_twinsが'out'なのに予約がない車両をDBでもreadyにクリーンアップ（バックグラウンド・札幌のみ）
+      vehicles.filter(v=>twMap[v.code]?.status==='out'&&!vcResvMap[v.id]).forEach(v=>{
+        sb.from('vehicle_twins').update({status:'ready',current_resv_no:null,current_customer:null}).eq('id',v.id).then(()=>console.log('[cleanup] reset',v.id,'to ready'));
+      });
     }
     vehiclesCache=vehicles;
     renderVehicleList(vehiclesCache,currentStore);
     updateSmStats(vehiclesCache);
-    // vehicle_twinsが'out'なのに予約がない車両をDBでもreadyにクリーンアップ（バックグラウンド）
-    vehicles.filter(v=>twMap[v.id]?.status==='out'&&!vcResvMap[v.id]).forEach(v=>{
-      sb.from('vehicle_twins').update({status:'ready',current_resv_no:null,current_customer:null}).eq('id',v.id).then(()=>console.log('[cleanup] reset',v.id,'to ready'));
-    });
     const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
     const el=document.getElementById('smHdStore');
     if(el) el.textContent=`${storeLabel} — ${vehicles.length}台`;

@@ -156,6 +156,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 .dmg-del-btn:active{background:#ffeeee;}
 .dmg-repair-btn{width:100%;padding:14px;border-radius:12px;border:1.5px solid #00aa55;background:#edfaf4;color:#007733;font-size:14px;font-weight:700;cursor:pointer;}
 
+/* ===== ゾーン傷リストシート ===== */
+.zdl-overlay{position:fixed;inset:0;background:#00000055;z-index:260;opacity:0;pointer-events:none;transition:opacity .22s;max-width:520px;margin:0 auto;}
+.zdl-overlay.show{opacity:1;pointer-events:all;}
+.zdl-sheet{position:absolute;bottom:0;left:0;right:0;background:#ffffff;border-radius:22px 22px 0 0;padding:20px 20px;padding-bottom:max(env(safe-area-inset-bottom),24px);transform:translateY(100%);transition:transform .32s cubic-bezier(.32,1,.58,1);border-top:1px solid #dde8f4;max-height:75vh;overflow-y:auto;}
+.zdl-overlay.show .zdl-sheet{transform:translateY(0);}
+.zdl-handle{width:36px;height:4px;border-radius:2px;background:#d0dce8;margin:0 auto 14px;}
+.zdl-add-btn{width:100%;padding:14px;border-radius:12px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;}
+.zdl-add-btn:active{background:#ddeeff;}
+.zdl-close-btn{width:100%;padding:12px;border-radius:12px;background:#f4f6fa;border:1px solid #d8e4f0;color:#5577aa;font-size:13px;font-weight:600;cursor:pointer;}
+
 /* ===== 手動編集ボタン ===== */
 .s0-edit-btn{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 16px 0;padding:10px;border-radius:12px;background:#fff;border:1.5px solid #4488cc;color:#2266cc;font-size:13px;font-weight:700;cursor:pointer;}
 .s0-edit-btn:active{background:#eef4fc;}
@@ -486,7 +496,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   .sc0-section-label{padding:8px 24px 4px;}
 
   /* オーバーレイ */
-  .edit-overlay,.dmg-edit-overlay,.conf-overlay,.photo-lb{max-width:640px;}
+  .edit-overlay,.dmg-edit-overlay,.zdl-overlay,.conf-overlay,.photo-lb{max-width:640px;}
   .sp-bottom{max-width:640px;}
   .s4-hd{padding:28px 28px 16px;}
   .s4-scroll{padding:12px 28px;}
@@ -546,7 +556,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
   .sc0-section-label{padding:8px 48px 4px;}
 
   /* オーバーレイ: PC幅に合わせる + シートは中央寄せ */
-  .edit-overlay,.dmg-edit-overlay,.conf-overlay,.photo-lb{max-width:1080px;}
+  .edit-overlay,.dmg-edit-overlay,.zdl-overlay,.conf-overlay,.photo-lb{max-width:1080px;}
   .sp-bottom{max-width:1080px;}
   .edit-sheet,.dmg-edit-sheet,.conf-sheet{
     max-width:560px;
@@ -933,6 +943,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
       <button class="dmg-repair-btn" id="dmgRepairBtn" onclick="markRepaired()">🔧 修復完了 — この傷を削除する</button>
       <button class="btn-ghost" onclick="closeDmgEdit()">閉じる</button>
     </div>
+  </div>
+</div>
+
+<!-- ===== ゾーン傷リストシート ===== -->
+<div class="zdl-overlay" id="zdlOverlay" onclick="closeZoneDmgList(event)">
+  <div class="zdl-sheet">
+    <div class="zdl-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#1a2840;" id="zdlZoneName">—</div>
+        <div style="font-size:11px;color:#7799bb;margin-top:2px;" id="zdlCount">—</div>
+      </div>
+    </div>
+    <button class="zdl-add-btn" id="zdlAddBtn">＋ この箇所に傷を追加</button>
+    <div id="zdlList"></div>
+    <button class="zdl-close-btn" onclick="closeZoneDmgList()">閉じる</button>
   </div>
 </div>
 
@@ -1998,6 +2024,8 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
   const H=view.clientHeight||view.offsetHeight||0;
   view.innerHTML=INSP_SVG;
   const damagedZoneIds=new Set();
+  // 同ゾーン内の傷インデックスをカウント（ピンオフセット用）
+  const zoneCountMap={};
 
   (damages||[]).forEach(d=>{
     let zone=null;
@@ -2010,12 +2038,20 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
     if(!zone) return;
     damagedZoneIds.add(zone.id);
 
+    // 同ゾーン内の何番目かをカウント（オフセット計算用）
+    if(!zoneCountMap[zone.id]) zoneCountMap[zone.id]={count:0};
+    const pinIdx=zoneCountMap[zone.id].count++;
+
     const isNew=newIds&&newIds.has(d.id);
     const c=isNew?'#ff3333':dmgColor(d);
     const pin=document.createElement('div');
     pin.className='ipin'+(clickable?' clickable':'');
-    // PCでもピンが正確な位置に来るよう、SVG描画領域を考慮した座標補正
-    const p=pinPct(zone.cx, zone.cy, W, H);
+    // 同ゾーン複数ピンは円形にオフセットして重ならないように表示
+    const offsetR=pinIdx>0?4.5:0; // 2件目以降はずらす
+    const offsetAngle=(pinIdx*137.5)*(Math.PI/180); // 黄金角でばらけさせる
+    const oxPct=pinIdx>0?offsetR*Math.cos(offsetAngle):0;
+    const oyPct=pinIdx>0?offsetR*Math.sin(offsetAngle):0;
+    const p=pinPct(zone.cx+oxPct, zone.cy+oyPct, W, H);
     pin.style.cssText=`left:${p.l}%;top:${p.t}%;`;
     pin.dataset.dmgId=d.id;
     const newBadge=isNew?`<div class="ipin-new">NEW</div>`:'';
@@ -2412,11 +2448,43 @@ function tapZone(zoneId){
     return z&&z.id===zoneId;
   });
   if(dmgsHere.length>0){
-    openDmgEdit(dmgsHere[0].id);
+    // 傷が1件以上ある場合 → リストシートを表示（追加・編集どちらも可能）
+    openZoneDmgList(zoneId, dmgsHere);
   } else {
     const name=ZONE_ID_TO_NAME[zoneId];
     if(name) openAddDmgSheet(name);
   }
+}
+
+// ===== ゾーン傷リストシート =====
+function openZoneDmgList(zoneId, dmgsHere){
+  const zoneName=ZONE_ID_TO_NAME[zoneId]||dmgsHere[0]?.location||'不明';
+  const typeNames={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ・シミ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
+  const sevNames={minor:'軽微',moderate:'中程度',major:'重大'};
+  document.getElementById('zdlZoneName').textContent=zoneName;
+  document.getElementById('zdlCount').textContent=dmgsHere.length+'件の傷が記録されています';
+  document.getElementById('zdlAddBtn').onclick=()=>{ closeZoneDmgList(); openAddDmgSheet(zoneName); };
+  const list=document.getElementById('zdlList');
+  list.innerHTML=dmgsHere.map(d=>{
+    const c=dmgColor(d);
+    const sev=d.severity||d.type;
+    const sizeTxt=d.size?' / '+d.size:'';
+    const descTxt=(d.desc&&d.desc!=='手動追加')?' — '+d.desc:'';
+    return `<div style="background:#f8fafd;border:1px solid #dde8f4;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">
+      <div style="width:12px;height:12px;border-radius:50%;background:${c};flex-shrink:0;border:1.5px solid ${c}88;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:#1a2840;">${typeNames[d.type]||d.type}</div>
+        <div style="font-size:10px;color:#7799bb;margin-top:2px;">${sevNames[sev]||sev}${sizeTxt}${descTxt}</div>
+        <div style="font-size:9px;color:#aabbcc;margin-top:2px;">${d.addedAt||''}${d.addedBy?' — '+d.addedBy:''}</div>
+      </div>
+      <button onclick="closeZoneDmgList();openDmgEdit('${d.id}')" style="padding:7px 13px;border-radius:8px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;touch-action:manipulation;">詳細</button>
+    </div>`;
+  }).join('');
+  document.getElementById('zdlOverlay').classList.add('show');
+}
+function closeZoneDmgList(e){
+  if(e&&e.target!==document.getElementById('zdlOverlay')) return;
+  document.getElementById('zdlOverlay').classList.remove('show');
 }
 
 // ===== 既存傷ピンタップ → 編集シート =====

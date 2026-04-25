@@ -624,7 +624,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.6.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.6.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1042,13 +1042,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 // JSエラーが起きても画面にエラー内容を表示し、自動リトライする
 window.onerror=function(msg,src,line,col,err){
   console.error('[GLOBAL ERROR]',msg,src,line,col,err);
+  // クロスオリジンエラー（CDN/Supabase起因）は無視 → line=0,col=0 で詳細不明
+  var m=String(msg||'');
+  if(m==='Script error.'||m==='Script error'||(line===0&&col===0&&!err)) return true;
+  // Supabase内部エラーも無視（WebSocket/Realtimeの接続エラー等）
+  if(m.includes('supabase')||m.includes('realtime')||m.includes('WebSocket')) return true;
   // 既にエラーバナーがあれば二重表示しない
   if(document.getElementById('_globalErrBanner')) return;
   var ban=document.createElement('div');
   ban.id='_globalErrBanner';
   ban.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#cc2222;color:#fff;padding:16px 20px;font-size:13px;font-family:sans-serif;text-align:left;line-height:1.5;';
   ban.innerHTML='<b>⚠ アプリエラー</b><br>'
-    +'<span style="font-size:11px;opacity:.9;">'+String(msg).substring(0,120)+'</span><br>'
+    +'<span style="font-size:11px;opacity:.9;">'+m.substring(0,120)+'</span><br>'
     +'<span style="font-size:10px;opacity:.7;">line:'+line+' col:'+col+'</span><br>'
     +'<button onclick="location.reload()" style="margin-top:8px;padding:6px 16px;background:#fff;color:#cc2222;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;">再読み込み</button>'
     +' <button onclick="this.parentElement.remove()" style="margin-top:8px;padding:6px 12px;background:transparent;color:#fff;border:1px solid #fff8;border-radius:6px;font-size:12px;cursor:pointer;">閉じる</button>';
@@ -1258,7 +1263,7 @@ async function loadVehicles(){
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
         sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo'),
         sb.from('fleet').select('reservation_id,vehicle_code'),
-        sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false})
+        sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false}).limit(300)
       ]);
       const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
       // fleet→reservationsのマップ: vehicle_code → 直近予約
@@ -1727,17 +1732,26 @@ async function reloadS0(){
 }
 
 function subscribeRealtime(){
-  sb.channel('hm-vehicle-twins-all')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'vehicle_twins'},payload=>{
-      handleVehicleTwinChange(payload.new,'insert');
-    })
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'vehicle_twins'},payload=>{
-      handleVehicleTwinChange(payload.new,'update');
-    })
-    .subscribe(status=>{
-      if(status==='SUBSCRIBED') setRtStatus('live');
-      else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT') setRtStatus('error');
-    });
+  try{
+    sb.channel('hm-vehicle-twins-all')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'vehicle_twins'},payload=>{
+        try{handleVehicleTwinChange(payload.new,'insert');}catch(e){console.warn('[RT] insert error:',e);}
+      })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'vehicle_twins'},payload=>{
+        try{handleVehicleTwinChange(payload.new,'update');}catch(e){console.warn('[RT] update error:',e);}
+      })
+      .subscribe(status=>{
+        if(status==='SUBSCRIBED') setRtStatus('live');
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+          setRtStatus('error');
+          // 60秒後に自動再接続
+          setTimeout(()=>{try{subscribeRealtime();}catch(e){}},60000);
+        }
+      });
+  }catch(e){
+    console.warn('[RT] subscribe error:',e);
+    setRtStatus('error');
+  }
 }
 
 function handleVehicleTwinChange(updated, event){

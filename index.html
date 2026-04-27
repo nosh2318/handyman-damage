@@ -2556,7 +2556,9 @@ async function markRepaired(){
   const loc=d?d.location:'';
   const dmgId=currentEditDmgId;
   try{
-    const updated=await safeWriteDamages(currentVehicleId,fresh=>fresh.filter(x=>x.id!==dmgId));
+    const cv=vehiclesCache.find(x=>x.id===currentVehicleId);
+    const updated=(cv?.current_damages||[]).filter(x=>x.id!==dmgId);
+    if(cv) cv.current_damages=updated;
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
@@ -2897,6 +2899,7 @@ function updateEditBtns(){
   if(photoBtns){photoBtns.style.opacity='1';photoBtns.style.pointerEvents='all';}
   if(photoHint){photoHint.style.display='none';}
 }
+let _submitEditBusy=false; // 連続タップ防止フラグ
 async function submitEdit(){
   if(!editZone||!editType||!editSev) return;
   const desc=document.getElementById('editDescInput').value.trim()||'手動追加';
@@ -2917,24 +2920,32 @@ async function submitEdit(){
     return;
   }
 
-  // ===== 通常モード: 最新データ取得→追記→保存 =====
+  // ===== 通常モード: キャッシュ使用→保存（連続登録でもデータ消失しない） =====
+  if(_submitEditBusy){ showToast('⏳ 保存中です。少しお待ちください'); return; }
+  _submitEditBusy=true;
   const btn=document.getElementById('editOkBtn');
   if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
+  const overlay=document.getElementById('editOverlay');
   try{
-    const updated=await safeWriteDamages(currentVehicleId,fresh=>[...fresh,newDmg]);
+    // ★ SELECT不要: vehiclesCacheは常に最新ローカル状態（連続登録でのデータ消失を防止）
+    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+    const updated=[...(v?.current_damages||[]),newDmg];
+    if(v) v.current_damages=updated; // ローカルキャッシュを即時更新
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
     // SR0表示中ならSR0マップも更新
     const activeSc=document.querySelector('.screen.active');
     if(activeSc&&activeSc.id==='sr0') renderMapInto('sr0MapView',null,updated,null,false);
-    document.getElementById('editOverlay').classList.remove('show');
+    if(overlay) overlay.classList.remove('show');
     resetEditPhoto();
     showToast('✓ '+editZone+'の傷を保存しました');
   }catch(e){
     console.error('submitEdit:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    if(overlay) overlay.classList.remove('show'); // エラー時もオーバーレイを閉じる
   }finally{
+    _submitEditBusy=false;
     if(btn){btn.textContent='✓ 傷を追加';btn.style.pointerEvents='all';}
   }
 }
@@ -2943,16 +2954,20 @@ async function repairZone(){
   const zone=editZone;
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   const beforeCnt=(v?.current_damages||[]).length;
+  const overlay=document.getElementById('editOverlay');
   try{
-    const updated=await safeWriteDamages(currentVehicleId,fresh=>fresh.filter(d=>d.location!==zone));
+    // キャッシュから直接フィルタ（SELECT不要）
+    const updated=(v?.current_damages||[]).filter(d=>d.location!==zone);
+    if(v) v.current_damages=updated;
     const removed=beforeCnt-updated.length;
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
-    document.getElementById('editOverlay').classList.remove('show');
+    if(overlay) overlay.classList.remove('show');
     showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
   }catch(e){
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    if(overlay) overlay.classList.remove('show');
   }
 }
 function showToast(msg){
@@ -3577,8 +3592,10 @@ async function submitRepair(){
     }).select().single();
     if(evErr) throw evErr;
 
-    // 3. current_damages から傷を削除
-    const updated = await safeWriteDamages(currentVehicleId, fresh => fresh.filter(x => x.id !== repairCurrentDmgId));
+    // 3. current_damages から傷を削除（キャッシュ直接参照）
+    const rv=vehiclesCache.find(x=>x.id===currentVehicleId);
+    const updated=(rv?.current_damages||[]).filter(x=>x.id!==repairCurrentDmgId);
+    if(rv) rv.current_damages=updated;
     const { error: twErr } = await sb.from('vehicle_twins').update({
       current_damages: updated,
       last_event_id: ev.id,

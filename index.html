@@ -1068,6 +1068,14 @@ const SUPA_URL='https://ckrxttbnawkclshczsia.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrcnh0dGJuYXdrY2xzaGN6c2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzg1NTAsImV4cCI6MjA4NzQ1NDU1MH0.kDC_UDVWvcrS97wzqQ3NXP79ewjgYwF4vSFdV7y06S8';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
+// ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
+const APP_VERSION='v2.7.0-DAMAGE';
+setTimeout(async function(){
+  try{
+    await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
+  }catch(e){console.warn('[recordAppVersion]',e&&e.message);}
+},3000);
+
 // ===== PWA サービスワーカー登録 =====
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});

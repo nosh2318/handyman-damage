@@ -1237,10 +1237,13 @@ async function loadVehicles(){
   try{
     let vehicles=[];
     if(currentStore==='naha'){
-      // 那覇: nha_cars + vehicle_twins + fleet/reservations(予約連動) + 走行距離
+      // 那覇: nha_vehicles (NHA管理APP車両タブの正本) + vehicle_twins + fleet/reservations(予約連動) + 走行距離
+      // ★ 2026-05-11 fix: nha_cars → nha_vehicles に切替
+      //   旧: nha_cars (NHA管理APP 車両タブと別テーブル・手動同期必要)
+      //   新: nha_vehicles (NHA管理APP 車両タブの正本) → マスター変更が即反映
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll},{data:mileageAll}]=await Promise.all([
-        sb.from('nha_cars').select('id,name,plate,class_id,status').eq('store_id','naha').eq('status','active').order('class_id').order('id'),
+        sb.from('nha_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
         sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','naha'),
         sb.from('nha_fleet').select('reservation_id,vehicle_code'),
         sb.from('nha_reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300),
@@ -1256,23 +1259,26 @@ async function loadVehicles(){
       // 走行距離マップ: vehicle_code → 最新km
       const odometerMap={};
       (mileageAll||[]).forEach(m=>{if(!odometerMap[m.vehicle_code])odometerMap[m.vehicle_code]=m.odometer_km;});
+      // ★ nha_vehicles のカラム: code/name/plate_no/type
+      //   旧 nha_cars のカラム: id/name/plate/class_id (互換のためマッピング)
       vehicles=(cars||[]).map(car=>{
-        const resv=vcResvMap[car.id];
-        const twStatus=twMap[car.id]?.status||'ready';
+        const id=car.code;  // ★ nha_vehicles.code が車両ID
+        const resv=vcResvMap[id];
+        const twStatus=twMap[id]?.status||'ready';
         const effectiveStatus=(twStatus==='out'&&!resv)?'ready':twStatus;
         return {
-          id:car.id,
+          id:id,
           status:effectiveStatus,
-          current_damages:twMap[car.id]?.current_damages||[],
-          current_resv_no:resv?.id||(effectiveStatus==='out'?twMap[car.id]?.current_resv_no:null)||null,
-          current_customer:resv?.name||(effectiveStatus==='out'?twMap[car.id]?.current_customer:null)||null,
+          current_damages:twMap[id]?.current_damages||[],
+          current_resv_no:resv?.id||(effectiveStatus==='out'?twMap[id]?.current_resv_no:null)||null,
+          current_customer:resv?.name||(effectiveStatus==='out'?twMap[id]?.current_customer:null)||null,
           current_resv:resv||null,
-          last_check_at:twMap[car.id]?.last_check_at||null,
-          last_check_staff:twMap[car.id]?.last_check_staff||null,
-          last_event_id:twMap[car.id]?.last_event_id||null,
-          odometer:odometerMap[car.id]||twMap[car.id]?.odometer||0,
-          rental_count:twMap[car.id]?.rental_count||0,
-          vehicles:{name:car.name,plate_no:car.plate,code:car.id,class_id:car.class_id}
+          last_check_at:twMap[id]?.last_check_at||null,
+          last_check_staff:twMap[id]?.last_check_staff||null,
+          last_event_id:twMap[id]?.last_event_id||null,
+          odometer:odometerMap[id]||twMap[id]?.odometer||0,
+          rental_count:twMap[id]?.rental_count||0,
+          vehicles:{name:car.name,plate_no:car.plate_no,code:id,class_id:car.type}
         };
       });
     } else {

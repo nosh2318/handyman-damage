@@ -1064,12 +1064,36 @@ window.addEventListener('unhandledrejection',function(ev){
 });
 
 // ===== Supabase 初期化 =====
+// ★ 2026-05-14 fix: 5/13セキュリティ強化(anonポリシー削除)で anonキーで全テーブル401
+//   → 共通アカウントで自動ログインして authenticated として動かす（NHA/SPK と同じパターン）
+//   ※ APP内のSTAFF_LIST選択でスタッフ識別はそのまま（DB認証とは独立）
 const SUPA_URL='https://ckrxttbnawkclshczsia.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrcnh0dGJuYXdrY2xzaGN6c2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzg1NTAsImV4cCI6MjA4NzQ1NDU1MH0.kDC_UDVWvcrS97wzqQ3NXP79ewjgYwF4vSFdV7y06S8';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
+// 起動時 自動ログイン（既存セッションあればスキップ）
+(async function(){
+  try{
+    const {data}=await sb.auth.getSession();
+    if(!data || !data.session){
+      const {error}=await sb.auth.signInWithPassword({email:'member@g-lines.jp',password:'8888'});
+      if(error){
+        document.body.innerHTML='<div style="padding:40px;font-size:16px;text-align:center;background:#fef2f2;color:#991b1b;min-height:100vh;">'
+          +'<h2>🔴 認証エラー</h2><p>傷チェックAPPの自動ログインに失敗しました。</p>'
+          +'<p style="font-size:13px;color:#666">'+error.message+'</p>'
+          +'<button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;background:#1e40af;color:#fff;border:0;border-radius:6px;font-size:14px">再読み込み</button></div>';
+        return;
+      }
+      // 認証成功 → セッション確立のためreload（次回からは既存セッションでスキップ）
+      location.reload();
+    }
+  }catch(e){
+    console.error('[auth] init error:',e);
+  }
+})();
+
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.0-DAMAGE';
+const APP_VERSION='v2.7.1-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});

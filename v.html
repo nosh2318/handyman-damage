@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>HANDYMAN 車両ダメージレポート</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;background:#0a0e18;color:#e0e6f0;min-height:100vh;max-width:520px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom);overflow-x:hidden;}
+.app{padding:0 14px 24px;}
+
+/* ヘッダー */
+.hd{padding:max(env(safe-area-inset-top),12px) 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.hd-brand{font-size:11px;font-weight:800;color:#7099d4;letter-spacing:.5px;}
+.hd-store{font-size:11px;color:#aabbcc;font-weight:600;}
+.hd-today{font-size:10px;color:#8899aa;text-align:right;line-height:1.4;}
+
+/* 車両情報カード */
+.vh-card{margin-top:6px;padding:14px 16px;background:linear-gradient(135deg,#13192a,#1a2238);border:1px solid #2a3552;border-radius:14px;box-shadow:0 4px 16px #00000040;}
+.vh-plate{font-size:26px;font-weight:900;color:#fff;letter-spacing:1px;font-family:Menlo,'SF Mono',monospace;line-height:1.1;}
+.vh-model{margin-top:4px;font-size:12px;color:#aaccdd;font-weight:600;}
+.vh-last{margin-top:10px;padding-top:10px;border-top:1px solid #2a3552;font-size:11px;color:#7799bb;display:flex;align-items:center;gap:6px;}
+.vh-last-ico{font-size:13px;}
+
+/* 車両図エリア */
+.car-wrap{margin-top:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 16px #00000040;}
+.car-view{position:relative;width:100%;aspect-ratio:270/430;max-width:340px;margin:0 auto;}
+
+/* 凡例 */
+.legend{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px 14px;padding:8px 12px;background:#11172a;border-radius:10px;border:1px solid #2a3552;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#aabbcc;font-weight:600;}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.legend-empty{font-size:11px;color:#5d7d9a;font-weight:600;}
+
+/* ピン */
+.ipin{position:absolute;transform:translate(-50%,-50%);pointer-events:all;cursor:pointer;}
+.ipin-r{width:22px;height:22px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;animation:pRing 2.2s ease-in-out infinite;background:rgba(0,0,0,.05);transition:transform .15s;}
+.ipin:active .ipin-r{transform:scale(1.25);}
+.ipin-c{width:7px;height:7px;border-radius:50%;}
+.ipin-lbl{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:8px;font-weight:700;background:#1a2840ee;color:#fff;padding:2px 5px;border-radius:4px;pointer-events:none;}
+@keyframes pRing{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,.4);}50%{box-shadow:0 0 0 5px rgba(255,68,68,0);}}
+
+/* 案内文 */
+.tip{margin-top:10px;padding:10px 14px;font-size:11px;color:#7099d4;background:#0e1424;border:1px solid #1f2a48;border-radius:10px;display:flex;align-items:center;gap:8px;line-height:1.5;}
+.tip-ico{font-size:14px;}
+
+/* 写真ライトボックス */
+.photo-lb{position:fixed;inset:0;background:#000;z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;max-width:520px;margin:0 auto;display:flex;flex-direction:column;}
+.photo-lb.show{opacity:1;pointer-events:all;}
+.photo-lb-header{padding:max(env(safe-area-inset-top),52px) 16px 10px;display:flex;align-items:center;gap:12px;}
+.photo-lb-close{width:36px;height:36px;border-radius:10px;background:#ffffff18;border:1px solid #ffffff20;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.photo-lb-hd-info{flex:1;min-width:0;}
+.photo-lb-hd-loc{font-size:16px;font-weight:800;color:#fff;}
+.photo-lb-hd-sub{font-size:10px;color:#8899bb;margin-top:2px;}
+.photo-lb-canvas{flex:1;display:flex;align-items:center;justify-content:center;padding:0 16px;overflow:hidden;}
+.photo-lb-canvas-inner{width:100%;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px #00000080;}
+.photo-lb-canvas-inner img{width:100%;display:block;}
+.photo-lb-footer{padding:16px 20px;padding-bottom:max(env(safe-area-inset-bottom),32px);}
+.photo-lb-desc{font-size:13px;color:#ccd8e8;line-height:1.7;}
+.photo-lb-meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.photo-lb-tag{font-size:10px;padding:4px 10px;border-radius:8px;border:1px solid #ffffff20;color:#aabbcc;font-weight:700;background:#ffffff08;}
+
+/* エラー画面 */
+.err-view{display:none;min-height:60vh;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:12px;}
+.err-icon{font-size:48px;}
+.err-title{font-size:18px;font-weight:800;color:#fff;}
+.err-desc{font-size:13px;color:#8899aa;line-height:1.6;max-width:320px;}
+
+/* ローディング */
+.loading{display:flex;justify-content:center;align-items:center;min-height:50vh;color:#7099d4;font-size:13px;}
+.loading::before{content:'';width:24px;height:24px;border:3px solid #2a3552;border-top-color:#7099d4;border-radius:50%;animation:spin 1s linear infinite;margin-right:10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* フッター */
+.ft{margin-top:16px;padding:12px;font-size:9px;color:#5d7d9a;text-align:center;line-height:1.6;}
+.ft-divider{margin:0 6px;color:#3d4d6a;}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="loading" id="loadingView">読込中...</div>
+
+  <div class="err-view" id="errView">
+    <div class="err-icon">🚫</div>
+    <div class="err-title" id="errTitle">この共有リンクは利用できません</div>
+    <div class="err-desc" id="errDesc">リンクが無効または停止されています。<br>HANDYMAN までお問い合わせください。</div>
+  </div>
+
+  <div id="mainView" style="display:none;">
+    <div class="hd">
+      <div>
+        <div class="hd-brand">HANDYMAN</div>
+        <div class="hd-store" id="storeLabel">--</div>
+      </div>
+      <div class="hd-today" id="todayLabel">--</div>
+    </div>
+
+    <div class="vh-card">
+      <div class="vh-plate" id="plate">--</div>
+      <div class="vh-model" id="model">--</div>
+      <div class="vh-last" id="lastCheckBox" style="display:none;">
+        <span class="vh-last-ico">📋</span>
+        <span id="lastCheck">--</span>
+      </div>
+    </div>
+
+    <div class="car-wrap">
+      <div class="car-view" id="carView"></div>
+    </div>
+
+    <div class="legend" id="legend"></div>
+
+    <div class="tip">
+      <span class="tip-ico">👆</span>
+      <span>車両図の <strong style="color:#ffaa00;">●印</strong> をタップすると傷の写真と詳細が見られます</span>
+    </div>
+
+    <div class="ft">
+      © HANDYMAN<span class="ft-divider">|</span>共有レポート
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 写真ライトボックス ==================== -->
+<div class="photo-lb" id="photoLb" onclick="closePhotoLB(event)">
+  <div class="photo-lb-header">
+    <button class="photo-lb-close" onclick="closePhotoLB()">‹</button>
+    <div class="photo-lb-hd-info">
+      <div class="photo-lb-hd-loc" id="lbLoc">—</div>
+      <div class="photo-lb-hd-sub" id="lbSub">—</div>
+    </div>
+  </div>
+  <div class="photo-lb-canvas">
+    <div class="photo-lb-canvas-inner" id="lbCanvasInner"></div>
+  </div>
+  <div class="photo-lb-footer">
+    <div class="photo-lb-desc" id="lbDesc">—</div>
+    <div class="photo-lb-meta" id="lbMeta"></div>
+  </div>
+</div>
+
+<!-- ==================== 車両SVGテンプレート ==================== -->
+<template id="carSvgTpl"><svg viewBox="-5 -25 270 430" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+<defs>
+  <linearGradient id="gBody" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#dce8f0"/>
+    <stop offset="100%" stop-color="#cddae6"/>
+  </linearGradient>
+  <linearGradient id="gDoor" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%" stop-color="#d0dde8"/>
+    <stop offset="100%" stop-color="#c8d8e4"/>
+  </linearGradient>
+</defs>
+<rect x="80" y="-22" width="100" height="18" rx="5" fill="#1a8844" opacity=".88"/>
+<text x="130" y="-10" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">▲ フロント FRONT</text>
+<rect x="80" y="389" width="100" height="18" rx="5" fill="#d44422" opacity=".88"/>
+<text x="130" y="401" text-anchor="middle" fill="#fff" font-size="7" font-weight="900" font-family="-apple-system,sans-serif">リア REAR ▼</text>
+<text x="0" y="198" text-anchor="start" fill="#88aabb" font-size="7" font-family="-apple-system,sans-serif">左</text>
+<text x="260" y="198" text-anchor="end" fill="#88aabb" font-size="7" font-family="-apple-system,sans-serif">右</text>
+<g transform="translate(130,195) scale(1,-1) translate(-130,-195)">
+<rect width="260" height="390" fill="#e8f0f6" rx="6"/>
+<rect id="iz-rear-bumper" x="85" y="18" width="90" height="22" rx="4" fill="#c8aaa0" stroke="#aa4422" stroke-width="1.5"/>
+<rect id="iz-trunk" x="85" y="40" width="90" height="38" rx="2" fill="url(#gBody)" stroke="#4477aa" stroke-width="1.5"/>
+<rect x="97" y="45" width="66" height="24" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
+<path id="iz-lr-fender" d="M85,42 L56,52 L56,128 L85,128Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
+<path id="iz-rr-fender" d="M175,42 L204,52 L204,128 L175,128Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
+<ellipse id="iz-lr-tire" cx="40" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse cx="40" cy="100" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
+<line x1="40" y1="85" x2="40" y2="115" stroke="#ffffff60" stroke-width="0.8"/>
+<line x1="25" y1="100" x2="55" y2="100" stroke="#ffffff60" stroke-width="0.8"/>
+<ellipse id="iz-rr-tire" cx="220" cy="100" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse cx="220" cy="100" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
+<line x1="220" y1="85" x2="220" y2="115" stroke="#ffffff60" stroke-width="0.8"/>
+<line x1="205" y1="100" x2="235" y2="100" stroke="#ffffff60" stroke-width="0.8"/>
+<rect id="iz-lr-door" x="25" y="128" width="60" height="74" rx="3" fill="url(#gDoor)" stroke="#4477aa" stroke-width="1.5"/>
+<rect x="30" y="161" width="14" height="5" rx="2" fill="#aabbcc" stroke="#334466" stroke-width="1"/>
+<rect id="iz-rr-door" x="175" y="128" width="60" height="74" rx="3" fill="url(#gDoor)" stroke="#4477aa" stroke-width="1.5"/>
+<rect x="216" y="161" width="14" height="5" rx="2" fill="#aabbcc" stroke="#334466" stroke-width="1"/>
+<rect id="iz-roof" x="85" y="78" width="90" height="234" rx="4" fill="url(#gBody)" stroke="#4477aa" stroke-width="1.5"/>
+<rect id="iz-rear-glass" x="93" y="84" width="74" height="38" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
+<rect id="iz-lr-window" x="94" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-rr-window" x="134" y="130" width="32" height="28" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-lf-window" x="94" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-rf-window" x="134" y="205" width="32" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1"/>
+<rect id="iz-front-glass" x="93" y="248" width="74" height="36" rx="2" fill="#a8c4d8" stroke="#3366aa" stroke-width="1.2"/>
+<rect x="128" y="126" width="4" height="122" fill="#9aaabb" opacity=".9"/>
+<line x1="85" y1="128" x2="175" y2="128" stroke="#334466aa" stroke-width="1" stroke-dasharray="4,3"/>
+<line x1="85" y1="202" x2="175" y2="202" stroke="#334466aa" stroke-width="1" stroke-dasharray="4,3"/>
+<line x1="85" y1="312" x2="175" y2="312" stroke="#334466aa" stroke-width="1" stroke-dasharray="4,3"/>
+<line x1="85" y1="78" x2="85" y2="312" stroke="#33446680" stroke-width="0.8"/>
+<line x1="175" y1="78" x2="175" y2="312" stroke="#33446680" stroke-width="0.8"/>
+<rect id="iz-lf-door" x="25" y="202" width="60" height="74" rx="3" fill="url(#gDoor)" stroke="#4477aa" stroke-width="1.5"/>
+<rect x="30" y="235" width="14" height="5" rx="2" fill="#aabbcc" stroke="#334466" stroke-width="1"/>
+<rect id="iz-rf-door" x="175" y="202" width="60" height="74" rx="3" fill="url(#gDoor)" stroke="#4477aa" stroke-width="1.5"/>
+<rect x="216" y="235" width="14" height="5" rx="2" fill="#aabbcc" stroke="#334466" stroke-width="1"/>
+<rect id="iz-l-mirror" x="61" y="270" width="23" height="11" rx="3" fill="#b0c4d4" stroke="#3366aa" stroke-width="1.2"/>
+<rect id="iz-r-mirror" x="176" y="270" width="23" height="11" rx="3" fill="#b0c4d4" stroke="#3366aa" stroke-width="1.2"/>
+<path id="iz-lf-fender" d="M85,260 L56,266 L56,330 L85,312Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
+<path id="iz-rf-fender" d="M175,260 L204,266 L204,330 L175,312Z" fill="#c8d8e4" stroke="#4477aa" stroke-width="1.2"/>
+<ellipse id="iz-lf-tire" cx="40" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse cx="40" cy="300" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
+<line x1="40" y1="285" x2="40" y2="315" stroke="#ffffff60" stroke-width="0.8"/>
+<line x1="25" y1="300" x2="55" y2="300" stroke="#ffffff60" stroke-width="0.8"/>
+<ellipse id="iz-rf-tire" cx="220" cy="300" rx="15" ry="24" fill="#6688aa" stroke="#334466" stroke-width="1.5"/>
+<ellipse cx="220" cy="300" rx="9" ry="15" fill="#8899bb" stroke="#4466aa" stroke-width="1"/>
+<line x1="220" y1="285" x2="220" y2="315" stroke="#ffffff60" stroke-width="0.8"/>
+<line x1="205" y1="300" x2="235" y2="300" stroke="#ffffff60" stroke-width="0.8"/>
+<rect id="iz-hood" x="85" y="312" width="90" height="44" rx="2" fill="url(#gBody)" stroke="#4477aa" stroke-width="1.5"/>
+<line x1="130" y1="314" x2="130" y2="354" stroke="#33446640" stroke-width="0.8"/>
+<rect id="iz-front-bumper" x="85" y="356" width="90" height="22" rx="4" fill="#9acca8" stroke="#1a7744" stroke-width="1.5"/>
+<rect x="105" y="360" width="50" height="12" rx="1" fill="#d4eed8" stroke="#33886640" stroke-width="0.5"/>
+<rect id="iz-front-spoiler" x="88" y="378" width="84" height="7" rx="2" fill="#5bb876" stroke="#1a7744" stroke-width="1"/>
+<rect id="iz-rear-spoiler" x="90" y="11" width="80" height="7" rx="2" fill="#cc6644" stroke="#aa3322" stroke-width="1"/>
+<rect id="iz-rside-spoiler" x="16" y="148" width="9" height="158" rx="3" fill="#88aabb" stroke="#4477aa" stroke-width="1"/>
+<rect id="iz-lside-spoiler" x="235" y="148" width="9" height="158" rx="3" fill="#88aabb" stroke="#4477aa" stroke-width="1"/>
+</g>
+</svg></template>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+// HANDYMAN 車両ダメージ お客様共有ビュー（v.html）
+// 2026-05-26 新規 — リードオンリー
+// 個人情報・社内情報（顧客名・予約番号・担当者名）は表示しない
+// ============================================================
+
+const SUPA_URL='https://ckrxttbnawkclshczsia.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrcnh0dGJuYXdrY2xzaGN6c2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzg1NTAsImV4cCI6MjA4NzQ1NDU1MH0.kDC_UDVWvcrS97wzqQ3NXP79ewjgYwF4vSFdV7y06S8';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false}});
+
+// ===== ゾーン定義（index.html から移植） =====
+const ZONE_MAP={
+  'フロントバンパー':    {id:'iz-front-bumper',  cx:50,   cy:11.2},
+  'ボンネット':          {id:'iz-hood',           cx:50,   cy:18.8},
+  'フロントガラス':      {id:'iz-front-glass',    cx:50,   cy:34.7},
+  '左フロントフェンダー':{id:'iz-lf-fender',      cx:25.9, cy:28.6},
+  '右フロントフェンダー':{id:'iz-rf-fender',      cx:74.1, cy:28.6},
+  '左フロントドア':      {id:'iz-lf-door',        cx:22.2, cy:40.9},
+  '右フロントドア':      {id:'iz-rf-door',        cx:77.8, cy:40.9},
+  'ルーフ':              {id:'iz-roof',            cx:50,   cy:51.2},
+  '左リアドア':          {id:'iz-lr-door',         cx:22.2, cy:58.1},
+  '右リアドア':          {id:'iz-rr-door',         cx:77.8, cy:58.1},
+  '左リアフェンダー':    {id:'iz-lr-fender',       cx:25.9, cy:76.0},
+  '右リアフェンダー':    {id:'iz-rr-fender',       cx:74.1, cy:76.0},
+  'リアバンパー左':      {id:'iz-rear-bumper',     cx:40.7, cy:89.8},
+  'リアバンパー右':      {id:'iz-rear-bumper',     cx:59.3, cy:89.8},
+  'リアバンパー':        {id:'iz-rear-bumper',     cx:50,   cy:89.8},
+  'バックドア':          {id:'iz-trunk',           cx:50,   cy:82.8},
+  '左ドアミラー':        {id:'iz-l-mirror',        cx:28.5, cy:32.4},
+  '右ドアミラー':        {id:'iz-r-mirror',        cx:71.3, cy:32.4},
+  '左前タイヤ':          {id:'iz-lf-tire',         cx:16.7, cy:26.7},
+  '右前タイヤ':          {id:'iz-rf-tire',         cx:83.3, cy:26.7},
+  '左後タイヤ':          {id:'iz-lr-tire',         cx:16.7, cy:73.3},
+  '右後タイヤ':          {id:'iz-rr-tire',         cx:83.3, cy:73.3},
+  'リアガラス':          {id:'iz-rear-glass',      cx:50,   cy:72.6},
+  '左リア窓':            {id:'iz-lr-window',       cx:42.6, cy:63.0},
+  '右リア窓':            {id:'iz-rr-window',       cx:57.4, cy:63.0},
+  '左フロント窓':        {id:'iz-lf-window',       cx:42.6, cy:44.7},
+  '右フロント窓':        {id:'iz-rf-window',       cx:57.4, cy:44.7},
+  'ルーフ（リア）':      {id:'iz-rear-glass',      cx:50,   cy:70.0},
+  'フロントスポイラー':  {id:'iz-front-spoiler',   cx:50,   cy:7.8 },
+  'テールゲートスポイラー':{id:'iz-rear-spoiler',  cx:50,   cy:93.1},
+  '左サイドスポイラー':  {id:'iz-rside-spoiler',   cx:9.4,  cy:43.7},
+  '右サイドスポイラー':  {id:'iz-lside-spoiler',   cx:90.6, cy:43.7},
+};
+
+const SEV_COLOR={major:'#ff3333',moderate:'#ff8800',minor:'#ffcc00',scratch:'#ff4444',dent:'#ff8800',chip:'#ffaa00',crack:'#4488ff',stone_chip:'#22aaee'};
+function dmgColor(d){ return SEV_COLOR[d.severity]||SEV_COLOR[d.type]||'#ff8888'; }
+
+const SVG_VB_W=270, SVG_VB_H=430;
+function pinPct(cx, cy, W, H){
+  if(!W||!H) return {l:cx,t:cy};
+  const scale=Math.min(W/SVG_VB_W, H/SVG_VB_H);
+  const rw=SVG_VB_W*scale, rh=SVG_VB_H*scale;
+  const xOff=(W-rw)/2, yOff=(H-rh)/2;
+  return {
+    l:(xOff + cx/100*rw)/W*100,
+    t:(yOff + cy/100*rh)/H*100
+  };
+}
+
+let currentVehicle=null;
+
+// ===== 車両図描画（リードオンリー版） =====
+function renderMap(damages){
+  const view=document.getElementById('carView');
+  if(!view) return;
+  // SVG を template から取得して埋め込み
+  const tpl=document.getElementById('carSvgTpl');
+  view.innerHTML='';
+  view.appendChild(tpl.content.cloneNode(true));
+
+  // 描画後にサイズ確定するため次フレームで処理
+  requestAnimationFrame(()=>{
+    const W=view.clientWidth||view.offsetWidth||0;
+    const H=view.clientHeight||view.offsetHeight||0;
+    const zoneCountMap={};
+
+    (damages||[]).forEach(d=>{
+      let zone=null;
+      const loc=d.location||'';
+      if(ZONE_MAP[loc]) zone=ZONE_MAP[loc];
+      if(!zone){
+        const keys=Object.keys(ZONE_MAP).sort((a,b)=>b.length-a.length);
+        for(const k of keys){ if(loc.includes(k)){ zone=ZONE_MAP[k]; break; }}
+      }
+      if(!zone) return;
+
+      if(!zoneCountMap[zone.id]) zoneCountMap[zone.id]={count:0};
+      const pinIdx=zoneCountMap[zone.id].count++;
+
+      const c=dmgColor(d);
+      const pin=document.createElement('div');
+      pin.className='ipin';
+      const offsetR=pinIdx>0?4.5:0;
+      const offsetAngle=(pinIdx*137.5)*(Math.PI/180);
+      const oxPct=pinIdx>0?offsetR*Math.cos(offsetAngle):0;
+      const oyPct=pinIdx>0?offsetR*Math.sin(offsetAngle):0;
+      const p=pinPct(zone.cx+oxPct, zone.cy+oyPct, W, H);
+      pin.style.cssText=`left:${p.l}%;top:${p.t}%;`;
+      pin.dataset.dmgId=d.id;
+      pin.innerHTML=`<div class="ipin-r" style="border-color:${c}80;"><div class="ipin-c" style="background:${c};"></div></div><div class="ipin-lbl">${d.location}</div>`;
+      pin.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        openPhotoLB(d.id);
+      });
+      view.appendChild(pin);
+
+      const el=view.querySelector('#'+zone.id);
+      if(el){
+        const hFill={major:'#ffcccc',moderate:'#ffe0b8',minor:'#fff3cc',scratch:'#ffcccc',dent:'#ffe0b8',chip:'#fff0b0',crack:'#cce0ff',stone_chip:'#bbebff'};
+        const hStroke={major:'#dd2222',moderate:'#cc6600',minor:'#cc9900',scratch:'#dd2222',dent:'#cc6600',chip:'#cc8800',crack:'#2255cc',stone_chip:'#0088cc'};
+        el.style.fill=hFill[d.severity]||hFill[d.type]||'#ffeecc';
+        el.setAttribute('stroke',hStroke[d.severity]||hStroke[d.type]||'#cc8800');
+        el.setAttribute('stroke-width','2');
+      }
+    });
+
+    // 凡例描画
+    const legend=document.getElementById('legend');
+    if(legend){
+      if(!damages||damages.length===0){
+        legend.innerHTML='<div class="legend-empty">✨ 傷の登録はありません（クリーンな状態です）</div>';
+      } else {
+        legend.innerHTML=damages.map(d=>{
+          const c=dmgColor(d);
+          return `<div class="legend-item"><div class="legend-dot" style="background:${c};"></div>${d.location}</div>`;
+        }).join('');
+      }
+    }
+  });
+}
+
+// ===== 写真ライトボックス（個人情報・担当者は非表示） =====
+function openPhotoLB(dmgId){
+  if(!currentVehicle) return;
+  const d=(currentVehicle.current_damages||[]).find(x=>x.id===dmgId);
+  if(!d) return;
+  const inner=document.getElementById('lbCanvasInner');
+  if(d.photo){
+    inner.innerHTML=`<img src="${d.photo}" alt="${d.location}">`;
+  } else {
+    inner.innerHTML=`<div style="aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:#1a2536;color:#5d7d9a;font-size:13px;border-radius:12px;">📷 写真は登録されていません</div>`;
+  }
+  document.getElementById('lbLoc').textContent=d.location||'—';
+  // 担当者名は非表示（addedBy をマスキング）— 記録日付のみ
+  document.getElementById('lbSub').textContent=(d.addedAt||'—')+' 記録';
+  document.getElementById('lbDesc').textContent=d.desc||'';
+  const meta=document.getElementById('lbMeta');
+  const tL={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',crack:'ひび割れ',other:'その他',stone_chip:'飛び石'};
+  const sL={minor:'軽微',moderate:'中程度',major:'重大'};
+  if(meta){
+    const tags=[];
+    if(d.type) tags.push(`<div class="photo-lb-tag">${tL[d.type]||d.type}</div>`);
+    if(d.severity) tags.push(`<div class="photo-lb-tag">${sL[d.severity]||d.severity}</div>`);
+    meta.innerHTML=tags.join('');
+  }
+  document.getElementById('photoLb').classList.add('show');
+}
+function closePhotoLB(e){
+  if(e&&e.target!==document.getElementById('photoLb')&&!e.target.classList.contains('photo-lb-close'))return;
+  document.getElementById('photoLb').classList.remove('show');
+}
+window.closePhotoLB=closePhotoLB;
+
+// ===== 日時フォーマット =====
+function formatDateTime(iso){
+  if(!iso) return '';
+  try{
+    const d=new Date(iso);
+    if(isNaN(d.getTime())) return iso;
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(d.getDate()).padStart(2,'0');
+    const hh=String(d.getHours()).padStart(2,'0');
+    const mi=String(d.getMinutes()).padStart(2,'0');
+    return `${y}/${m}/${dd} ${hh}:${mi}`;
+  }catch(e){ return iso; }
+}
+function formatToday(){
+  const d=new Date();
+  const wd=['日','月','火','水','木','金','土'][d.getDay()];
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  const hh=String(d.getHours()).padStart(2,'0');
+  const mi=String(d.getMinutes()).padStart(2,'0');
+  return `閲覧: ${y}/${m}/${dd}(${wd})<br>${hh}:${mi}`;
+}
+
+// ===== エラー表示 =====
+function showError(title, desc){
+  document.getElementById('loadingView').style.display='none';
+  document.getElementById('mainView').style.display='none';
+  const errView=document.getElementById('errView');
+  errView.style.display='flex';
+  if(title) document.getElementById('errTitle').textContent=title;
+  if(desc) document.getElementById('errDesc').innerHTML=desc;
+}
+
+// ===== メイン: トークン取得 → DB照会 → 表示 =====
+async function loadShareData(){
+  const params=new URLSearchParams(location.search);
+  const token=params.get('t');
+  if(!token){
+    showError('共有リンクが無効です','URL にトークンが含まれていません。');
+    return;
+  }
+  // UUID 形式チェック
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)){
+    showError('共有リンクが無効です','URL のトークン形式が不正です。');
+    return;
+  }
+  try{
+    const {data,error}=await sb.from('vehicle_twins')
+      .select('id,store,plate,model,year,color,current_damages,last_check_at,share_enabled')
+      .eq('share_token',token)
+      .maybeSingle();
+    if(error){
+      console.error('[v.html] DB error:',error);
+      showError('読込エラー','データ取得に失敗しました。<br>時間を置いて再度アクセスしてください。');
+      return;
+    }
+    if(!data){
+      showError('共有リンクは利用できません','このリンクは無効または停止されています。<br>HANDYMAN までお問い合わせください。');
+      return;
+    }
+    if(!data.share_enabled){
+      showError('共有が停止されています','このリンクの共有は停止されました。<br>HANDYMAN までお問い合わせください。');
+      return;
+    }
+    currentVehicle=data;
+    renderVehicle(data);
+  }catch(e){
+    console.error('[v.html] exception:',e);
+    showError('読込エラー','通信に失敗しました。<br>Wi-Fi/モバイル回線をご確認ください。');
+  }
+}
+
+function renderVehicle(v){
+  document.getElementById('loadingView').style.display='none';
+  document.getElementById('mainView').style.display='block';
+
+  // 店舗
+  const storeLabel=v.store==='naha'?'那覇空港店':(v.store==='sapporo'?'札幌店':'');
+  document.getElementById('storeLabel').textContent=storeLabel;
+
+  // 本日日付
+  document.getElementById('todayLabel').innerHTML=formatToday();
+
+  // 車両情報
+  document.getElementById('plate').textContent=v.plate||'--';
+  const modelParts=[v.model];
+  if(v.year) modelParts.push(`${v.year}年`);
+  if(v.color) modelParts.push(v.color);
+  document.getElementById('model').textContent=modelParts.filter(Boolean).join(' / ');
+
+  // 最終チェック日時（担当者名は出さない）
+  if(v.last_check_at){
+    document.getElementById('lastCheck').textContent=`最終チェック: ${formatDateTime(v.last_check_at)}`;
+    document.getElementById('lastCheckBox').style.display='flex';
+  }
+
+  // 車両図描画
+  renderMap(v.current_damages||[]);
+}
+
+// 起動
+loadShareData();
+</script>
+</body>
+</html>

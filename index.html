@@ -1276,7 +1276,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll},{data:mileageAll}]=await Promise.all([
         sb.from('nha_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','naha'),
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','naha'),
         sb.from('nha_fleet').select('reservation_id,vehicle_code'),
         sb.from('nha_reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300),
         sb.from('nha_vehicle_maintenance').select('vehicle_code,odometer_km,completed_date').eq('type','走行距離').order('completed_date',{ascending:false}).order('created_at',{ascending:false}).limit(500)
@@ -1318,7 +1318,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count').eq('store','sapporo'),
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','sapporo'),
         sb.from('fleet').select('reservation_id,vehicle_code'),
         sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false}).limit(300)
       ]);
@@ -1626,15 +1626,26 @@ function renderS0(v){
     } else {
       // S0ハブ画面：貸出・返却を縦積み大ボタン ／ 傷編集・履歴・修理を横並び小ボタン
       const isReturned=(v.status==='returned');
+      // 共有リンク発行/停止ボタン（2026-05-26追加）
+      const isShared=!!v.share_enabled;
+      const shareBtn=isShared
+        ? `<button onclick="copyShareUrl()" style="flex:1;padding:11px 4px;border-radius:11px;border:1.5px solid #16a34a;background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;">📋 リンクコピー</button>
+           <button onclick="toggleShare(false)" style="flex:1;padding:11px 4px;border-radius:11px;border:1.5px solid #dc2626;background:#fef2f2;color:#b91c1c;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;">🔒 共有停止</button>`
+        : `<button onclick="toggleShare(true)" style="width:100%;padding:12px 8px;border-radius:11px;border:1.5px solid #2563eb;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;">📤 お客様共有リンクを発行</button>`;
       actionArea.innerHTML=`
         <div style="padding:10px 0 max(env(safe-area-inset-bottom),20px);">
           ${isReturned?`<div style="padding:7px 12px;border-radius:10px;background:#00aa5518;border:1px solid #00aa5540;color:#007733;font-size:11px;font-weight:700;text-align:center;margin-bottom:8px;">✅ 返却済み — 次の予約を待っています</div>`:''}
           <button onclick="goto('sc0')" style="width:100%;padding:16px 10px;border-radius:13px;border:none;background:linear-gradient(135deg,#2266dd,#1144bb);color:#fff;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:8px;box-shadow:0 4px 14px #2266dd30;">🚗 貸出チェック</button>
           <button onclick="startReturnCheck()" style="width:100%;padding:16px 10px;border-radius:13px;border:none;background:linear-gradient(135deg,#cc5500,#994400);color:#fff;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-bottom:14px;box-shadow:0 4px 14px #cc550030;">📋 返却チェック</button>
-          <div style="display:flex;gap:7px;">
+          <div style="display:flex;gap:7px;margin-bottom:10px;">
             <button onclick="openDamageEdit('s0')" style="flex:1;padding:12px 4px;border-radius:11px;border:1.5px solid #4488cc;background:#eef4fc;color:#2266cc;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;">✏️ 傷編集</button>
             <button onclick="goto('sc')" style="flex:1;padding:12px 4px;border-radius:11px;border:1.5px solid #8899bb;background:#f4f8fc;color:#445566;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;">⛓ 履歴</button>
             <button onclick="openRepairPage()" style="flex:1;padding:12px 4px;border-radius:11px;border:1.5px solid #ee8800;background:#fff8e6;color:#884400;font-size:11px;font-weight:700;cursor:pointer;touch-action:manipulation;">🔧 修理</button>
+          </div>
+          <div style="padding:10px 12px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:11px;">
+            <div style="font-size:10px;color:#64748b;font-weight:700;margin-bottom:6px;">📤 お客様用共有リンク${isShared?' <span style="color:#16a34a;">●公開中</span>':' <span style="color:#94a3b8;">●未発行</span>'}</div>
+            <div style="display:flex;gap:7px;">${shareBtn}</div>
+            ${isShared?`<div style="font-size:9px;color:#64748b;margin-top:6px;line-height:1.5;">LINE等でURLを送るとお客様が傷状態を閲覧できます。<br>顧客名・予約番号・担当者名は自動的に非表示になります。</div>`:''}
           </div>
         </div>`;
     }
@@ -1874,6 +1885,74 @@ if(currentStaff){
 }
 // AIキーボタン初期状態
 setTimeout(()=>updateSmAiBtn(), 100);
+
+// ===== お客様共有リンク（2026-05-26追加） =====
+// 各車両ごとに share_token + share_enabled を持ち、share_enabled=true の車両のみ
+// anon ロールで vehicle_twins を SELECT 可能（RLS で制御）。
+// 共有URL: https://nosh2318.github.io/handyman-damage/v.html?t=<share_token>
+async function toggleShare(enable){
+  if(!currentVehicleId){ showToast('車両を選択してください'); return; }
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v){ showToast('車両が見つかりません'); return; }
+  if(enable){
+    const ok=window.confirm('この車両のダメージ情報をお客様に公開しますか？\n\n発行されるURLを知っている人は誰でも閲覧できます（顧客名・担当者名は自動非表示）。');
+    if(!ok) return;
+  } else {
+    const ok=window.confirm('共有を停止しますか？\n\n発行済みのURLは即座にアクセスできなくなります。');
+    if(!ok) return;
+  }
+  try{
+    const patch={ share_enabled: enable };
+    if(enable) patch.share_enabled_at=new Date().toISOString();
+    const{error}=await sb.from('vehicle_twins').update(patch).eq('id',currentVehicleId);
+    if(error){ showToast('❌ 更新失敗: '+error.message); console.error('[toggleShare]',error); return; }
+    // ローカルキャッシュ更新
+    v.share_enabled=enable;
+    if(enable){
+      v.share_enabled_at=patch.share_enabled_at;
+      // 発行時にURL自動コピー
+      await copyShareUrl();
+    } else {
+      showToast('🔒 共有を停止しました');
+    }
+    // 再描画
+    renderS0(v);
+  }catch(e){
+    console.error('[toggleShare] exception:',e);
+    showToast('❌ エラー: '+e.message);
+  }
+}
+
+async function copyShareUrl(){
+  if(!currentVehicleId){ showToast('車両を選択してください'); return; }
+  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+  if(!v||!v.share_token){ showToast('共有トークンがありません'); return; }
+  const url='https://nosh2318.github.io/handyman-damage/v.html?t='+v.share_token;
+  try{
+    // モダンブラウザ
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(url);
+      showToast('📋 URLをコピーしました\nLINEに貼り付けて送信してください');
+      return;
+    }
+    // フォールバック (iOS Safari 等)
+    const ta=document.createElement('textarea');
+    ta.value=url;
+    ta.style.cssText='position:fixed;top:-1000px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok) showToast('📋 URLをコピーしました\nLINEに貼り付けて送信してください');
+    else showToast('⚠️ コピー失敗 → URL:\n'+url);
+  }catch(e){
+    console.error('[copyShareUrl]',e);
+    showToast('⚠️ コピー失敗 → URL:\n'+url);
+  }
+}
+
+window.toggleShare=toggleShare;
+window.copyShareUrl=copyShareUrl;
 
 // ===== 車両一覧リロード =====
 async function reloadVehicles(){

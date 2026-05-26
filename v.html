@@ -463,16 +463,32 @@ function renderVehicle(v){
   document.getElementById('todayLabel').innerHTML=formatToday();
 
   // 車両情報: "車種 / ナンバー" 1行のみ表示（最終チェック日時は表示しない）
-  // 後方互換: 過去発行の旧形式（"プレート|車種 ／ ID"）も整形して表示
+  // 後方互換ロジック（過去のフォーマット履歴に対応）:
+  //   v1 パイプ形式 "プレート|車種 ／ ID"           → "車種 / プレート" に変換
+  //   v2 スラッシュ形式 "プレート / 車種 / 年式"     → "車種 / プレート" に変換
+  //   v3 新形式 "車種 / プレート"                    → そのまま表示
   let label=(v.display_label||v.id||'--').trim();
   if(label.indexOf('|')>=0){
-    // 旧パイプ形式 → "車種 / ナンバー" に整形
+    // v1 パイプ形式
     const parts=label.split('|');
     const plate=(parts[0]||'').trim();
     const modelLine=(parts[1]||'').trim();
-    // "ヴェルファイア ／ ヴェル5555" → 車種名だけ抽出
     const modelOnly=modelLine.split(/ ／ | \/ |\//)[0].trim();
     label=modelOnly?(modelOnly+' / '+plate):plate;
+  } else if(label.indexOf(' / ')>=0){
+    // v2 vs v3 判別: 先頭が数字/英字始まりで日本語カナを含まなければ v2（プレート先頭）
+    const parts=label.split(' / ').map(s=>s.trim()).filter(Boolean);
+    if(parts.length>=2){
+      const first=parts[0];
+      const hasKana=/[ぁ-んァ-ヶー一-龯]/.test(first);
+      if(!hasKana && /^[\dA-Za-z]/.test(first)){
+        // v2 旧スラッシュ形式 → name + plate に並べ替え（年式は捨てる）
+        const plate=parts[0];
+        const name=parts[1]||'';
+        label=name?(name+' / '+plate):plate;
+      }
+      // それ以外（v3 新形式 "ノア / 5398"）はそのまま使う
+    }
   }
   document.getElementById('plate').textContent=label;
 

@@ -1566,8 +1566,14 @@ function renderS0(v){
   const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
   const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
   setText('s0StoreLabel',`HANDYMAN / ${storeLabel}`);
-  setText('s0Vno',vInfo.plate_no||v.id);
-  setText('s0Model',`${vInfo.name||''} ／ ${v.id}`);
+  // ★ 2026-05-26 修正: ナンバー表示の改善
+  //   - 「VEL」「ヴェル5555」 等の code が表示される問題を解決
+  //   - plate_no が空 or "未定"/"確認" 等の不正値なら「ナンバー未登録」表示
+  //   - 車種名(name)を大きく表示・ナンバーをサブ表示
+  const _plate=(vInfo.plate_no||'').toString().trim();
+  const _isValidPlate=_plate && !['未定','確認','-','—','tbd','TBD','none'].includes(_plate);
+  setText('s0Vno', vInfo.name || '【車種未登録】');
+  setText('s0Model', _isValidPlate ? `🚗 ナンバー ${_plate} ／ ${v.id}` : `⚠️ ナンバー未登録 ／ ${v.id}`);
   const badge=document.getElementById('s0StatusBadge');
   if(badge){
     badge.textContent=`${statusEmoji(v.status)} ${st.label}`;

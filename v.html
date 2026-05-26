@@ -470,11 +470,23 @@ function renderVehicle(v){
   // 本日日付
   document.getElementById('todayLabel').innerHTML=formatToday();
 
-  // 車両情報（display_label は「ナンバー / 車種 / 年式」形式でスラッシュ区切り）
-  const label=v.display_label||v.id||'--';
-  const labelParts=label.split(' / ');
-  document.getElementById('plate').textContent=labelParts[0]||v.id;
-  document.getElementById('model').textContent=labelParts.slice(1).join(' / ')||'';
+  // 車両情報（社内APPと完全一致表記: "プレート|車種 ／ ID" 形式のパイプ区切り）
+  // 旧形式（スラッシュ区切り・パイプなし）にも後方互換でフォールバック
+  const label=v.display_label||'';
+  if(label.indexOf('|')>=0){
+    const parts=label.split('|');
+    document.getElementById('plate').textContent=parts[0]||v.id||'--';
+    document.getElementById('model').textContent=parts[1]||'';
+  } else if(label){
+    // 旧形式（display_label が pipe を含まない場合）
+    const parts=label.split(' / ');
+    document.getElementById('plate').textContent=parts[0]||v.id||'--';
+    document.getElementById('model').textContent=parts.slice(1).join(' / ')||'';
+  } else {
+    // 未発行時のフォールバック (旧トークン互換)
+    document.getElementById('plate').textContent=v.id||'--';
+    document.getElementById('model').textContent='';
+  }
 
   // 最終チェック日時（担当者名は出さない）
   if(v.last_check_at){

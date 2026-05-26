@@ -1906,13 +1906,14 @@ async function toggleShare(enable){
     if(enable){
       patch.share_enabled_at=new Date().toISOString();
       // ★ お客様ビュー用の車両ラベルを保存（anon ロールから vehicles テーブルが見えないため、ここでスナップショット）
+      //   社内APP (renderS0 L1569-1570) と完全一致する表記:
+      //     大見出し = vInfo.plate_no || v.id       例: "9047"
+      //     小見出し = vInfo.name + ' ／ ' + v.id   例: "ヴェルファイア ／ ヴェル5555"
+      //   v.html 側でパイプ '|' を区切りに分離して表示
       const vInfo=v.vehicles||{};
-      const parts=[];
-      if(vInfo.plate_no) parts.push(vInfo.plate_no);
-      else parts.push(v.id);
-      if(vInfo.name) parts.push(vInfo.name);
-      if(vInfo.year) parts.push(vInfo.year+'年');
-      patch.display_label=parts.join(' / ');
+      const labelPlate=vInfo.plate_no||v.id||'';
+      const labelModel=(vInfo.name||'')+(v.id?' ／ '+v.id:'');
+      patch.display_label=labelPlate+'|'+labelModel;
     }
     const{error}=await sb.from('vehicle_twins').update(patch).eq('id',currentVehicleId);
     if(error){ showToast('❌ 更新失敗: '+error.message); console.error('[toggleShare]',error); return; }

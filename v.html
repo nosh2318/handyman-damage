@@ -435,7 +435,7 @@ async function loadShareData(){
   }
   try{
     const {data,error}=await sb.from('vehicle_twins')
-      .select('id,store,plate,model,year,color,current_damages,last_check_at,share_enabled')
+      .select('id,store,display_label,current_damages,last_check_at,share_enabled')
       .eq('share_token',token)
       .maybeSingle();
     if(error){
@@ -470,12 +470,11 @@ function renderVehicle(v){
   // 本日日付
   document.getElementById('todayLabel').innerHTML=formatToday();
 
-  // 車両情報
-  document.getElementById('plate').textContent=v.plate||'--';
-  const modelParts=[v.model];
-  if(v.year) modelParts.push(`${v.year}年`);
-  if(v.color) modelParts.push(v.color);
-  document.getElementById('model').textContent=modelParts.filter(Boolean).join(' / ');
+  // 車両情報（display_label は「ナンバー / 車種 / 年式」形式でスラッシュ区切り）
+  const label=v.display_label||v.id||'--';
+  const labelParts=label.split(' / ');
+  document.getElementById('plate').textContent=labelParts[0]||v.id;
+  document.getElementById('model').textContent=labelParts.slice(1).join(' / ')||'';
 
   // 最終チェック日時（担当者名は出さない）
   if(v.last_check_at){

@@ -1903,13 +1903,24 @@ async function toggleShare(enable){
   }
   try{
     const patch={ share_enabled: enable };
-    if(enable) patch.share_enabled_at=new Date().toISOString();
+    if(enable){
+      patch.share_enabled_at=new Date().toISOString();
+      // ★ お客様ビュー用の車両ラベルを保存（anon ロールから vehicles テーブルが見えないため、ここでスナップショット）
+      const vInfo=v.vehicles||{};
+      const parts=[];
+      if(vInfo.plate_no) parts.push(vInfo.plate_no);
+      else parts.push(v.id);
+      if(vInfo.name) parts.push(vInfo.name);
+      if(vInfo.year) parts.push(vInfo.year+'年');
+      patch.display_label=parts.join(' / ');
+    }
     const{error}=await sb.from('vehicle_twins').update(patch).eq('id',currentVehicleId);
     if(error){ showToast('❌ 更新失敗: '+error.message); console.error('[toggleShare]',error); return; }
     // ローカルキャッシュ更新
     v.share_enabled=enable;
     if(enable){
       v.share_enabled_at=patch.share_enabled_at;
+      v.display_label=patch.display_label;
       // 発行時にURL自動コピー
       await copyShareUrl();
     } else {

@@ -1936,7 +1936,9 @@ async function copyShareUrl(){
   if(!currentVehicleId){ showToast('車両を選択してください'); return; }
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   if(!v||!v.share_token){ showToast('共有トークンがありません'); return; }
-  const url='https://nosh2318.github.io/handyman-damage/v.html?t='+v.share_token;
+  // 共有URL（バージョンクエリ付けてブラウザキャッシュ抑制）
+  const VER='v3';
+  const url='https://nosh2318.github.io/handyman-damage/v.html?t='+v.share_token+'&v='+VER;
   try{
     // モダンブラウザ
     if(navigator.clipboard&&navigator.clipboard.writeText){

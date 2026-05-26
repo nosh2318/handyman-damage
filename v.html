@@ -16,12 +16,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 .hd-store{font-size:11px;color:#aabbcc;font-weight:600;}
 .hd-today{font-size:10px;color:#8899aa;text-align:right;line-height:1.4;}
 
-/* 車両情報カード */
+/* 車両情報カード（"車種 / ナンバー" 1行のみ） */
 .vh-card{margin-top:6px;padding:14px 16px;background:linear-gradient(135deg,#13192a,#1a2238);border:1px solid #2a3552;border-radius:14px;box-shadow:0 4px 16px #00000040;}
-.vh-plate{font-size:26px;font-weight:900;color:#fff;letter-spacing:1px;font-family:Menlo,'SF Mono',monospace;line-height:1.1;}
-.vh-model{margin-top:4px;font-size:12px;color:#aaccdd;font-weight:600;}
-.vh-last{margin-top:10px;padding-top:10px;border-top:1px solid #2a3552;font-size:11px;color:#7799bb;display:flex;align-items:center;gap:6px;}
-.vh-last-ico{font-size:13px;}
+.vh-plate{font-size:22px;font-weight:900;color:#fff;letter-spacing:.5px;line-height:1.2;}
 
 /* 車両図エリア */
 .car-wrap{margin-top:12px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 4px 16px #00000040;}
@@ -99,11 +96,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 
     <div class="vh-card">
       <div class="vh-plate" id="plate">--</div>
-      <div class="vh-model" id="model">--</div>
-      <div class="vh-last" id="lastCheckBox" style="display:none;">
-        <span class="vh-last-ico">📋</span>
-        <span id="lastCheck">--</span>
-      </div>
     </div>
 
     <div class="car-wrap">
@@ -470,29 +462,19 @@ function renderVehicle(v){
   // 本日日付
   document.getElementById('todayLabel').innerHTML=formatToday();
 
-  // 車両情報（社内APPと完全一致表記: "プレート|車種 ／ ID" 形式のパイプ区切り）
-  // 旧形式（スラッシュ区切り・パイプなし）にも後方互換でフォールバック
-  const label=v.display_label||'';
+  // 車両情報: "車種 / ナンバー" 1行のみ表示（最終チェック日時は表示しない）
+  // 後方互換: 過去発行の旧形式（"プレート|車種 ／ ID"）も整形して表示
+  let label=(v.display_label||v.id||'--').trim();
   if(label.indexOf('|')>=0){
+    // 旧パイプ形式 → "車種 / ナンバー" に整形
     const parts=label.split('|');
-    document.getElementById('plate').textContent=parts[0]||v.id||'--';
-    document.getElementById('model').textContent=parts[1]||'';
-  } else if(label){
-    // 旧形式（display_label が pipe を含まない場合）
-    const parts=label.split(' / ');
-    document.getElementById('plate').textContent=parts[0]||v.id||'--';
-    document.getElementById('model').textContent=parts.slice(1).join(' / ')||'';
-  } else {
-    // 未発行時のフォールバック (旧トークン互換)
-    document.getElementById('plate').textContent=v.id||'--';
-    document.getElementById('model').textContent='';
+    const plate=(parts[0]||'').trim();
+    const modelLine=(parts[1]||'').trim();
+    // "ヴェルファイア ／ ヴェル5555" → 車種名だけ抽出
+    const modelOnly=modelLine.split(/ ／ | \/ |\//)[0].trim();
+    label=modelOnly?(modelOnly+' / '+plate):plate;
   }
-
-  // 最終チェック日時（担当者名は出さない）
-  if(v.last_check_at){
-    document.getElementById('lastCheck').textContent=`最終チェック: ${formatDateTime(v.last_check_at)}`;
-    document.getElementById('lastCheckBox').style.display='flex';
-  }
+  document.getElementById('plate').textContent=label;
 
   // 車両図描画
   renderMap(v.current_damages||[]);

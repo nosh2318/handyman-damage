@@ -2884,8 +2884,8 @@ async function sr0SaveReturn(){
       staff:currentStaff,
       customer_name:customer,
       resv_no:resvNo,
-      damages_snapshot:finalDamages,
-      new_damages:newDamagesRecord,
+      damages_snapshot:stripPhotos_(finalDamages),
+      new_damages:stripPhotos_(newDamagesRecord),
       staff_confirmed:true,
       confirmed_at:now,
       prev_event_id:prevEventId,
@@ -2933,7 +2933,7 @@ function triggerLibrary(){ document.getElementById('libraryInput').click(); }
 async function handlePhotoSelect(input){
   const file=input.files[0]; if(!file) return; input.value='';
   try{
-    const b64=await compressPhoto(file,800,0.72);
+    const b64=await compressPhoto(file,600,0.55);
     editPhoto=b64;
     const preview=document.getElementById('editPhotoPreview');
     const img=document.getElementById('editPhotoImg');
@@ -2941,6 +2941,15 @@ async function handlePhotoSelect(input){
     if(preview) preview.style.display='block';
     showToast('✓ 写真を追加しました');
   }catch(e){ showToast('⚠ 写真の読み込みに失敗しました'); }
+}
+// ★ 2026-05-28: check_events の damages_snapshot / new_damages から写真を除去
+// 写真は vehicle_twins.current_damages にのみ保存。check_events は傷メタデータのみ保持。
+// 目的: check_events INSERT ペイロードを 200KB+ → ~5KB に削減し保存フリーズを解消
+function stripPhotos_(damages){
+  return (damages||[]).map(d=>{
+    const {photo,...rest}=d;
+    return rest;
+  });
 }
 function compressPhoto(file,maxPx,quality){
   return new Promise((resolve,reject)=>{
@@ -3259,8 +3268,8 @@ async function siComplete(){
       vehicle_id:currentVehicleId,
       event_type:'initial',
       staff:currentStaff,
-      damages_snapshot:damages,
-      new_damages:damages,
+      damages_snapshot:stripPhotos_(damages),
+      new_damages:stripPhotos_(damages),
       staff_confirmed:true,
       confirmed_at:now,
       notes:`初期登録 ／ 傷${damages.length}件 ／ チェーン起点`
@@ -3455,7 +3464,7 @@ async function sc0Checkout(){
       staff:currentStaff,
       customer_name:customer,
       resv_no:resvNo,
-      damages_snapshot:damages,
+      damages_snapshot:stripPhotos_(damages),
       new_damages:[],
       staff_confirmed:true,
       confirmed_at:new Date().toISOString(),
@@ -3717,7 +3726,7 @@ async function submitRepair(){
       vehicle_id: currentVehicleId,
       event_type: 'repair',
       staff: staff,
-      damages_snapshot: v.current_damages || [],
+      damages_snapshot: stripPhotos_(v.current_damages || []),
       new_damages: [],
       staff_confirmed: true,
       confirmed_at: now,

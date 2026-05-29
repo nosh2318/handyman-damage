@@ -624,7 +624,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.3</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1093,7 +1093,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.2-DAMAGE';
+const APP_VERSION='v2.7.3-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -2684,11 +2684,25 @@ function closeDmgEdit(e){
   document.getElementById('dmgEditOverlay').classList.remove('show');
   currentEditDmgId=null;
 }
+// ★ 2026-05-29: 共通 watchdog ヘルパー（保存系すべてに30秒タイムアウト）
+function _saveWatchdog(btn,origLabel,ms){
+  ms=ms||30000;
+  return setTimeout(()=>{
+    if(btn){btn.textContent=origLabel;btn.style.pointerEvents='all';btn.disabled=false;}
+    showToast('⚠ タイムアウト。再度お試しください');
+  },ms);
+}
 async function markRepaired(){
   if(!currentEditDmgId) return;
   const d=currentDamages().find(x=>x.id===currentEditDmgId);
   const loc=d?d.location:'';
   const dmgId=currentEditDmgId;
+  const ov=document.getElementById('dmgEditOverlay');
+  // ★ 2026-05-29: 30秒タイムアウト watchdog
+  const _wd=setTimeout(()=>{
+    if(ov) ov.classList.remove('show');
+    showToast('⚠ 修復タイムアウト。再度お試しください');
+  },30000);
   try{
     const cv=vehiclesCache.find(x=>x.id===currentVehicleId);
     const updated=(cv?.current_damages||[]).filter(x=>x.id!==dmgId);
@@ -2696,12 +2710,13 @@ async function markRepaired(){
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
-    document.getElementById('dmgEditOverlay').classList.remove('show');
+    if(ov) ov.classList.remove('show');
     currentEditDmgId=null;
     showToast('🔧 '+loc+'を修復済みにしました');
   }catch(e){
+    console.error('markRepaired:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
-  }
+  }finally{ clearTimeout(_wd); }
 }
 
 function typeLabel(type){
@@ -2875,6 +2890,7 @@ async function sr0SaveReturn(){
 
   const btn=document.getElementById('sr0ReturnBtn');
   if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
+  const _wd=_saveWatchdog(btn,'✓ 全件確認済み — 返却完了');
 
   try{
     const now=new Date().toISOString();
@@ -2915,7 +2931,7 @@ async function sr0SaveReturn(){
     console.error('sr0SaveReturn:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
     if(btn){btn.textContent='✓ 全件確認済み — 返却完了';btn.style.pointerEvents='all';}
-  }
+  }finally{ clearTimeout(_wd); }
 }
 
 // ===== 写真ユーティリティ =====
@@ -3496,6 +3512,10 @@ async function sc0Checkout(){
   const customer=v?.current_customer||sc0ResvData?.name||'—';
   const resvNo=v?.current_resv_no||sc0ResvData?.id||'—';
   const prevEventId=v?.last_event_id||null;
+  const _sc0Btn=document.getElementById('sc0CheckoutBtn');
+  const _origSc0=_sc0Btn?_sc0Btn.textContent:'';
+  if(_sc0Btn){_sc0Btn.style.pointerEvents='none';_sc0Btn.textContent='保存中...';}
+  const _wd=_saveWatchdog(_sc0Btn,_origSc0||'✓ 出庫チェック完了');
   try{
     const{data:ev,error}=await sb.from('check_events').insert({
       vehicle_id:currentVehicleId,
@@ -3528,8 +3548,11 @@ async function sc0Checkout(){
   }catch(e){
     console.warn('sc0Checkout save error:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
+    if(_sc0Btn){_sc0Btn.style.pointerEvents='all';_sc0Btn.textContent=_origSc0||'✓ 出庫チェック完了';}
+    clearTimeout(_wd);
     return;
   }
+  clearTimeout(_wd);
   goto('sm');
   setTimeout(()=>showToast(`✓ 出庫チェック完了 ／ ${customer} 様 ／ チェーンに記録`),200);
 }

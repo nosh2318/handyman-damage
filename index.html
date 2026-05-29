@@ -624,7 +624,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.6.3</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="reloadVehicles()" id="smReloadBtn" style="font-size:9px;color:#88ccff;background:#ffffff10;border:1px solid #88ccff30;border-radius:6px;padding:3px 8px;cursor:pointer;" title="車両一覧を更新">🔄</button>
@@ -1093,7 +1093,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.1-DAMAGE';
+const APP_VERSION='v2.7.2-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -2933,13 +2933,20 @@ function triggerLibrary(){ document.getElementById('libraryInput').click(); }
 async function handlePhotoSelect(input){
   const file=input.files[0]; if(!file) return; input.value='';
   try{
-    const b64=await compressPhoto(file,600,0.55);
+    // ★ 2026-05-29: 480px/quality 0.4 に圧縮強化（保存フリーズ対策）
+    // 旧 600px/0.55 → 100-300KB だったため、JSONB UPDATE が重く保存フリーズ多発
+    let b64=await compressPhoto(file,480,0.4);
+    // ★ さらに 200KB 超なら 360px/0.35 で再圧縮
+    if(b64.length>200000){
+      b64=await compressPhoto(file,360,0.35);
+    }
     editPhoto=b64;
     const preview=document.getElementById('editPhotoPreview');
     const img=document.getElementById('editPhotoImg');
     if(img) img.src=b64;
     if(preview) preview.style.display='block';
-    showToast('✓ 写真を追加しました');
+    const kb=Math.round(b64.length/1024);
+    showToast('✓ 写真を追加しました ('+kb+'KB)');
   }catch(e){ showToast('⚠ 写真の読み込みに失敗しました'); }
 }
 // ★ 2026-05-28: check_events の damages_snapshot / new_damages から写真を除去
@@ -3069,10 +3076,23 @@ async function submitEdit(){
   const btn=document.getElementById('editOkBtn');
   if(btn){btn.textContent='保存中...';btn.style.pointerEvents='none';}
   const overlay=document.getElementById('editOverlay');
+  // ★ 2026-05-29: 30秒タイムアウト watchdog（保存フリーズ対策）
+  const _watchdog=setTimeout(()=>{
+    if(_submitEditBusy){
+      _submitEditBusy=false;
+      if(btn){btn.textContent='✓ 傷を追加';btn.style.pointerEvents='all';}
+      showToast('⚠ 保存タイムアウト。再度お試しください');
+    }
+  },30000);
   try{
     // ★ SELECT不要: vehiclesCacheは常に最新ローカル状態（連続登録でのデータ消失を防止）
     const v=vehiclesCache.find(x=>x.id===currentVehicleId);
     const updated=[...(v?.current_damages||[]),newDmg];
+    // ★ サイズチェック: 800KB 超で警告（PostgreSQL JSONB UPDATE が極端に遅くなる）
+    const _sizeKB=Math.round(JSON.stringify(updated).length/1024);
+    if(_sizeKB>800){
+      showToast('⚠ データサイズ大('+_sizeKB+'KB) 保存に時間がかかります');
+    }
     if(v) v.current_damages=updated; // ローカルキャッシュを即時更新
     const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
     if(error) throw error;
@@ -3088,6 +3108,7 @@ async function submitEdit(){
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
     if(overlay) overlay.classList.remove('show'); // エラー時もオーバーレイを閉じる
   }finally{
+    clearTimeout(_watchdog);
     _submitEditBusy=false;
     if(btn){btn.textContent='✓ 傷を追加';btn.style.pointerEvents='all';}
   }
@@ -3098,6 +3119,11 @@ async function repairZone(){
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   const beforeCnt=(v?.current_damages||[]).length;
   const overlay=document.getElementById('editOverlay');
+  // ★ 2026-05-29: 30秒タイムアウト watchdog
+  const _watchdog=setTimeout(()=>{
+    if(overlay) overlay.classList.remove('show');
+    showToast('⚠ 削除タイムアウト。再度お試しください');
+  },30000);
   try{
     // キャッシュから直接フィルタ（SELECT不要）
     const updated=(v?.current_damages||[]).filter(d=>d.location!==zone);
@@ -3109,9 +3135,10 @@ async function repairZone(){
     if(overlay) overlay.classList.remove('show');
     showToast('🔧 '+editZone+'を修復済みに（'+removed+'件削除）');
   }catch(e){
+    console.error('repairZone:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
     if(overlay) overlay.classList.remove('show');
-  }
+  }finally{ clearTimeout(_watchdog); }
 }
 function showToast(msg){
   const t=document.createElement('div');
@@ -3233,7 +3260,18 @@ function siCancel(){
 async function siComplete(){
   const damages=siLocalDamages;
   const btn=document.getElementById('siCompleteBtn');
+  const _origLabel=siEditMode?'✓ 保存する':'✓ 登録完了 — チェーン起点を作成';
   if(btn){btn.textContent='⏳ 保存中...';btn.style.pointerEvents='none';}
+  // ★ 2026-05-29: 30秒タイムアウト watchdog（保存フリーズ対策）
+  const _watchdog=setTimeout(()=>{
+    if(btn){btn.textContent=_origLabel;btn.style.pointerEvents='all';}
+    showToast('⚠ 保存タイムアウト。再度お試しください');
+  },30000);
+  // ★ サイズチェック
+  const _sizeKB=Math.round(JSON.stringify(damages).length/1024);
+  if(_sizeKB>800){
+    showToast('⚠ データサイズ大('+_sizeKB+'KB) 保存に時間がかかります');
+  }
 
   // ===== 編集モード: current_damagesのみ更新 =====
   if(siEditMode){
@@ -3255,9 +3293,10 @@ async function siComplete(){
       if(ret==='sr0') setTimeout(()=>renderMapInto('sr0MapView',null,damages,null,false),100);
       setTimeout(()=>showToast(`✓ 傷情報を保存しました（${damages.length}件）`),200);
     }catch(e){
+      console.error('siComplete edit:',e);
       showToast('❌ 保存エラー: '+e.message.slice(0,40));
       if(btn){btn.textContent='✓ 保存する';btn.style.pointerEvents='all';}
-    }
+    }finally{ clearTimeout(_watchdog); }
     return;
   }
 
@@ -3296,7 +3335,7 @@ async function siComplete(){
     console.error('siComplete:',e);
     showToast('❌ 保存エラー: '+e.message.slice(0,40));
     if(btn){btn.textContent='✓ 登録完了 — チェーン起点を作成';btn.style.pointerEvents='all';}
-  }
+  }finally{ clearTimeout(_watchdog); }
 }
 
 // ===== 貸出・返却 共通: 展開図メイン描画 =====

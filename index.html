@@ -624,7 +624,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.6</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.5</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="forceAppUpdate()" id="smForceUpdBtn" style="font-size:9px;color:#fbbf24;background:#fbbf2415;border:1px solid #fbbf2440;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;" title="アプリを最新版に更新（保存できない時はコレ）">🔄 最新版</button>
@@ -1094,7 +1094,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.6-DAMAGE';
+const APP_VERSION='v2.7.5-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1696,42 +1696,10 @@ function updateS0Chips(damages, isRegistered){
     return;
   }
   if(damages.length===0){chips.innerHTML='<div class="chip" style="color:#00aa55;border-color:#00aa5535;background:#00aa5510;">✓ 傷なし（クリーン）</div>';return;}
-  // 試験運用車(2856): 番号付きの詳細箇条書きリスト（図のピン番号と一致）
-  if(typeof isTrialListVehicle==='function' && isTrialListVehicle()){
-    const tLMap={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
-    const sLMap={minor:'軽微',moderate:'中程度',major:'重大'};
-    chips.style.cssText='display:flex;flex-direction:column;gap:6px;align-items:stretch;';
-    chips.innerHTML=damages.map((d,i)=>{
-      const c=dmgColor(d);
-      const tL=tLMap[d.type]||d.type||'傷';
-      const sL=sLMap[d.severity]||'';
-      const meta=[tL, sL, d.size, (d.desc&&d.desc!=='手動追加'?d.desc:'')].filter(Boolean).join(' ／ ');
-      const dt=d.addedAt||'';
-      const cam=d.photo?`<span style="font-size:11px;color:#2266cc;flex-shrink:0;">📷</span>`:'';
-      return `<div onclick="trialDmgTap('${d.id}')" style="display:flex;align-items:center;gap:9px;padding:7px 9px;background:#fff;border:1px solid ${c}40;border-left:4px solid ${c};border-radius:9px;cursor:pointer;text-align:left;">
-        <span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;background:${c};color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;">${i+1}</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:700;color:#1a2840;">${d.location}</div>
-          <div style="font-size:10px;color:#8899bb;margin-top:1px;white-space:normal;">${meta}${dt?'｜'+dt:''}</div>
-        </div>
-        ${cam}
-      </div>`;
-    }).join('');
-    return;
-  }
-  chips.style.cssText='';
   chips.innerHTML=damages.map(d=>{
     const c=dmgColor(d);
     return `<div class="chip" style="color:${c};border-color:${c}35;background:${c}10;">${d.location}</div>`;
   }).join('');
-}
-// 試験運用リストの行タップ → 写真があれば拡大 / なければトースト
-function trialDmgTap(dmgId){
-  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-  const d=(v?.current_damages||[]).find(x=>x.id===dmgId);
-  if(!d) return;
-  if(d.photo){ openPhotoLBDirect(dmgId); }
-  else{ showToast(`📍 ${d.location} — 写真未登録`); }
 }
 
 // ===== ユーティリティ =====
@@ -2287,10 +2255,7 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
     pin.style.cssText=`left:${p.l}%;top:${p.t}%;`;
     pin.dataset.dmgId=d.id;
     const newBadge=isNew?`<div class="ipin-new">NEW</div>`:'';
-    // 試験運用車(2856)のS0画面はラベルを番号にして重なりを解消
-    const _useNum=(viewId==='s0CarView')&&(typeof isTrialListVehicle==='function')&&isTrialListVehicle()&&_dmgNumMap[d.id];
-    const _lblTxt=_useNum?('#'+_dmgNumMap[d.id]):d.location;
-    pin.innerHTML=`${newBadge}<div class="ipin-r" style="border-color:${c}80;${isNew?'box-shadow:0 0 10px '+c+'50;':''}"><div class="ipin-c" style="background:${c};"></div></div><div class="ipin-lbl" style="background:${isNew?'#ff3333':'#1a2840'}ee;color:#fff;">${_lblTxt}</div>`;
+    pin.innerHTML=`${newBadge}<div class="ipin-r" style="border-color:${c}80;${isNew?'box-shadow:0 0 10px '+c+'50;':''}"><div class="ipin-c" style="background:${c};"></div></div><div class="ipin-lbl" style="background:${isNew?'#ff3333':'#1a2840'}ee;color:#fff;">${d.location}</div>`;
     if(clickable) pin.addEventListener('click',(e)=>{ e.stopPropagation(); openDmgEdit(d.id); });
     view.appendChild(pin);
 
@@ -2343,18 +2308,7 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
 }
 
 // S0: ゾーンクリック不可・ピンタップで写真表示
-// ===== 試験運用: 傷を横に番号付き箇条書き表示する車両（2856のみ） =====
-const TRIAL_LIST_PLATES=['2856'];
-function isTrialListVehicle(){
-  const v=vehiclesCache.find(x=>x.id===currentVehicleId);
-  const plate=(v?.vehicles?.plate_no||'').toString().trim();
-  return TRIAL_LIST_PLATES.includes(plate)||TRIAL_LIST_PLATES.includes(currentVehicleId);
-}
-let _dmgNumMap={};
-function buildDmgNumMap(damages){ _dmgNumMap={}; (damages||[]).forEach((d,i)=>{ if(d&&d.id) _dmgNumMap[d.id]=i+1; }); }
-
 function renderInspectionMap(damages){
-  buildDmgNumMap(damages);
   renderMapInto('s0CarView','s0InspLegend',damages,null,false);
   // ピンをタップ → 写真ポップアップ
   const view=document.getElementById('s0CarView');

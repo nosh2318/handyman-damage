@@ -1094,7 +1094,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.5-DAMAGE';
+const APP_VERSION='v2.7.6-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1266,6 +1266,7 @@ function selectStaff(id,name){
   initPresence();
   startAutoRefresh();
   subscribeRealtime();
+  if(pendingDeepLink){ runDeepLink(); }   // ★ログイン後にディープリンク対象を開く（2026-06-15）
 }
 function updateStaffHeader(){
   const el=document.getElementById('smStaffLabel');
@@ -1908,16 +1909,46 @@ function renderVehicleCard(v){
     <div class="sm-arr">›</div></div>`;
 }
 
+// ===== ディープリンク受け口（2026-06-15追加：本体APPの本日スケジュール/タスクサマリーから対象車両チェックへ直行）=====
+// 例: index.html?store=naha&vehicle=VTZ02&mode=checkout&resv=R0XXXX
+//   mode: checkout=貸出チェック(sc0) / return=返却チェック(sr0) / 無し=車両詳細(s0)
+// ★パラメータが無い場合は従来フロー(login→store→staff→sm)を一切変更しない（非破壊）
+let pendingDeepLink=null;
+let deepLinkResv='';
+(function parseDeepLink(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const vehicle=q.get('vehicle');
+    if(!vehicle) return;               // パラメータ無し＝従来通り（非破壊）
+    const store=q.get('store');
+    if(store==='naha'||store==='sapporo'){ currentStore=store; localStorage.setItem('hm_store',store); }
+    pendingDeepLink={vehicle:vehicle, mode:(q.get('mode')||''), resv:(q.get('resv')||'')};
+  }catch(e){ console.warn('[deeplink parse]',e&&e.message); }
+})();
+async function runDeepLink(){
+  if(!pendingDeepLink) return;
+  const dl=pendingDeepLink; pendingDeepLink=null; deepLinkResv=dl.resv||'';
+  try{
+    await loadVehicles();              // vehiclesCache を確実に用意してから開く
+    const v=vehiclesCache.find(x=>x.id===dl.vehicle);
+    if(!v){ showToast('対象車両が見つかりません: '+dl.vehicle); goto('sm'); return; }
+    await openVehicle(dl.vehicle);     // 車両詳細(s0)
+    if(dl.mode==='checkout') goto('sc0');        // 貸出チェック
+    else if(dl.mode==='return') goto('sr0');     // 返却チェック
+  }catch(e){ console.warn('[deeplink run]',e&&e.message); goto('sm'); }
+}
+
 // ===== 起動処理 =====
 initLogin();
 // 前回ログイン済みなら直接 SM へ
 if(currentStaff){
   updateStaffHeader();
   goto('sm');
-  loadVehicles();
   subscribeRealtime();
   initPresence();
   startAutoRefresh();
+  if(pendingDeepLink){ runDeepLink(); }   // ★ディープリンクあれば対象車両を自動で開く
+  else { loadVehicles(); }
 }
 // AIキーボタン初期状態
 setTimeout(()=>updateSmAiBtn(), 100);

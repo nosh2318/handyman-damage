@@ -607,6 +607,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
             <div class="store-sub">北海道札幌市</div>
           </div>
         </button>
+        <button class="store-sel-card" onclick="selectStore('takamatsu')">
+          <div class="store-icon">🌉</div>
+          <div class="store-info">
+            <div class="store-name">高松店（BUDDICA）</div>
+            <div class="store-sub">香川県高松市</div>
+          </div>
+        </button>
       </div>
     </div>
 
@@ -1070,7 +1077,24 @@ window.addEventListener('unhandledrejection',function(ev){
 //   ※ APP内のSTAFF_LIST選択でスタッフ識別はそのまま（DB認証とは独立）
 const SUPA_URL='https://ckrxttbnawkclshczsia.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrcnh0dGJuYXdrY2xzaGN6c2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzg1NTAsImV4cCI6MjA4NzQ1NDU1MH0.kDC_UDVWvcrS97wzqQ3NXP79ewjgYwF4vSFdV7y06S8';
-const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+// ★ 2026-07-13 BT(高松/BUDDICA)は独立Supabase。店舗選択で sb を main/BT に切替（全DB操作が自動ルーティング）。
+const BT_URL='https://ggqugvyskyiblxiycpci.supabase.co';
+const BT_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdncXVndnlza3lpYmx4aXljcGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMDc3NjksImV4cCI6MjA5MzY4Mzc2OX0.uNhWcBd_Dl5nzemZDQfJ8mQV6iY73MwystGGpTRPC18';
+const sbMain=supabase.createClient(SUPA_URL,SUPA_KEY);                       // main: 既存storageKey維持
+const sbBT=supabase.createClient(BT_URL,BT_KEY,{auth:{storageKey:'sb-hm-bt'}}); // BT: 別storageKeyでセッション分離
+let sb=sbMain;  // ★アクティブクライアント（selectStoreで切替）
+let _btAuthed=false;
+async function ensureBTAuth(){
+  if(_btAuthed) return true;
+  try{
+    const {data}=await sbBT.auth.getSession();
+    if(!data||!data.session){
+      const {error}=await sbBT.auth.signInWithPassword({email:'oshita.touring@buddica.co.jp',password:'0003'});
+      if(error){ console.error('[BT auth] failed:',error); alert('高松店データベースの認証に失敗しました。\n'+error.message); return false; }
+    }
+    _btAuthed=true; return true;
+  }catch(e){ console.error('[BT auth] exception:',e); return false; }
+}
 
 // 起動時 自動ログイン（既存セッションあればスキップ）
 (async function(){
@@ -1094,7 +1118,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.7.6-DAMAGE';
+const APP_VERSION='v2.8.0-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1153,6 +1177,7 @@ const STAFF_LIST=[
   {id:'koyama',    name:'小山',   emoji:'👨‍💼', store:'naha'},
   {id:'yoshida',   name:'吉田',   emoji:'👨‍💼', store:'naha'},
   {id:'fukudome',  name:'福留',   emoji:'👨‍💼', store:'naha'},
+  {id:'toshima',   name:'戸島',   emoji:'👨‍💼', store:'takamatsu'},
 ];
 let currentStaff=localStorage.getItem('hm_staff')||null;
 let currentStore=localStorage.getItem('hm_store')||'naha';
@@ -1240,13 +1265,14 @@ function showStep1(){
 function selectStore(store){
   currentStore=store;
   localStorage.setItem('hm_store',store);
+  sb = (store==='takamatsu') ? sbBT : sbMain;   // ★アクティブDB切替
   showStep2(store);
 }
 function showStep2(store){
   document.getElementById('loginStep1').style.display='none';
   document.getElementById('loginStep2').classList.add('active');
   const badge=document.getElementById('loginStoreBadge');
-  badge.textContent=store==='naha'?'🌺 那覇空港店':'❄️ 札幌店';
+  badge.textContent=store==='naha'?'🌺 那覇空港店':(store==='takamatsu'?'🌉 高松店':'❄️ 札幌店');
   const grid=document.getElementById('staffGrid');
   const filtered=STAFF_LIST.filter(s=>s.store==='both'||s.store===store);
   grid.innerHTML=filtered.map(s=>`
@@ -1257,10 +1283,12 @@ function showStep2(store){
 function backToStep1(){
   showStep1();
 }
-function selectStaff(id,name){
+async function selectStaff(id,name){
   currentStaff=name;
   localStorage.setItem('hm_staff',name);
   localStorage.setItem('hm_store',currentStore);
+  sb = (currentStore==='takamatsu') ? sbBT : sbMain;   // ★念のため再確定
+  if(currentStore==='takamatsu'){ const ok=await ensureBTAuth(); if(!ok) return; }
   updateStaffHeader();
   goto('sm');
   initPresence();
@@ -1272,10 +1300,10 @@ function updateStaffHeader(){
   const el=document.getElementById('smStaffLabel');
   if(el) el.textContent=currentStaff||'';
   const hd=document.getElementById('smHdStore');
-  const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
+  const storeLabel=currentStore==='naha'?'那覇空港店':(currentStore==='takamatsu'?'高松店':'札幌店');
   if(hd) hd.textContent=storeLabel+' — ';
   const appLink=document.getElementById('smAppLink');
-  if(appLink) appLink.href=currentStore==='naha'?'https://nosh2318.github.io/naha-project/':'https://nosh2318.github.io/spk-task/';
+  if(appLink) appLink.href=currentStore==='naha'?'https://nosh2318.github.io/naha-project/':(currentStore==='takamatsu'?'https://buddica-touring.github.io/app/':'https://nosh2318.github.io/spk-task/');
 }
 
 // ===== ステータス定義 =====
@@ -1344,6 +1372,41 @@ async function loadVehicles(){
           vehicles:{name:car.name,plate_no:car.plate_no,code:id,class_id:car.type}
         };
       });
+    } else if(currentStore==='takamatsu'){
+      // 高松(BUDDICA): bt_vehicles + vehicle_twins(store=takamatsu) + bt_fleet/bt_reservations(予約連動) ※独立DB(sbBT)
+      const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
+      const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
+        sb.from('bt_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','takamatsu'),
+        sb.from('bt_fleet').select('reservation_id,vehicle_code'),
+        sb.from('bt_reservations').select('id,name,start_date,start_time,end_date,end_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300)
+      ]);
+      const twMap={};(twins||[]).forEach(t=>twMap[t.id]=t);
+      const vcResvMap={};
+      if(fleetAll&&resvAll){
+        const resvMap={};(resvAll||[]).forEach(r=>resvMap[r.id]=r);
+        (fleetAll||[]).forEach(f=>{const r=resvMap[f.reservation_id];if(r&&!vcResvMap[f.vehicle_code])vcResvMap[f.vehicle_code]=r;});
+      }
+      vehicles=(cars||[]).map(car=>{
+        const id=car.code;
+        const resv=vcResvMap[id];
+        const twStatus=twMap[id]?.status||'ready';
+        const effectiveStatus=(twStatus==='out'&&!resv)?'ready':twStatus;
+        return {
+          id:id,
+          status:effectiveStatus,
+          current_damages:twMap[id]?.current_damages||[],
+          current_resv_no:resv?.id||(effectiveStatus==='out'?twMap[id]?.current_resv_no:null)||null,
+          current_customer:resv?.name||(effectiveStatus==='out'?twMap[id]?.current_customer:null)||null,
+          current_resv:resv||null,
+          last_check_at:twMap[id]?.last_check_at||null,
+          last_check_staff:twMap[id]?.last_check_staff||null,
+          last_event_id:twMap[id]?.last_event_id||null,
+          odometer:twMap[id]?.odometer||0,
+          rental_count:twMap[id]?.rental_count||0,
+          vehicles:{name:car.name,plate_no:car.plate_no,code:id,class_id:car.type}
+        };
+      });
     } else {
       // 札幌: vehicles + vehicle_twins(ダメージ状態) + fleet/reservations(予約連動)
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
@@ -1393,7 +1456,7 @@ async function loadVehicles(){
     vehiclesCache=vehicles;
     renderVehicleList(vehiclesCache,currentStore);
     updateSmStats(vehiclesCache);
-    const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
+    const storeLabel=currentStore==='naha'?'那覇空港店':(currentStore==='takamatsu'?'高松店':'札幌店');
     const el=document.getElementById('smHdStore');
     if(el) el.textContent=`${storeLabel} — ${vehicles.length}台`;
   }catch(e){
@@ -1453,7 +1516,9 @@ function renderVehicleList(vehicles, store){
     if(!groups[cid]) groups[cid]=[];
     groups[cid].push(v);
   });
-  const classOrder=st2==='naha'?['A','B','C','D','F','H']:['LUX','MPV','SUV','CSUV','SDN','CPT','OTH'];
+  let classOrder=st2==='naha'?['A','B','C','D','F','H']:(st2==='takamatsu'?['A','AA','C','D','E','F','G','H']:['LUX','MPV','SUV','CSUV','SDN','CPT','OTH']);
+  // ★未知クラス(BTの新クラス等)も必ず表示（末尾に追加）＝車両が落ちないように
+  Object.keys(groups).forEach(cid=>{ if(classOrder.indexOf(cid)<0) classOrder=classOrder.concat(cid); });
 
   let html='';
   classOrder.forEach(cid=>{
@@ -1595,7 +1660,7 @@ async function openVehicle(vehicleId){
 function renderS0(v){
   const vInfo=v.vehicles||{};
   const st=STATUS_DEF[v.status]||STATUS_DEF.ready;
-  const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
+  const storeLabel=currentStore==='naha'?'那覇空港店':(currentStore==='takamatsu'?'高松店':'札幌店');
   setText('s0StoreLabel',`HANDYMAN / ${storeLabel}`);
   // ★ 2026-05-26 修正: ナンバー表示の改善
   //   - 「VEL」「ヴェル5555」 等の code が表示される問題を解決
@@ -2519,7 +2584,7 @@ async function loadChain(vehicleId){
 
 // ===== テストリセット =====
 function openTestReset(){
-  const storeLabel=currentStore==='naha'?'那覇空港店':'札幌店';
+  const storeLabel=currentStore==='naha'?'那覇空港店':(currentStore==='takamatsu'?'高松店':'札幌店');
   const overlay=document.createElement('div');
   overlay.id='testResetOverlay';
   overlay.style.cssText='position:fixed;inset:0;background:#00000088;z-index:600;display:flex;align-items:flex-end;justify-content:center;max-width:520px;margin:0 auto;';
@@ -2548,7 +2613,7 @@ async function execTestReset(){
 
   showToast('⏳ リセット中...');
   const store=currentStore;
-  const storeName=store==='naha'?'naha':'sapporo';
+  const storeName=store;
 
   try{
     // 1. vehicle_twins を全件リセット（当該ストアのみ）
@@ -3397,7 +3462,7 @@ async function siComplete(){
     if(evErr) throw evErr;
     await sb.from('vehicle_twins').upsert({
       id:currentVehicleId,
-      store:currentStore==='naha'?'naha':'sapporo',
+      store:currentStore,
       status:'ready',
       current_damages:damages,
       last_event_id:ev.id,
@@ -3834,7 +3899,7 @@ async function submitRepair(){
     // 1. repair_records に登録
     const { error: repErr } = await sb.from('repair_records').insert({
       vehicle_id: currentVehicleId,
-      store: currentStore === 'naha' ? 'naha' : 'sapporo',
+      store: currentStore,
       damage_id: repairCurrentDmgId,
       damage_location: d.location,
       damage_type: d.type,

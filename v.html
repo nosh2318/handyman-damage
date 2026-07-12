@@ -224,6 +224,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 const SUPA_URL='https://ckrxttbnawkclshczsia.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrcnh0dGJuYXdrY2xzaGN6c2lhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4Nzg1NTAsImV4cCI6MjA4NzQ1NDU1MH0.kDC_UDVWvcrS97wzqQ3NXP79ewjgYwF4vSFdV7y06S8';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false}});
+// ★ 2026-07-13 BT(高松/BUDDICA)は独立Supabase → 顧客URLはmain/BT両方を照合
+const BT_URL='https://ggqugvyskyiblxiycpci.supabase.co';
+const BT_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdncXVndnlza3lpYmx4aXljcGNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMDc3NjksImV4cCI6MjA5MzY4Mzc2OX0.uNhWcBd_Dl5nzemZDQfJ8mQV6iY73MwystGGpTRPC18';
+const sbBT=supabase.createClient(BT_URL,BT_KEY,{auth:{persistSession:false}});
 
 // ===== ゾーン定義（index.html から移植） =====
 const ZONE_MAP={
@@ -429,10 +433,13 @@ async function loadShareData(){
     return;
   }
   try{
-    const {data,error}=await sb.from('vehicle_twins')
-      .select('id,store,display_label,current_damages,last_check_at,share_enabled')
-      .eq('share_token',token)
-      .maybeSingle();
+    const SEL='id,store,display_label,current_damages,last_check_at,share_enabled';
+    let {data,error}=await sb.from('vehicle_twins').select(SEL).eq('share_token',token).maybeSingle();
+    // main で見つからなければ BT(高松/独立DB) を照合
+    if(!error && !data){
+      const bt=await sbBT.from('vehicle_twins').select(SEL).eq('share_token',token).maybeSingle();
+      if(!bt.error && bt.data){ data=bt.data; }
+    }
     if(error){
       console.error('[v.html] DB error:',error);
       showError('読込エラー','データ取得に失敗しました。<br>時間を置いて再度アクセスしてください。');
@@ -459,7 +466,7 @@ function renderVehicle(v){
   document.getElementById('mainView').style.display='block';
 
   // 店舗
-  const storeLabel=v.store==='naha'?'那覇空港店':(v.store==='sapporo'?'札幌店':'');
+  const storeLabel=v.store==='naha'?'那覇空港店':(v.store==='sapporo'?'札幌店':(v.store==='takamatsu'?'高松店':''));
   document.getElementById('storeLabel').textContent=storeLabel;
 
   // 本日日付

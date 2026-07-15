@@ -103,7 +103,7 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 
 <!-- ③ 予約情報 -->
 <div class="card">
-  <div class="sec-h"><span class="badge-no">③</span>ご予約情報</div>
+  <div class="sec-h"><span class="badge-no">1</span>ご予約情報</div>
   <div class="kv"><span class="k">予約番号</span><span class="v">TAK-260715-0007</span></div>
   <div class="kv"><span class="k">お名前</span><span class="v">大下 紀孝 様</span></div>
   <div class="kv"><span class="k">車両</span><span class="v">メルセデス・ベンツ Eクラス カブリオレ　<span class="pill">AA / 外車</span></span></div>
@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 
 <!-- ① 傷チェック + 承認サイン -->
 <div class="card" id="card1">
-  <div class="sec-h"><span class="badge-no">①</span>車両の状態確認（傷チェック）<span class="done-chip">✅ 承認済み</span></div>
+  <div class="sec-h"><span class="badge-no">2</span>車両の状態確認（傷チェック）<span class="done-chip">✅ 承認済み</span></div>
   <div class="dmg-embed">
     <div class="lead2">現在の車両の傷・状態です。車両図の <b style="color:#ee6a1c;">●印</b> をタップすると写真が見られます。</div>
     <iframe class="dmg-frame" src="https://buddica-touring.github.io/damage/v.html?t=c5388c93-39e0-41a4-bdc4-19f80b930263" loading="lazy" title="傷チェック（カブリオレ）"></iframe>
@@ -131,7 +131,7 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 
 <!-- 📖 車両基本ガイド（この車は外車=あり） -->
 <div class="card guide">
-  <div class="sec-h"><span class="badge-no g">📖</span>この車の基本操作ガイド</div>
+  <div class="sec-h"><span class="badge-no g">3</span>この車の基本操作ガイド</div>
   <details open>
     <summary>▼ メルセデス・ベンツ Eクラス カブリオレ — 操作ガイド（タップで開閉）</summary>
     <div style="padding:8px 14px 14px;">
@@ -204,7 +204,7 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 
 <!-- ② 約款 + 同意サイン -->
 <div class="card" id="card2">
-  <div class="sec-h"><span class="badge-no">②</span>貸渡約款のご同意<span class="done-chip">✅ 同意済み</span></div>
+  <div class="sec-h"><span class="badge-no">4</span>貸渡約款のご同意<span class="done-chip">✅ 同意済み</span></div>
   <div class="terms">
     <h4>第1条（貸渡）</h4>当社は本約款に基づき、お客様に車両を貸渡します。
     <h4>第2条（補償・免責）</h4>対人・対物補償は無制限。車両補償は免責額を上限にお客様負担が生じる場合があります。NOC（ノンオペレーションチャージ）が適用される場合があります。
@@ -226,8 +226,8 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 </div>
 
 <div class="status">
-  <span class="s" id="st1">① 傷承認：未</span>
-  <span class="s" id="st2">② 約款同意：未</span>
+  <span class="s" id="st1">傷承認：未</span>
+  <span class="s" id="st2">約款同意：未</span>
   <span class="fin" id="fin">締結 未完了</span>
 </div>
 </div>
@@ -257,7 +257,7 @@ function sign(cardId,padId,n){
   document.getElementById('who'+n).textContent=RES_NAME+' 様　'+new Date().toLocaleString('ja-JP')+'　署名';
   document.getElementById('img'+n).src=pad._cv.toDataURL();
   signed[n]=true;
-  var st=document.getElementById('st'+n);st.textContent=(n==1?'① 傷承認：済':'② 約款同意：済');st.classList.add('ok');
+  var st=document.getElementById('st'+n);st.textContent=(n==1?'傷承認：済':'約款同意：済');st.classList.add('ok');
   if(signed[1]&&signed[2]){var f=document.getElementById('fin');f.textContent='✅ 締結 完了';f.classList.add('ready');}
 }
 setupPad('pad1');setupPad('pad2');

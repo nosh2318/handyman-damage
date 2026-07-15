@@ -280,12 +280,12 @@ async function boot(){
   RES_NAME=d.name||'';
   document.getElementById('r_id').textContent=d.id||'';
   document.getElementById('r_name').textContent=(d.name||'')+' 様';
-  document.getElementById('r_vehicle').innerHTML=(d.vehicle_name||d.vehicle_class||'—')+(d.vehicle_class?' <span class="pill">'+d.vehicle_class+'</span>':'');
-  document.getElementById('r_plate').textContent=d.vt_label||d.assigned_vehicle||'—';
+  document.getElementById('r_vehicle').innerHTML=(d.veh_name||d.veh_class||'—')+(d.veh_class?' <span class="pill">'+d.veh_class+'</span>':'');
+  document.getElementById('r_plate').textContent=d.veh_plate||'ナンバー未登録';
   document.getElementById('r_period').textContent=(d.start_date||'')+' 〜 '+(d.end_date||'');
   document.title=(d.name||'')+' 様｜BUDDICA TOURISM ご利用ガイド';
   if(d.dmg_token&&d.dmg_enabled){document.getElementById('dmgFrame').src="https://buddica-touring.github.io/damage/v.html?t="+d.dmg_token;}
-  var hasGuide=/カブリオレ/.test((d.vehicle_name||'')+(d.vt_label||''));
+  var hasGuide=/カブリオレ/.test(d.veh_name||'');
   if(!hasGuide){var g=document.getElementById('guideCard');if(g)g.style.display='none';}
   (d.signs||[]).forEach(function(sg){
     if(sg.type==='damage_approval')applyLock('card1',1,sg,null);

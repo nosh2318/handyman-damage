@@ -101,6 +101,16 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
   <div class="h1">ご利用ガイド<small>ご出発前のご確認・締結</small></div>
 </div>
 
+<!-- ③ 予約情報 -->
+<div class="card">
+  <div class="sec-h"><span class="badge-no">③</span>ご予約情報</div>
+  <div class="kv"><span class="k">予約番号</span><span class="v">TAK-260715-0007</span></div>
+  <div class="kv"><span class="k">お名前</span><span class="v">大下 紀孝 様</span></div>
+  <div class="kv"><span class="k">車両</span><span class="v">メルセデス・ベンツ Eクラス カブリオレ　<span class="pill">AA / 外車</span></span></div>
+  <div class="kv"><span class="k">ナンバー</span><span class="v">高松 300 な 12-34</span></div>
+  <div class="kv"><span class="k">ご利用期間</span><span class="v">2026/07/16 10:00 〜 2026/07/18 17:00</span></div>
+</div>
+
 <!-- ① 傷チェック + 承認サイン -->
 <div class="card" id="card1">
   <div class="sec-h"><span class="badge-no">①</span>車両の状態確認（傷チェック）<span class="done-chip">✅ 承認済み</span></div>
@@ -117,29 +127,6 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
     </div>
   </div>
   <div class="signed-view"><span class="who" id="who1"></span><br><img id="img1"/></div>
-</div>
-
-<!-- ② 約款 + 同意サイン -->
-<div class="card" id="card2">
-  <div class="sec-h"><span class="badge-no">②</span>貸渡約款のご同意<span class="done-chip">✅ 同意済み</span></div>
-  <div class="terms">
-    <h4>第1条（貸渡）</h4>当社は本約款に基づき、お客様に車両を貸渡します。
-    <h4>第2条（補償・免責）</h4>対人・対物補償は無制限。車両補償は免責額を上限にお客様負担が生じる場合があります。NOC（ノンオペレーションチャージ）が適用される場合があります。
-    <h4>第3条（禁止事項）</h4>飲酒運転・無免許運転・又貸し・競技使用・全席禁煙。喫煙が確認された場合は清掃費をご請求します。
-    <h4>第4条（事故・故障）</h4>事故・故障時はまず安全確保のうえ、警察および当社へ速やかにご連絡ください。
-    <h4>第5条（返却）</h4>燃料満タンでご返却ください。満タンでない場合は燃料代・給油手数料をご請求します。
-    <h4>第6条（キャンセル）</h4>所定のキャンセル規定に従います。
-    <div style="color:#8a94a0;font-size:12px;margin-top:6px;">（本番は正式な貸渡約款の全文を表示）</div>
-  </div>
-  <div class="sign-area">
-    <div class="sign-label" style="margin-top:12px;">上記の貸渡約款に同意します（お客様サイン）</div>
-    <div class="pad" id="pad2"><canvas></canvas><div class="ph">ここに指またはペンでご署名ください</div></div>
-    <div class="row">
-      <button class="btn clear" onclick="clearPad('pad2')">消す</button>
-      <button class="btn go" id="go2" onclick="sign('card2','pad2',2)">同意する</button>
-    </div>
-  </div>
-  <div class="signed-view"><span class="who" id="who2"></span><br><img id="img2"/></div>
 </div>
 
 <!-- 📖 車両基本ガイド（この車は外車=あり） -->
@@ -215,14 +202,27 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
   <div class="note">※ このガイドは「外車・AA・特殊車」など、ガイドがある車のときだけ自動で表示されます（国産一般車では非表示）。</div>
 </div>
 
-<!-- ③ 予約情報 -->
-<div class="card">
-  <div class="sec-h"><span class="badge-no">③</span>ご予約情報</div>
-  <div class="kv"><span class="k">予約番号</span><span class="v">TAK-260715-0007</span></div>
-  <div class="kv"><span class="k">お名前</span><span class="v">大下 紀孝 様</span></div>
-  <div class="kv"><span class="k">車両</span><span class="v">メルセデス・ベンツ Eクラス カブリオレ　<span class="pill">AA / 外車</span></span></div>
-  <div class="kv"><span class="k">ナンバー</span><span class="v">高松 300 な 12-34</span></div>
-  <div class="kv"><span class="k">ご利用期間</span><span class="v">2026/07/16 10:00 〜 2026/07/18 17:00</span></div>
+<!-- ② 約款 + 同意サイン -->
+<div class="card" id="card2">
+  <div class="sec-h"><span class="badge-no">②</span>貸渡約款のご同意<span class="done-chip">✅ 同意済み</span></div>
+  <div class="terms">
+    <h4>第1条（貸渡）</h4>当社は本約款に基づき、お客様に車両を貸渡します。
+    <h4>第2条（補償・免責）</h4>対人・対物補償は無制限。車両補償は免責額を上限にお客様負担が生じる場合があります。NOC（ノンオペレーションチャージ）が適用される場合があります。
+    <h4>第3条（禁止事項）</h4>飲酒運転・無免許運転・又貸し・競技使用・全席禁煙。喫煙が確認された場合は清掃費をご請求します。
+    <h4>第4条（事故・故障）</h4>事故・故障時はまず安全確保のうえ、警察および当社へ速やかにご連絡ください。
+    <h4>第5条（返却）</h4>燃料満タンでご返却ください。満タンでない場合は燃料代・給油手数料をご請求します。
+    <h4>第6条（キャンセル）</h4>所定のキャンセル規定に従います。
+    <div style="color:#8a94a0;font-size:12px;margin-top:6px;">（本番は正式な貸渡約款の全文を表示）</div>
+  </div>
+  <div class="sign-area">
+    <div class="sign-label" style="margin-top:12px;">上記の貸渡約款に同意します（お客様サイン）</div>
+    <div class="pad" id="pad2"><canvas></canvas><div class="ph">ここに指またはペンでご署名ください</div></div>
+    <div class="row">
+      <button class="btn clear" onclick="clearPad('pad2')">消す</button>
+      <button class="btn go" id="go2" onclick="sign('card2','pad2',2)">同意する</button>
+    </div>
+  </div>
+  <div class="signed-view"><span class="who" id="who2"></span><br><img id="img2"/></div>
 </div>
 
 <div class="status">

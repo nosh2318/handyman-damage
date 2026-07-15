@@ -29,8 +29,8 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 .linkbtn{display:inline-block;margin-top:8px;font-size:14px;font-weight:800;color:#1565c0;text-decoration:underline;}
 .dmg-embed{margin-bottom:12px;}
 .lead2{font-size:14px;color:var(--sub);font-weight:700;margin-bottom:8px;}
-.dmg-frame{width:100%;height:560px;border:1px solid var(--line);border-radius:10px;background:#fff;display:block;}
-@media(max-width:640px){.dmg-frame{height:480px;}}
+.dmg-frame{width:100%;height:920px;border:1px solid var(--line);border-radius:10px;background:#fff;display:block;}
+@media(max-width:640px){.dmg-frame{height:820px;}}
 /* ガイド */
 .guide details{border:1px solid var(--line);border-radius:10px;overflow:hidden;}
 .guide summary{list-style:none;cursor:pointer;padding:12px 14px;background:#faf7ef;font-weight:800;color:var(--gold);font-size:16px;}
@@ -64,7 +64,7 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
 .ghelp b{color:var(--navy);font-size:15px;}
 @media(max-width:640px){.gitem{flex-direction:column;}.gitem .frame{width:100%;min-height:96px;}}
 /* 約款 */
-.terms{height:190px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:14px;background:#fcfcfd;font-size:14px;line-height:1.7;color:#333;}
+.terms{height:440px;overflow-y:auto;border:1px solid var(--line);border-radius:10px;padding:14px;background:#fcfcfd;font-size:14px;line-height:1.7;color:#333;}
 .terms h4{color:var(--navy);margin:8px 0 3px;font-size:14px;}
 /* サイン */
 .sign-wrap{margin-top:12px;}
@@ -99,6 +99,8 @@ body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;}
   <div class="brand">BUDDICA TOURISM ／ 高松空港店</div>
   <div class="h1">ご利用ガイド<small>ご出発前のご確認・締結</small></div>
 </div>
+
+<div id="doneBanner" style="display:none;background:#dcfce7;border:1.5px solid #86efac;border-radius:12px;padding:15px 18px;margin-bottom:16px;color:#166534;font-weight:800;font-size:16px;text-align:center;">✅ 締結が完了しました（傷の確認・約款へのご同意をいただきました）</div>
 
 <!-- ③ 予約情報 -->
 <div class="card">
@@ -264,7 +266,7 @@ function applyLock(cardId,n,srec,sigimg){
   if(sigimg)document.getElementById('img'+n).src=sigimg;
   signed[n]=true;
   var st=document.getElementById('st'+n);st.textContent=(n==1?'傷承認：済':'約款同意：済');st.classList.add('ok');
-  if(signed[1]&&signed[2]){var f=document.getElementById('fin');f.textContent='✅ 締結 完了';f.classList.add('ready');}
+  if(signed[1]&&signed[2]){var f=document.getElementById('fin');f.textContent='✅ 締結 完了';f.classList.add('ready');var b=document.getElementById('doneBanner');if(b){b.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}}
 }
 /* ===== 動的読取（トークン→予約） ===== */
 var BT_URL="https://ggqugvyskyiblxiycpci.supabase.co";

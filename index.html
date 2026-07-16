@@ -631,7 +631,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.7.5</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.8.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="forceAppUpdate()" id="smForceUpdBtn" style="font-size:9px;color:#fbbf24;background:#fbbf2415;border:1px solid #fbbf2440;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;" title="アプリを最新版に更新（保存できない時はコレ）">🔄 最新版</button>
@@ -989,7 +989,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
         <button class="edit-type-btn" data-val="scratch" onclick="selEditType(this)">擦り傷<br><span style="font-size:8px;opacity:.7;">Scratch</span></button>
         <button class="edit-type-btn" data-val="dent" onclick="selEditType(this)">凹み<br><span style="font-size:8px;opacity:.7;">Dent</span></button>
         <button class="edit-type-btn" data-val="chip" onclick="selEditType(this)">塗装欠け<br><span style="font-size:8px;opacity:.7;">Paint Chip</span></button>
-        <button class="edit-type-btn" data-val="stone_chip" onclick="selEditType(this)" style="background:#e8f4ff;border-color:#4499dd;">飛び石<br><span style="font-size:8px;opacity:.7;">Stone Chip</span></button>
+        <button class="edit-type-btn" data-val="stone_chip" onclick="selEditType(this)">飛び石<br><span style="font-size:8px;opacity:.7;">Stone Chip</span></button>
         <button class="edit-type-btn" data-val="crack" onclick="selEditType(this)">ひび割れ<br><span style="font-size:8px;opacity:.7;">Crack</span></button>
         <button class="edit-type-btn" data-val="break" onclick="selEditType(this)">破損<br><span style="font-size:8px;opacity:.7;">Break</span></button>
         <button class="edit-type-btn" data-val="stain" onclick="selEditType(this)">汚れ・シミ<br><span style="font-size:8px;opacity:.7;">Stain</span></button>
@@ -1118,7 +1118,7 @@ async function ensureBTAuth(){
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.8.0-DAMAGE';
+const APP_VERSION='v2.8.1-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -3168,7 +3168,7 @@ function selEditType(btn){
 }
 function selEditSev(btn){
   editSev=btn.dataset.val;
-  document.querySelectorAll('.edit-sev-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.edit-sev .edit-sev-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
   updateEditBtns();
 }

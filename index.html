@@ -631,7 +631,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.8.1</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.8.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="forceAppUpdate()" id="smForceUpdBtn" style="font-size:9px;color:#fbbf24;background:#fbbf2415;border:1px solid #fbbf2440;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;" title="アプリを最新版に更新（保存できない時はコレ）">🔄 最新版</button>
@@ -1118,7 +1118,7 @@ async function ensureBTAuth(){
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.8.1-DAMAGE';
+const APP_VERSION='v2.8.2-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -2297,6 +2297,33 @@ function dmgColor(d){ return SEV_COLOR[d.severity]||SEV_COLOR[d.type]||'#ff8888'
 const ZONE_ID_TO_NAME={};
 Object.entries(ZONE_MAP).forEach(([name,{id}])=>{ if(!ZONE_ID_TO_NAME[id]) ZONE_ID_TO_NAME[id]=name; });
 
+// ゾーンID → 左右分割（1要素を左右で共有するゾーン＝例:リアバンパー）
+// cx<48=左(画面左/助手席)・cx>52=右(画面右/運転席)・それ以外=中央
+// これが無いと ZONE_ID_TO_NAME が常に最初の名称(=左)を返し、右をタップしても左に登録される（左右反転バグ）
+const ZONE_ID_SIDES={};
+Object.entries(ZONE_MAP).forEach(([name,{id,cx}])=>{
+  if(!ZONE_ID_SIDES[id]) ZONE_ID_SIDES[id]={};
+  if(cx<48) ZONE_ID_SIDES[id].left=name;
+  else if(cx>52) ZONE_ID_SIDES[id].right=name;
+  else ZONE_ID_SIDES[id].center=name;
+});
+// 左右両方を持つゾーンのみ側判定対象（片側だけ/中央のみは従来通り）
+// タップX座標(clientX)から要素中心を基準に左右を解決する
+function resolveZoneName(zoneId, ev){
+  const s=ZONE_ID_SIDES[zoneId];
+  if(s && s.left && s.right && ev){
+    const el=(ev.currentTarget&&ev.currentTarget.getBoundingClientRect)?ev.currentTarget:document.getElementById(zoneId);
+    if(el&&el.getBoundingClientRect){
+      const r=el.getBoundingClientRect();
+      if(r.width>0){
+        const ratio=((ev.clientX!=null?ev.clientX:(r.left+r.width/2))-r.left)/r.width;
+        return ratio<0.5 ? s.left : s.right; // 画面左=左(助手席) / 画面右=右(運転席)
+      }
+    }
+  }
+  return ZONE_ID_TO_NAME[zoneId];
+}
+
 // ===== 汎用マップ描画 =====
 // SVG viewBox: width=270, height=430（縦向き、フロント=上）
 const SVG_VB_W=270, SVG_VB_H=430;
@@ -2374,7 +2401,7 @@ function renderMapInto(viewId, legendId, damages, newIds, clickable){
     view.querySelectorAll('[id^="iz-"]').forEach(el=>{
       el.style.cursor='pointer';
       const zId=el.id;
-      el.addEventListener('click',(e)=>{ e.stopPropagation(); tapZone(zId); });
+      el.addEventListener('click',(e)=>{ e.stopPropagation(); tapZone(zId,e); });
     });
     // タイヤ透明クリック領域（PCクリック対応）
     view.querySelectorAll('[data-tire]').forEach(el=>{
@@ -2737,24 +2764,24 @@ function startReturnCheck(){
 
 
 // ===== ゾーンタップ（傷追加 or 編集） =====
-function tapZone(zoneId){
+function tapZone(zoneId, ev){
   const dmgsHere=currentDamages().filter(d=>{
     let z=ZONE_MAP[d.location];
     if(!z){ const keys=Object.keys(ZONE_MAP).sort((a,b)=>b.length-a.length); for(const k of keys){ if(d.location.includes(k)){z=ZONE_MAP[k];break;} } }
     return z&&z.id===zoneId;
   });
+  const name=resolveZoneName(zoneId, ev); // タップX座標から左右を解決（リアバンパー左右反転バグ対策）
   if(dmgsHere.length>0){
     // 傷が1件以上ある場合 → リストシートを表示（追加・編集どちらも可能）
-    openZoneDmgList(zoneId, dmgsHere);
+    openZoneDmgList(zoneId, dmgsHere, name);
   } else {
-    const name=ZONE_ID_TO_NAME[zoneId];
     if(name) openAddDmgSheet(name);
   }
 }
 
 // ===== ゾーン傷リストシート =====
-function openZoneDmgList(zoneId, dmgsHere){
-  const zoneName=ZONE_ID_TO_NAME[zoneId]||dmgsHere[0]?.location||'不明';
+function openZoneDmgList(zoneId, dmgsHere, resolvedName){
+  const zoneName=resolvedName||ZONE_ID_TO_NAME[zoneId]||dmgsHere[0]?.location||'不明';
   const typeNames={scratch:'擦り傷',dent:'凹み',chip:'塗装欠け',stone_chip:'飛び石',crack:'ひび割れ',break:'破損',stain:'汚れ・シミ',burn:'焦げ痕',rust:'錆び',missing:'部品欠損',tire_flat:'パンク',tire_wear:'タイヤ摩耗',other:'その他'};
   const sevNames={minor:'軽微',moderate:'中程度',major:'重大'};
   document.getElementById('zdlZoneName').textContent=zoneName;
@@ -3333,7 +3360,7 @@ function siRenderMap(){
   view.querySelectorAll('[id^="iz-"]').forEach(el=>{
     el.style.cursor='pointer';
     const zId=el.id;
-    el.addEventListener('click',(e)=>{ e.stopPropagation(); siTapZone(zId); });
+    el.addEventListener('click',(e)=>{ e.stopPropagation(); siTapZone(zId,e); });
   });
   // ピンタップ → 削除
   view.querySelectorAll('.ipin[data-dmg-id]').forEach(pin=>{
@@ -3353,8 +3380,8 @@ function siRenderMap(){
   view.appendChild(hint);
 }
 
-function siTapZone(zoneId){
-  const name=ZONE_ID_TO_NAME[zoneId];
+function siTapZone(zoneId, ev){
+  const name=resolveZoneName(zoneId, ev); // タップX座標から左右を解決（リアバンパー左右反転バグ対策）
   if(name) openAddDmgSheet(name);
 }
 

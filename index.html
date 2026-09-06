@@ -1255,6 +1255,12 @@ function updateSmAiBtn(){
 // 旧AIカメラフロー変数（削除済み）
 
 function initLogin(){
+  // ?store= があれば店舗選択をスキップ（company3d等からの直リンク）。company3dキー(nha/spk/bt/tkm)と傷チェック名(naha/sapporo/takamatsu)の両方を受ける
+  try{
+    var qs=(new URLSearchParams(location.search).get('store')||'').toLowerCase();
+    var map={naha:'naha',nha:'naha',sapporo:'sapporo',spk:'sapporo',takamatsu:'takamatsu',bt:'takamatsu',tkm:'takamatsu'};
+    if(qs&&map[qs]){ selectStore(map[qs]); return; }
+  }catch(e){}
   // 常にSTEP1（店舗選択）から開始
   showStep1();
 }

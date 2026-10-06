@@ -631,7 +631,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#eef2f7;font-family:
 <div class="screen" id="sm">
   <div class="sm-hd">
     <div class="sm-hd-top">
-      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.8.2</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
+      <div class="sm-logo" style="display:flex;align-items:center;gap:5px;">HANDYMAN <span style="font-size:8px;color:#4488cc88;font-weight:600;letter-spacing:1px;">v2.8.3</span><span id="rtDot" class="rt-dot" title="接続中..."></span></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div style="font-size:10px;color:#88aacc;" id="smStaffLabel"></div>
         <button onclick="forceAppUpdate()" id="smForceUpdBtn" style="font-size:9px;color:#fbbf24;background:#fbbf2415;border:1px solid #fbbf2440;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:700;" title="アプリを最新版に更新（保存できない時はコレ）">🔄 最新版</button>
@@ -1118,7 +1118,7 @@ async function ensureBTAuth(){
 })();
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.8.2-DAMAGE';
+const APP_VERSION='v2.8.3-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1383,7 +1383,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('bt_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','takamatsu'),
+        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token,display_label').eq('store','takamatsu'),
         sb.from('bt_fleet').select('reservation_id,vehicle_code'),
         sb.from('bt_reservations').select('id,name,start_date,start_time,end_date,end_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300)
       ]);
@@ -1410,6 +1410,9 @@ async function loadVehicles(){
           last_event_id:twMap[id]?.last_event_id||null,
           odometer:twMap[id]?.odometer||0,
           rental_count:twMap[id]?.rental_count||0,
+          share_enabled:twMap[id]?.share_enabled||false,
+          share_token:twMap[id]?.share_token||null,
+          display_label:twMap[id]?.display_label||null,
           vehicles:{name:car.name,plate_no:car.plate_no,code:id,class_id:car.type}
         };
       });
@@ -2070,6 +2073,28 @@ async function toggleShare(enable){
   }
 }
 
+// ★ 2026-10-06: 高松(takamatsu)のみ、傷チェック保存時に自動で共有ON（SQLトリガーのアプリ側代替）。
+//   last_check_at を書く全経路(保存ペイロード)をこの関数で包み、未公開の車だけ share_enabled を立てる。
+//   既に公開済みなら何もしない＝share_enabled_at/display_label を再スタンプしない。
+//   HANDYMAN高松マイページ と BUDDICAガイド は同じ share_enabled を見るので両ブランドに一括で効く。
+//   那覇/札幌は currentStore 条件で対象外（従来どおり手動）。戻す時はこの関数と呼出しを外すだけ。
+function _autoSharePatch(patch){
+  try{
+    if(currentStore!=='takamatsu') return patch;
+    const v=vehiclesCache.find(x=>x.id===currentVehicleId);
+    if(v&&v.share_enabled) return patch; // 既に公開済み → 触らない
+    patch.share_enabled=true;
+    patch.share_enabled_at=new Date().toISOString();
+    if(!(v&&v.display_label)){
+      const vInfo=(v&&v.vehicles)||{};
+      const carName=(vInfo.name||'').trim();
+      const carPlate=(vInfo.plate_no||currentVehicleId||'').trim();
+      patch.display_label=carName?(carName+' / '+carPlate):carPlate;
+    }
+    if(v){ v.share_enabled=true; v.share_enabled_at=patch.share_enabled_at; if(patch.display_label) v.display_label=patch.display_label; }
+  }catch(e){ console.warn('[autoShare]',e); }
+  return patch;
+}
 async function copyShareUrl(){
   if(!currentVehicleId){ showToast('車両を選択してください'); return; }
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
@@ -2866,7 +2891,7 @@ async function markRepaired(){
     const cv=vehiclesCache.find(x=>x.id===currentVehicleId);
     const updated=(cv?.current_damages||[]).filter(x=>x.id!==dmgId);
     if(cv) cv.current_damages=updated;
-    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    const{error}=await sb.from('vehicle_twins').update(_autoSharePatch({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff})).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
     if(ov) ov.classList.remove('show');
@@ -3068,7 +3093,7 @@ async function sr0SaveReturn(){
     }).select().single();
     if(evErr) throw evErr;
 
-    await sb.from('vehicle_twins').update({
+    await sb.from('vehicle_twins').update(_autoSharePatch({
       status:'ready',
       current_damages:finalDamages,
       last_event_id:ev.id,
@@ -3076,7 +3101,7 @@ async function sr0SaveReturn(){
       last_check_staff:currentStaff,
       current_resv_no:null,
       current_customer:null,
-    }).eq('id',currentVehicleId);
+    })).eq('id',currentVehicleId);
 
     const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
     if(idx>=0){
@@ -3269,7 +3294,7 @@ async function submitEdit(){
       showToast('⚠ データサイズ大('+_sizeKB+'KB) 保存に時間がかかります');
     }
     if(v) v.current_damages=updated; // ローカルキャッシュを即時更新
-    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    const{error}=await sb.from('vehicle_twins').update(_autoSharePatch({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff})).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
     // SR0表示中ならSR0マップも更新
@@ -3304,7 +3329,7 @@ async function repairZone(){
     const updated=(v?.current_damages||[]).filter(d=>d.location!==zone);
     if(v) v.current_damages=updated;
     const removed=beforeCnt-updated.length;
-    const{error}=await sb.from('vehicle_twins').update({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    const{error}=await sb.from('vehicle_twins').update(_autoSharePatch({current_damages:updated,last_check_at:new Date().toISOString(),last_check_staff:currentStaff})).eq('id',currentVehicleId);
     if(error) throw error;
     renderInspectionMap(updated);
     if(overlay) overlay.classList.remove('show');
@@ -3456,11 +3481,11 @@ async function siComplete(){
   if(siEditMode){
     try{
       const now=new Date().toISOString();
-      const{error}=await sb.from('vehicle_twins').update({
+      const{error}=await sb.from('vehicle_twins').update(_autoSharePatch({
         current_damages:damages,
         last_check_at:now,
         last_check_staff:currentStaff
-      }).eq('id',currentVehicleId);
+      })).eq('id',currentVehicleId);
       if(error) throw error;
       const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
       if(idx>=0) vehiclesCache[idx]={...vehiclesCache[idx],current_damages:damages,last_check_at:now,last_check_staff:currentStaff};
@@ -3493,7 +3518,7 @@ async function siComplete(){
       notes:`初期登録 ／ 傷${damages.length}件 ／ チェーン起点`
     }).select().single();
     if(evErr) throw evErr;
-    await sb.from('vehicle_twins').upsert({
+    await sb.from('vehicle_twins').upsert(_autoSharePatch({
       id:currentVehicleId,
       store:currentStore,
       status:'ready',
@@ -3501,7 +3526,7 @@ async function siComplete(){
       last_event_id:ev.id,
       last_check_at:now,
       last_check_staff:currentStaff,
-    },{onConflict:'id'});
+    }),{onConflict:'id'});
     const idx=vehiclesCache.findIndex(x=>x.id===currentVehicleId);
     if(idx>=0){
       vehiclesCache[idx]={...vehiclesCache[idx],last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,current_damages:damages};
@@ -3696,14 +3721,14 @@ async function sc0Checkout(){
     if(error) throw error;
     // vehicle_twins: status='out' + last_event_id + 予約情報 更新
     const now=new Date().toISOString();
-    await sb.from('vehicle_twins').update({
+    await sb.from('vehicle_twins').update(_autoSharePatch({
       status:'out',
       last_event_id:ev.id,
       last_check_at:now,
       last_check_staff:currentStaff,
       current_resv_no:resvNo!=='—'?resvNo:null,
       current_customer:customer!=='—'?customer:null,
-    }).eq('id',currentVehicleId);
+    })).eq('id',currentVehicleId);
     const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
     if(idx>=0){vehiclesCache[idx]={...vehiclesCache[idx],status:'out',last_event_id:ev.id,last_check_at:now,last_check_staff:currentStaff,current_resv_no:resvNo!=='—'?resvNo:null,current_customer:customer!=='—'?customer:null};}
     const btn=document.getElementById('sc0CheckoutBtn');
@@ -3724,7 +3749,7 @@ async function sc0Checkout(){
 async function markVehicleReady(){
   try{
     const now=new Date().toISOString();
-    await sb.from('vehicle_twins').update({status:'ready',last_check_at:now,last_check_staff:currentStaff}).eq('id',currentVehicleId);
+    await sb.from('vehicle_twins').update(_autoSharePatch({status:'ready',last_check_at:now,last_check_staff:currentStaff})).eq('id',currentVehicleId);
     const idx=vehiclesCache.findIndex(v=>v.id===currentVehicleId);
     if(idx>=0){vehiclesCache[idx]={...vehiclesCache[idx],status:'ready',last_check_at:now,last_check_staff:currentStaff};}
     await openVehicle(currentVehicleId);
@@ -3964,12 +3989,12 @@ async function submitRepair(){
     const rv=vehiclesCache.find(x=>x.id===currentVehicleId);
     const updated=(rv?.current_damages||[]).filter(x=>x.id!==repairCurrentDmgId);
     if(rv) rv.current_damages=updated;
-    const { error: twErr } = await sb.from('vehicle_twins').update({
+    const { error: twErr } = await sb.from('vehicle_twins').update(_autoSharePatch({
       current_damages: updated,
       last_event_id: ev.id,
       last_check_at: now,
       last_check_staff: staff,
-    }).eq('id', currentVehicleId);
+    })).eq('id', currentVehicleId);
     if(twErr) throw twErr;
 
     // 4. ローカルキャッシュ更新

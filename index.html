@@ -1156,7 +1156,7 @@ function showStoreLogin(store){
 }
 
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.9.0-DAMAGE';
+const APP_VERSION='v2.10.0-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1379,7 +1379,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll},{data:mileageAll}]=await Promise.all([
         sb.from('nha_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','naha'),
+        sb.rpc('damage_twins_lite',{p_store:'naha'}),   // ★2026-10-09 一覧は写真抜き(数十KB)。写真は車両を開いた時に取得
         sb.from('nha_fleet').select('reservation_id,vehicle_code'),
         sb.from('nha_reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300),
         sb.from('nha_vehicle_maintenance').select('vehicle_code,odometer_km,completed_date').eq('type','走行距離').order('completed_date',{ascending:false}).order('created_at',{ascending:false}).limit(500)
@@ -1421,7 +1421,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('bt_vehicles').select('code,name,plate_no,type,active').eq('active',true).order('type').order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token,display_label').eq('store','takamatsu'),
+        sb.rpc('damage_twins_lite',{p_store:'takamatsu'}),   // ★2026-10-09 一覧は写真抜き
         sb.from('bt_fleet').select('reservation_id,vehicle_code'),
         sb.from('bt_reservations').select('id,name,start_date,start_time,end_date,end_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('start_date',today).gte('end_date',today).order('start_date',{ascending:false}).limit(300)
       ]);
@@ -1459,7 +1459,7 @@ async function loadVehicles(){
       const _n=new Date();const today=_n.getFullYear()+'-'+String(_n.getMonth()+1).padStart(2,'0')+'-'+String(_n.getDate()).padStart(2,'0');
       const [{data:cars},{data:twins},{data:fleetAll},{data:resvAll}]=await Promise.all([
         sb.from('vehicles').select('id,code,name,plate_no,year').eq('active',true).order('code'),
-        sb.from('vehicle_twins').select('id,status,current_damages,current_resv_no,current_customer,last_check_at,last_check_staff,last_event_id,odometer,rental_count,share_enabled,share_token').eq('store','sapporo'),
+        sb.rpc('damage_twins_lite',{p_store:'sapporo'}),   // ★2026-10-09 一覧は写真抜き
         sb.from('fleet').select('reservation_id,vehicle_code'),
         sb.from('reservations').select('id,name,lend_date,lend_time,return_date,return_time,ota').not('status','eq','cancelled').not('status','eq','キャンセル').lte('lend_date',today).gte('return_date',today).order('lend_date',{ascending:false}).limit(300)
       ]);
@@ -1500,6 +1500,16 @@ async function loadVehicles(){
         });
       }catch(ce){console.warn('[cleanup] non-critical error:',ce);}
     }
+    // ★2026-10-09 写真抜き一覧：写真がある車は _lite=true（保存前に ensureFullDamages で写真込みを取得）
+    const _oldCache={};(vehiclesCache||[]).forEach(o=>{_oldCache[o.id]=o;});
+    vehicles.forEach(v=>{
+      const o=_oldCache[v.id];
+      if(o&&o._lite===false&&o.last_check_at===v.last_check_at&&(o.current_damages||[]).length===(v.current_damages||[]).length){
+        v.current_damages=o.current_damages; v._lite=false;
+      }else{
+        v._lite=(v.current_damages||[]).some(d=>d&&d.has_photo);
+      }
+    });
     vehiclesCache=vehicles;
     renderVehicleList(vehiclesCache,currentStore);
     updateSmStats(vehiclesCache);
@@ -1697,7 +1707,7 @@ async function openVehicle(vehicleId){
   if(twin){
     const idx=vehiclesCache.findIndex(v=>v.id===vehicleId);
     if(idx>=0){
-      vehiclesCache[idx]={...vehiclesCache[idx],...twin};
+      vehiclesCache[idx]={...vehiclesCache[idx],...twin,_lite:false};   // 写真込み
       renderS0(vehiclesCache[idx]);
       renderInspectionMap(vehiclesCache[idx].current_damages||[]);
     }
@@ -1983,6 +1993,7 @@ function handleVehicleTwinChange(updated, event){
   }
   const prevDmgCnt=(vehiclesCache[idx].current_damages||[]).length;
   vehiclesCache[idx]={...vehiclesCache[idx],...updated};
+  if(Array.isArray(updated.current_damages)) vehiclesCache[idx]._lite=false;   // DBの行=写真込み
   // SMカード更新
   const card=document.getElementById('smcard_'+updated.id);
   if(card){
@@ -2116,7 +2127,26 @@ async function toggleShare(enable){
 //   既に公開済みなら何もしない＝share_enabled_at/display_label を再スタンプしない。
 //   HANDYMAN高松マイページ と BUDDICAガイド は同じ share_enabled を見るので両ブランドに一括で効く。
 //   那覇/札幌は currentStore 条件で対象外（従来どおり手動）。戻す時はこの関数と呼出しを外すだけ。
+// ★2026-10-09 写真抜き一覧の安全策：保存・編集の前に、その車の傷データを写真込みで取り直す
+async function ensureFullDamages(id){
+  id=id||currentVehicleId; if(!id) return null;
+  const v=vehiclesCache.find(x=>x.id===id);
+  if(!v||!v._lite) return v;
+  const {data,error}=await sb.from('vehicle_twins').select('current_damages').eq('id',id).maybeSingle();
+  if(error) throw error;
+  v.current_damages=(data&&data.current_damages)||[]; v._lite=false;
+  return v;
+}
+// 安全網：写真抜きの傷データを書き戻すと写真が消える → 書込み直前に検出して中止。has_photo 印は保存しない
+function _guardDamages(patch){
+  if(patch&&Array.isArray(patch.current_damages)){
+    if(patch.current_damages.some(d=>d&&d.has_photo&&!d.photo)) throw new Error('写真の読込前のため保存を中止しました。車両を開き直してもう一度保存してください');
+    patch.current_damages=patch.current_damages.map(d=>{ if(d&&typeof d==='object'&&('has_photo' in d)){ const {has_photo,...r}=d; return r; } return d; });
+  }
+  return patch;
+}
 function _autoSharePatch(patch){
+  _guardDamages(patch);
   try{
     if(currentStore!=='takamatsu') return patch;
     const v=vehiclesCache.find(x=>x.id===currentVehicleId);
@@ -2815,7 +2845,8 @@ function startInitialRegistration(){
 }
 
 // 編集モードでSI画面を開く（登録済み車両の傷追加・削除）
-function openDamageEdit(returnTo){
+async function openDamageEdit(returnTo){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   if(!v) return;
   siEditMode=true;
@@ -2824,7 +2855,8 @@ function openDamageEdit(returnTo){
   goto('si');
 }
 
-function startReturnCheck(){
+async function startReturnCheck(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   // SR0へ直接遷移（旧AIカメラフロー廃止）
   sr0DamagesSnapshot=(vehiclesCache.find(x=>x.id===currentVehicleId)?.current_damages||[]).map(d=>({...d}));
   Object.keys(SR0_STATUS).forEach(k=>delete SR0_STATUS[k]);
@@ -2915,6 +2947,7 @@ function _saveWatchdog(btn,origLabel,ms){
   },ms);
 }
 async function markRepaired(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   if(!currentEditDmgId) return;
   const d=currentDamages().find(x=>x.id===currentEditDmgId);
   const loc=d?d.location:'';
@@ -3086,6 +3119,7 @@ function sr0SetStatus(dmgId,status){
 }
 
 async function sr0SaveReturn(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
   if(!v) return;
   const damages=v.current_damages||[];
@@ -3192,7 +3226,7 @@ async function handlePhotoSelect(input){
 // 目的: check_events INSERT ペイロードを 200KB+ → ~5KB に削減し保存フリーズを解消
 function stripPhotos_(damages){
   return (damages||[]).map(d=>{
-    const {photo,...rest}=d;
+    const {photo,has_photo,...rest}=d;
     return rest;
   });
 }
@@ -3289,6 +3323,7 @@ function updateEditBtns(){
 }
 let _submitEditBusy=false; // 連続タップ防止フラグ
 async function submitEdit(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   if(!editZone||!editType||!editSev) return;
   const desc=document.getElementById('editDescInput').value.trim()||'手動追加';
   const now=new Date();
@@ -3352,6 +3387,7 @@ async function submitEdit(){
   }
 }
 async function repairZone(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   if(!editZone) return;
   const zone=editZone;
   const v=vehiclesCache.find(x=>x.id===currentVehicleId);
@@ -3500,6 +3536,7 @@ function siCancel(){
 }
 
 async function siComplete(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   const damages=siLocalDamages;
   const btn=document.getElementById('siCompleteBtn');
   const _origLabel=siEditMode?'✓ 保存する':'✓ 登録完了 — チェーン起点を作成';
@@ -3627,7 +3664,7 @@ function renderChkDmgList(listId, damages, isReturn, addReturnTo){
     const tL=tLMap[d.type]||d.type;
     html+=`<div style="display:flex;align-items:center;gap:4px;padding:4px 9px;background:#fff;border:1px solid ${c}40;border-radius:20px;font-size:10px;font-weight:600;color:#1a2840;">
       <div style="width:6px;height:6px;border-radius:50%;background:${c};flex-shrink:0;"></div>
-      ${d.location}${d.photo?'<span style="font-size:8px;color:#4488cc;margin-left:2px;">📷</span>':''}
+      ${d.location}${(d.photo||d.has_photo)?'<span style="font-size:8px;color:#4488cc;margin-left:2px;">📷</span>':''}
     </div>`;
   });
   html+=`</div>${addBtnHtml}`;
@@ -3973,6 +4010,7 @@ function closeRepairModal(event){
 }
 
 async function submitRepair(){
+  try{ await ensureFullDamages(); }catch(e){ showToast('❌ 傷データの読込に失敗: '+(e.message||'').slice(0,40)); return; }
   if(!repairCurrentDmgId) return;
 
   const vendor = document.getElementById('repairVendor').value.trim();

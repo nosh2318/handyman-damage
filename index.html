@@ -1083,42 +1083,80 @@ const BT_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const sbMain=supabase.createClient(SUPA_URL,SUPA_KEY);                       // main: 既存storageKey維持
 const sbBT=supabase.createClient(BT_URL,BT_KEY,{auth:{storageKey:'sb-hm-bt'}}); // BT: 別storageKeyでセッション分離
 let sb=sbMain;  // ★アクティブクライアント（selectStoreで切替）
-let _btAuthed=false;
-async function ensureBTAuth(){
-  if(_btAuthed) return true;
+// ★ 2026-10-09 共有アカウント(member@g-lines.jp / oshita.touring)の自動ログインを全店で廃止。
+//   各店スタッフが「業務アプリと同じ ユーザー名＋パスコード」でログイン（パスワードはコードに持たない）。
+//   ユーザー名 xxx → 那覇 xxx@nha.hdm／札幌 xxx@spk.hdm／高松 xxx@bt.hdm（各業務アプリと同じ規則）。
+//   main(那覇/札幌)は業務アプリと同じ storageKey → 同じ端末で業務アプリにログイン済みならそのまま使える。
+const SHARED_BLOCKED=['member@g-lines.jp','oshita.touring@buddica.co.jp'];
+const LOGIN_CONF={
+  naha:{client:()=>sbMain,domain:'nha.hdm',title:'🌺 那覇空港店 傷チェック',app:'那覇の業務アプリ'},
+  sapporo:{client:()=>sbMain,domain:'spk.hdm',title:'❄️ 札幌店 傷チェック',app:'札幌の業務アプリ'},
+  takamatsu:{client:()=>sbBT,domain:'bt.hdm',title:'🌉 高松店 傷チェック',app:'高松の業務アプリ'}
+};
+const _authedStore={};
+async function ensureStoreAuth(store){
+  const conf=LOGIN_CONF[store]; if(!conf) return false;
+  if(_authedStore[store]) return true;
+  const cli=conf.client();
   try{
-    const {data}=await sbBT.auth.getSession();
-    if(!data||!data.session){
-      const {error}=await sbBT.auth.signInWithPassword({email:'oshita.touring@buddica.co.jp',password:'0003'});
-      if(error){ console.error('[BT auth] failed:',error); alert('高松店データベースの認証に失敗しました。\n'+error.message); return false; }
+    const {data,error}=await cli.auth.getUser();   // サーバーで有効性確認
+    const u=data&&data.user;
+    if(u && !SHARED_BLOCKED.includes((u.email||'').toLowerCase())){ _authedStore[store]=true; return true; }
+    // 共有アカウント or 停止/失効したセッションだけ端末から外す（通信エラーでは消さない＝業務アプリのログインを守る）
+    const st=error&&error.status;
+    if(u || st===401 || st===403){ try{ await cli.auth.signOut({scope:'local'}); }catch(e){} }
+  }catch(e){ console.warn('[auth] getUser:',e&&e.message); }
+  const ok=await showStoreLogin(store);
+  if(ok) _authedStore[store]=true;
+  return ok;
+}
+function showStoreLogin(store){
+  const conf=LOGIN_CONF[store];
+  return new Promise(resolve=>{
+    const ov=document.createElement('div');
+    ov.id='store-login-overlay';
+    ov.style.cssText='position:fixed;inset:0;background:linear-gradient(135deg,#1e3a8a,#1d4ed8);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:"Hiragino Sans","Yu Gothic",sans-serif;padding:16px';
+    ov.innerHTML='<div style="background:#fff;padding:32px 24px;border-radius:12px;width:100%;max-width:360px;box-shadow:0 20px 50px rgba(0,0,0,.3)">'
+      +'<div style="text-align:center;margin-bottom:20px"><div style="font-size:18px;font-weight:700;color:#1e3a8a">'+conf.title+'</div>'
+      +'<div style="font-size:12px;color:#6b7280;margin-top:6px">'+conf.app+'と同じユーザー名・パスコードでログインしてください</div></div>'
+      +'<div id="store-login-msg" style="display:none;padding:8px 12px;background:#fef2f2;color:#991b1b;border-radius:4px;margin-bottom:12px;font-size:13px"></div>'
+      +'<label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px">ユーザー名</label>'
+      +'<input id="store-login-user" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:16px;margin-bottom:12px">'
+      +'<label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px">パスコード</label>'
+      +'<input id="store-login-pass" type="password" autocomplete="current-password" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:16px;letter-spacing:4px;text-align:center;margin-bottom:16px">'
+      +'<button id="store-login-submit" style="width:100%;padding:12px;background:#1e3a8a;color:#fff;border:0;border-radius:6px;font-size:15px;font-weight:600">ログイン</button>'
+      +'<button id="store-login-cancel" style="width:100%;padding:10px;margin-top:8px;background:#fff;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;font-size:13px">戻る</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+    const ui=document.getElementById('store-login-user'),pi=document.getElementById('store-login-pass'),
+          bt=document.getElementById('store-login-submit'),msg=document.getElementById('store-login-msg');
+    const show=t=>{msg.textContent=t;msg.style.display='block';};
+    setTimeout(()=>ui.focus(),100);
+    async function go(){
+      const user=(ui.value||'').trim().toLowerCase(); const pass=pi.value;
+      if(!user||!pass){ show('ユーザー名とパスコードを入力してください'); return; }
+      const email=user.includes('@')?user:(user+'@'+conf.domain);
+      if(SHARED_BLOCKED.includes(email)){ show('このアカウントは使えません。ご自身のIDでログインしてください'); return; }
+      bt.disabled=true; bt.textContent='ログイン中...'; msg.style.display='none';
+      try{
+        const {error}=await conf.client().auth.signInWithPassword({email,password:pass});
+        if(error) throw error;
+        ov.remove(); resolve(true);
+      }catch(e){
+        console.warn('[login]',e&&e.message);
+        show('ユーザー名またはパスコードが違います');
+        bt.disabled=false; bt.textContent='ログイン';
+      }
     }
-    _btAuthed=true; return true;
-  }catch(e){ console.error('[BT auth] exception:',e); return false; }
+    bt.onclick=go;
+    pi.onkeydown=e=>{ if(e.key==='Enter') go(); };
+    ui.onkeydown=e=>{ if(e.key==='Enter') pi.focus(); };
+    document.getElementById('store-login-cancel').onclick=()=>{ ov.remove(); resolve(false); };
+  });
 }
 
-// 起動時 自動ログイン（既存セッションあればスキップ）
-(async function(){
-  try{
-    const {data}=await sb.auth.getSession();
-    if(!data || !data.session){
-      const {error}=await sb.auth.signInWithPassword({email:'member@g-lines.jp',password:'8888'});
-      if(error){
-        document.body.innerHTML='<div style="padding:40px;font-size:16px;text-align:center;background:#fef2f2;color:#991b1b;min-height:100vh;">'
-          +'<h2>🔴 認証エラー</h2><p>傷チェックAPPの自動ログインに失敗しました。</p>'
-          +'<p style="font-size:13px;color:#666">'+error.message+'</p>'
-          +'<button onclick="location.reload()" style="margin-top:20px;padding:10px 30px;background:#1e40af;color:#fff;border:0;border-radius:6px;font-size:14px">再読み込み</button></div>';
-        return;
-      }
-      // 認証成功 → セッション確立のためreload（次回からは既存セッションでスキップ）
-      location.reload();
-    }
-  }catch(e){
-    console.error('[auth] init error:',e);
-  }
-})();
-
 // ===== バージョン管理（GAS監視→Slack通知用） 2026-05-11 ★ =====
-const APP_VERSION='v2.8.3-DAMAGE';
+const APP_VERSION='v2.9.0-DAMAGE';
 setTimeout(async function(){
   try{
     await sb.from('app_settings').upsert({key:'app_version_damage',value:APP_VERSION},{onConflict:'key'});
@@ -1294,7 +1332,7 @@ async function selectStaff(id,name){
   localStorage.setItem('hm_staff',name);
   localStorage.setItem('hm_store',currentStore);
   sb = (currentStore==='takamatsu') ? sbBT : sbMain;   // ★念のため再確定
-  if(currentStore==='takamatsu'){ const ok=await ensureBTAuth(); if(!ok) return; }
+  { const ok=await ensureStoreAuth(currentStore); if(!ok) return; }   // ★全店：本人IDでログイン
   updateStaffHeader();
   goto('sm');
   initPresence();
